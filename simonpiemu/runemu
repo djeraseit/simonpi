@@ -1,5 +1,6 @@
 #!/bin/sh
 
+# Network Variables
 BRIDGE=rasp-br0
 TAP=rasp-tap0
 GATEWAY=192.168.66.1
@@ -7,6 +8,9 @@ FIRSTIP="${GATEWAY%.1}.2"
 LASTIP="${GATEWAY%.1}.254"
 BROADCAST="${GATEWAY%.1}.255"
 NET="${GATEWAY%.1}.0"
+
+# QEMU Variables
+QEMU_AUDIO_DRV=none
 
 killNetwork() {
 	pkill "$DNSMASQ"
@@ -56,7 +60,6 @@ run_rpi() {
 		-cpu arm1176 -m 256 -M versatilepb \
 		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
-		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
 		-append "console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 rw" \
 		-no-reboot -serial mon:stdio \
 		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
