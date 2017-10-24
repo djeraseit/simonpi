@@ -61,7 +61,7 @@ run_rpi() {
 		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
 		-append "console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 rw" \
-		-no-reboot -serial mon:stdio \
+		-no-reboot \
 		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
 }
 
@@ -75,7 +75,6 @@ run_rpi2() {
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
 		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
 		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop quiet loglevel=0" \
-		-serial mon:stdio \
 		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
 }
 
@@ -89,7 +88,6 @@ run_rpi3() {
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
 		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
 		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop" \
-		-serial mon:stdio \
 		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
 }
 
