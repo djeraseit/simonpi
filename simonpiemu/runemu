@@ -62,7 +62,7 @@ run_rpi() {
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
 		-append "console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 rw" \
 		-no-reboot \
-		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
+		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
 }
 
 # QEMU raspi2 support (-M raspi2) lacks of net support. Using versatilepb instead
@@ -75,7 +75,7 @@ run_rpi2() {
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
 		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
 		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop quiet loglevel=0" \
-		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
+		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
 }
 
 # Not working for AArch64. For now it uses same rpi2 params
@@ -88,7 +88,7 @@ run_rpi3() {
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
 		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
 		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop" \
-		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
+		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
 }
 
 run_emu() {
