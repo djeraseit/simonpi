@@ -10,7 +10,7 @@ BROADCAST="${GATEWAY%.1}.255"
 NET="${GATEWAY%.1}.0"
 
 # QEMU Variables
-QEMU_AUDIO_DRV=none
+export QEMU_AUDIO_DRV=none
 
 killNetwork() {
 	pkill "$DNSMASQ"
