@@ -40,7 +40,6 @@ checkNetwork() {
 		killNetwork > /dev/null 2>&1
 	else
 		createNetwork
-		sleep 20
 	fi
 }
 
