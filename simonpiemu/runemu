@@ -13,7 +13,7 @@ NET="${GATEWAY%.1}.0"
 export QEMU_AUDIO_DRV=none
 
 killNetwork() {
-	pkill "$DNSMASQ"
+	kill -SIGTERM "$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')"
 	$BRCTL delif "$BRIDGE" "$TAP" # Remove tap from bridge
 	$IP link set "$TAP" down
 	$IP link set "$BRIDGE" down
@@ -39,9 +39,9 @@ createNetwork() {
 }
 
 checkNetwork() {
-	if [ "$(pidof $DNSMASQ)" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
+	if [ "$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
 		echo -e "[$Y!$RST] Shutting down present network for QEMU ..."
-		killNetwork > /dev/null 2>&1
+		killNetwork
 		exit 0
 	fi
 	createNetwork

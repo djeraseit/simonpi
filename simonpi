@@ -6,19 +6,22 @@ OPT=.
 # You could overwrite paths using VARNAME=value ./simonpi
 
 # Software used in this script.
+AWK=awk
 BRCTL=brctl
 BSDTAR=bsdtar
 DNSMASQ=dnsmasq
 EXT4=mkfs.ext4
 EXT4CHK=fsck.ext4
 FDISK=fdisk
+GREP=grep
 IP=ip
 IPTABLES=iptables
+PS=ps
 QEMUARM=qemu-system-arm
 VFAT=mkfs.vfat
 VFATCHK=fsck.msdos
 WGET=wget
-PROGS=("$BRCTL" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$IPTABLES" "$QEMUARM" "$VFAT" "$WGET")
+PROGS=("$AWK" "$BRCTL" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" "$PS" "$QEMUARM" "$VFAT" "$WGET")
 
 # Parameters, Folders and Files
 SNDARG=$2
