@@ -11,21 +11,22 @@ NET="${GATEWAY%.1}.0"
 
 # QEMU Variables
 export QEMU_AUDIO_DRV=none
+QEMUPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
 
 killNetwork() {
-	kill -SIGTERM "$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')"
+	kill -SIGTERM "$QEMUPID"
 	$BRCTL delif "$BRIDGE" "$TAP" # Remove tap from bridge
 	$IP link set "$TAP" down
 	$IP link set "$BRIDGE" down
 	$IP tuntap del dev "$TAP" mode tap # Remove tap interface
 	$BRCTL delbr "$BRIDGE"
-	sysctl -w net.ipv4.ip_forward=0
+	sysctl -w net.ipv4.ip_forward=0 > /dev/null
 }
 
 createNetwork() {
 	# Generate Random MAC ADDRESS to avoid collisions
 	printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
-	sysctl -w net.ipv4.ip_forward=1
+	sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	$BRCTL addbr "$BRIDGE" # add bridge
 	$IP addr add 192.168.66.1/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
 	$IP link set "$BRIDGE" up
@@ -39,7 +40,7 @@ createNetwork() {
 }
 
 checkNetwork() {
-	if [ "$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
+	if [ "$QEMUPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
 		echo -e "[$Y!$RST] Shutting down present network for QEMU ..."
 		killNetwork
 		exit 0
