@@ -39,7 +39,7 @@ createNetwork() {
 }
 
 checkNetwork() {
-	if [ ! -z "$(pidof $DNSMASQ)" ] ||  [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
+	if [ ! -z "$(pidof $DNSMASQ)" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
 		echo -e "[$Y!$RST] Shutting down present network for QEMU ..."
 		killNetwork > /dev/null 2>&1
 		exit 0
