@@ -1,0 +1,307 @@
+#!/bin/sh
+
+OPT=.
+. $OPT/simonpiemu/runemu
+
+# You could overwrite paths using VARNAME=value ./simonpi
+
+# Software used in this script.
+BRCTL=brctl
+BSDTAR=bsdtar
+DNSMASQ=dnsmasq
+EXT4=mkfs.ext4
+FDISK=fdisk
+IP=ip
+IPTABLES=iptables
+QEMUARM=qemu-system-arm
+VFAT=mkfs.vfat
+WGET=wget
+PROGS=("$BRCTL" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$IPTABLES" "$QEMUARM" "$VFAT" "$WGET")
+
+# Parameters, Folders and Files
+SNDARG=$2
+GIGA=$3
+MODEL=$1
+SIMONPIFOLDER=~/.simonpi
+MOUNTFOLDERS=("boot" "root")
+EXTPKGSFOLDER="$SIMONPIFOLDER/$MODEL/pkgs"
+FILENAME="sd-arch-$MODEL-qemu.img"
+ARCHIMG="ArchLinuxARM-$MODEL-latest.tar.gz"
+FILES=("$ARCHIMG" "$ARCHIMG.md5")
+
+# Loopback devices
+DEVICE1=/dev/loop0
+DEVICE2=/dev/loop1
+
+# Text Colors
+R='\e[0;31m'
+G='\e[0;32m'
+Y='\e[0;33m'
+RST='\e[0m'
+
+# Must be root to use this tool
+if [[ ! $EUID -eq 0 ]];then
+	if [[ -x "$(command -v sudo)" ]]; then
+		exec sudo bash "$0" "$@"
+		exit $?
+	else
+		echo -e "[$Y!$RST] sudo is needed. Please run this script as root or install sudo."
+		exit 1
+	fi
+fi
+
+presetsGen() {
+	echo -e "[$G+$RST] Injecting a motd and fstab to $FILENAME ..."
+	# Prevent vfat corruption for boot partition
+	cat << EOF > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab
+# /etc/fstab: static file system information
+#
+# <file system> <dir>   <type>  <options>       <dump>  <pass>
+EOF
+	cat << 'EOF' > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/motd
+
+        __                                                                        __
+   ____/\_\    ___ ___                      ___     ___                    _____ /\_\
+  /',__\/\ \ /' __` __`\      _______      / __`\ /' _ `\      _______    /\ '__`\/\ \
+ /\__, `\ \ \/\ \/\ \/\ \    /\______\    /\ \L\ \/\ \/\ \    /\______\   \ \ \L\ \ \ \
+ \/\____/\ \_\ \_\ \_\ \_\   \/______/    \ \____/\ \_\ \_\   \/______/    \ \ ,__/\ \_\
+  \/___/  \/_/\/_/\/_/\/_/                 \/___/  \/_/\/_/                 \ \ \/  \/_/
+                                                                             \ \_\
+                                                                              \/_/
+Written by Gianluca Boiano
+
+In order to update the kernel image with pacman, you have to mount the boot partition.
+Do not add entries for your boot partition to /etc/fstab unless you know what are you doing
+
+EOF
+
+	cat << EOF >> $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/pacman.conf
+[archlinuxfr]
+SigLevel = Optional
+Server = http://repo.archlinux.fr/arm
+EOF
+}
+
+checkModel() {
+	if [[ $MODEL != rpi* ]]; then
+		echo "Please select the rpi model"
+		echo "Available:	rpi	rpi-2	rpi-3"
+		exit 1
+	elif [[ $MODEL == rpi-3 ]]; then # Temporary workaround for rpi-3
+		MODEL=rpi-2					 # Sorry no AArch64 support for now
+	fi
+}
+
+checkDeps() {
+	for i in "${PROGS[@]}"; do
+		if [ $(which $i 2>/dev/null) ]; then
+			echo -e "[$G+$RST] $i executable found"
+		else
+			echo -e "[$R-$RST] $i executable not found. Please install it on your distro"
+			exit 1;
+		fi
+	done
+}
+
+isMounted() {
+	if [[ $(mount|grep $DEVICE1) ]]; then
+		echo -e "[$Y!$RST] ${MOUNTFOLDERS[0]} is already mounted"
+	elif [ ! -f $SIMONPIFOLDER/$FILENAME ]; then
+		echo -e "[$R-$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
+		exit 1
+	else
+		echo -e "[$Y!$RST] Mounting $MODEL/${MOUNTFOLDERS[0]}"
+		echo -e "[$Y!$RST] Mounting $MODEL/${MOUNTFOLDERS[1]}"
+		mountImg
+		mountParts
+	fi
+}
+
+customContent() {
+	if [ -d $EXTPKGSFOLDER ]; then
+		echo -e "[$Y!$RST] $EXTPKGSFOLDER folder is present"
+		if [ "$(ls $EXTPKGSFOLDER)" ]; then
+			echo -e "[$Y!$RST] Copying custom content to $FILENAME ..."
+			for i in $(ls $EXTPKGSFOLDER); do
+				echo -e "	[$G+$RST] Copying $i in /home/alarm ..."
+				cp $EXTPKGSFOLDER/$i $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/home/alarm
+			done
+		else
+			echo -e "[$Y!$RST] $EXTPKGSFOLDER is empty"
+		fi
+	else
+		echo -e "[$Y!$RST] $EXTPKGSFOLDER folder not present. Creating ..."
+		mkdir -p $EXTPKGSFOLDER
+		echo -e "[$Y!$RST] You could add custom content on img copying it under $EXTPKGSFOLDER"
+	fi
+}
+checkFolders() {
+	for i in ${MOUNTFOLDERS[@]}; do
+		if [ -d "$SIMONPIFOLDER/$MODEL/$i" ]; then
+			echo -e "[$Y!$RST] $MODEL/$i folder is present"
+		else
+			echo -e "[$G+$RST] Creating $MODEL/$i folder ..."
+			mkdir -p "$SIMONPIFOLDER/$MODEL/$i"
+		fi
+	done
+}
+
+formatLoDevices() {
+	echo -e "[$G+$RST] Creating partitions on disk image named $FILENAME ..."
+	$VFAT $DEVICE1 > /dev/null 2>&1
+	$EXT4 $DEVICE2 > /dev/null 2>&1
+}
+
+downloadArchArm() {
+	echo -e "[$G+$RST] Downloading ..."
+	for i in ${FILES[@]}; do
+		if [ -f $SIMONPIFOLDER/$MODEL/$i ]; then
+			echo -e "[$Y!$RST] $i is present";
+		fi
+		$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress --continue
+	done
+
+	cd $SIMONPIFOLDER/$MODEL
+	if md5sum -c "$ARCHIMG.md5"; then
+		echo -e "[$G+$RST] Integrity check successfully completed"
+
+	else
+		echo -e "[$R-$RST] Integrity check failed, please retry to download"
+		exit 1
+	fi
+}
+
+mountParts() {
+	checkFolders
+	echo -e "[$G+$RST] Mounting partitions of $FILENAME ..."
+	mount -t msdos $DEVICE1 "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}"
+	mount $DEVICE2 "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
+}
+
+umountParts() {
+	echo -e "[$G+$RST] Umounting partitions of $FILENAME ..."
+	mountpointloop1=$(grep $DEVICE1 /proc/mounts | cut -d ' ' -f 2)
+	mountpointloop2=$(grep $DEVICE2 /proc/mounts | cut -d ' ' -f 2)
+	mountpoints=("$mountpointloop1" "$mountpointloop2")
+
+	for i in ${mountpoints[@]}; do
+		umount "$i"
+	done
+}
+
+listStorage() {
+	checkFolders
+	echo -e "[$Y!$RST] Content of $SIMONPIFOLDER/$MODEL"
+	ls $SIMONPIFOLDER/$MODEL
+}
+
+mountImg() {
+	echo -e "[$G+$RST] Mounting disk image named $FILENAME ..."
+	START1=$(fdisk -lo Start $SIMONPIFOLDER/$FILENAME | tail -n 2 | head -n -1)
+	START2=$(fdisk -lo Start $SIMONPIFOLDER/$FILENAME | tail -n 1)
+	END1=$(fdisk -lo End $SIMONPIFOLDER/$FILENAME | tail -n 2 | head -n -1)
+	END2=$(fdisk -lo End $SIMONPIFOLDER/$FILENAME | tail -n 1)
+	losetup -o $(( START1*512 )) --sizelimit $(( END1*512 )) $DEVICE1 $SIMONPIFOLDER/$FILENAME
+	losetup -o $(( START2*512 )) --sizelimit $(( END2*512 )) $DEVICE2 $SIMONPIFOLDER/$FILENAME
+}
+
+umountImg() {
+	echo -e "[$G+$RST] Unmounting disk image named $FILENAME ..."
+	losetup -D
+}
+createImg() {
+	if [ -z $GIGA ]; then
+		echo -e "[$R-$RST] Please specify a size in GB"
+		exit 1
+	elif [ $GIGA -lt 2 ]; then
+		echo -e "[$R-$RST] Please specify a size >= 2 GB"
+		exit 1
+	fi
+	checkDeps
+	umountParts
+	downloadArchArm
+
+	if [ -e "$SIMONPIFOLDER/$FILENAME" ]; then
+		echo -e "[$Y!$RST] An $FILENAME file already exists. Please delete it"
+		exit 1
+	else
+		SIZE=$(( GIGA*1000 ))
+		echo -e "[$G+$RST] Creating a $SIZE disk image named $FILENAME ..."
+		dd if=/dev/zero of="$SIMONPIFOLDER/$FILENAME" bs=1M count="$SIZE" > /dev/null 2>&1
+
+		echo -e "[$G+$RST] Creating partition table on $FILENAME ..."
+		(echo o; echo n; echo p; echo 1; echo; echo +100M; echo t; echo c; \
+			echo n; echo p; echo 2; echo ; echo ; echo a; echo 1; \
+		echo p; echo w; echo q) | $FDISK "$SIMONPIFOLDER/$FILENAME" >/dev/null 2>&1
+	fi
+	sync
+	mountImg
+	formatLoDevices
+	mountParts
+	echo -e "[$G+$RST] Extracting $ARCHIMG to $FILENAME ..."
+	$BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
+	echo -e "[$G+$RST] Syncing ..."
+	sync
+	presetsGen
+	customContent
+	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/boot/* $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}
+	umountParts
+	umountImg
+	echo -e "[$G+$RST] DONE"
+}
+
+purge () {
+	rm -rf $SIMONPIFOLDER/$FILENAME
+	echo -e "[$G+$RST] Soft cleaning ..."
+}
+
+purgeEverything() {
+	rm -rf $SIMONPIFOLDER/$MODEL/
+	echo -e "[$G+$RST] Hard cleaning ..."
+}
+help () {
+	echo "Create a raw partitioned img for rpi-(1-2-3) emulation on QEMU"
+	echo -e "Default storage is in $G$SIMONPIFOLDER$RST"
+	echo "usage: ./simonpi MODEL [<opts>]"
+	echo "	Available MODELs:	rpi	rpi-2	rpi-3"
+	echo "	<opts>	-h			print this message"
+	echo "		-c			check dependencies for this script"
+	echo "		-e			purge everything in storage folder"
+	echo "		-k			kill network virtual interfaces"
+	echo "		-l			list files in storage folder"
+	echo "		-m			mount only loop devices ($DEVICE1, $DEVICE2)"
+	echo "		-p			purge everything except Arch Linux archives"
+	echo "		-r			run QEMU processor emulator for defined model"
+	echo "		-s	<size in G>	write a partitioned raw .img file with Arch Linux"
+	echo "		-u			unmount ${MOUNTFOLDERS[0]} and ${MOUNTFOLDERS[1]} folders"
+	echo "examples:"
+	echo "	./simonpi rpi-3 -s 2		create a 2GB sd .img for rpi-3"
+	echo "	./simonpi rpi-2 -p		purge everything related to rpi-2 img creation"
+	exit 0
+}
+
+process_args () {
+	# Process other arguments.
+	case "$1" in
+		-h    ) help ;;
+		rpi   ) checkModel ;;
+		rpi-2 ) checkModel ;;
+		rpi-3 ) checkModel ;;
+		-*    ) help ;;
+		*     ) checkModel ;;
+	esac
+	case "$2" in
+		-e	  ) umountParts && purge && purgeEverything ;;
+		-k	  ) checkNetwork ;;
+		-l	  ) listStorage ;;
+		-m	  ) mountImg && mountParts ;;
+		-p	  ) umountParts && purge ;;
+		-r    ) isMounted && run_emu ;;
+		-s    ) createImg ;;
+		-u    ) umountParts && umountImg ;;
+		*     ) echo 'Please type -h for details' ;;
+	esac
+}
+
+process_args $@;
+

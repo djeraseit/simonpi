@@ -1,0 +1,100 @@
+#!/bin/sh
+
+BRIDGE=rasp-br0
+TAP=rasp-tap0
+GATEWAY=192.168.66.1
+FIRSTIP="${GATEWAY%.1}.2"
+LASTIP="${GATEWAY%.1}.254"
+BROADCAST="${GATEWAY%.1}.255"
+NET="${GATEWAY%.1}.0"
+
+killNetwork() {
+	pkill "$DNSMASQ"
+	$BRCTL delif "$BRIDGE" "$TAP" # Remove tap from bridge
+	$IP link set "$TAP" down
+	$IP link set "$BRIDGE" down
+	$IP tuntap del dev "$TAP" mode tap # Remove tap interface
+	$BRCTL delbr "$BRIDGE"
+	sysctl -w net.ipv4.ip_forward=0
+}
+
+createNetwork() {
+	# Generate Random MAC ADDRESS to avoid collisions
+	printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
+	sysctl -w net.ipv4.ip_forward=1
+	$BRCTL addbr "$BRIDGE" # add bridge
+	$IP addr add 192.168.66.1/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
+	$IP link set "$BRIDGE" up
+	$IP tuntap add dev "$TAP" mode tap # Add tap interface
+	$IP link set "$TAP" up promisc on
+	$BRCTL addif "$BRIDGE" "$TAP" # Bind tap to bridge
+	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
+	$IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE
+	echo -e "[$Y!$RST] Turning up a network for QEMU ..."
+	echo -e "[$Y!$RST] Gateway address: $G$GATEWAY$RST"
+}
+
+checkNetwork() {
+	if [ ! -z "$(pidof $DNSMASQ)" ] &&  [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
+		echo -e "[$Y!$RST] Shutting down present network for QEMU ..."
+		killNetwork > /dev/null 2>&1
+	else
+		createNetwork
+		sleep 20
+	fi
+}
+
+checkQemu() {
+	if [ ! -z "$(pidof $QEMUARM)" ]; then
+		pkill "$QEMUARM"
+	fi
+}
+
+run_rpi() {
+	checkNetwork 2>&1
+	checkQemu
+	$QEMUARM -nographic \
+		-cpu arm1176 -m 256 -M versatilepb \
+		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
+		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
+		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
+		-append "console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 rw" \
+		-no-reboot -serial mon:stdio \
+		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
+}
+
+# QEMU raspi2 support (-M raspi2) lacks of net support. Using versatilepb instead
+run_rpi2() {
+	checkNetwork
+	checkQemu
+	$QEMUARM -nographic \
+		-cpu arm1176 -m 256 -M versatilepb \
+		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
+		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
+		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
+		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop quiet loglevel=0" \
+		-serial mon:stdio \
+		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
+}
+
+# Not working for AArch64. For now it uses same rpi2 params
+run_rpi3() {
+	checkNetwork
+	checkQemu
+	qemu-system-aarch64 -nographic \
+		-m 256 -cpu cortex-a53 -M versatilepb \
+		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
+		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
+		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
+		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop" \
+		-serial mon:stdio \
+		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no -netdev user,id=net0,hostfwd=tcp::5555-:22
+}
+
+run_emu() {
+	case $MODEL in
+		rpi    ) run_rpi ;;
+		rpi-2  ) run_rpi2 ;;
+		rpi-3  ) run_rpi2 ;; #run_rpi3 ;;
+	esac
+}
