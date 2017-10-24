@@ -10,11 +10,13 @@ BRCTL=brctl
 BSDTAR=bsdtar
 DNSMASQ=dnsmasq
 EXT4=mkfs.ext4
+EXT4CHK=fsck.ext4
 FDISK=fdisk
 IP=ip
 IPTABLES=iptables
 QEMUARM=qemu-system-arm
 VFAT=mkfs.vfat
+VFATCHK=fsck.msdos
 WGET=wget
 PROGS=("$BRCTL" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$IPTABLES" "$QEMUARM" "$VFAT" "$WGET")
 
@@ -82,6 +84,12 @@ Server = http://repo.archlinux.fr/arm
 EOF
 }
 
+checkFs() {
+	echo -e "[$G+$RST] Checking partitions to prevent failures ..."
+	$VFATCHK $DEVICE1 
+	$EXT4CHK $DEVICE2 
+}	
+
 checkModel() {
 	if [[ $MODEL != rpi* ]]; then
 		echo "Please select the rpi model"
@@ -148,8 +156,8 @@ checkFolders() {
 
 formatLoDevices() {
 	echo -e "[$G+$RST] Creating partitions on disk image named $FILENAME ..."
-	$VFAT $DEVICE1 > /dev/null 2>&1
-	$EXT4 $DEVICE2 > /dev/null 2>&1
+	$VFAT $DEVICE1 
+	$EXT4 $DEVICE2 
 }
 
 downloadArchArm() {
@@ -291,6 +299,7 @@ process_args () {
 		*     ) checkModel ;;
 	esac
 	case "$2" in
+		-c	  ) umountParts && checkFs ;;
 		-e	  ) umountParts && purge && purgeEverything ;;
 		-k	  ) checkNetwork ;;
 		-l	  ) listStorage ;;
