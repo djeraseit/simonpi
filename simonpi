@@ -216,8 +216,8 @@ mountImg() {
 	START2=$(fdisk -lo Start $SIMONPIFOLDER/$FILENAME | tail -n 1)
 	END1=$(fdisk -lo End $SIMONPIFOLDER/$FILENAME | tail -n 2 | head -n -1)
 	END2=$(fdisk -lo End $SIMONPIFOLDER/$FILENAME | tail -n 1)
-	losetup -o $(( START1*512 )) --sizelimit $(( END1*512 )) $DEVICE1 $SIMONPIFOLDER/$FILENAME
-	losetup -o $(( START2*512 )) --sizelimit $(( END2*512 )) $DEVICE2 $SIMONPIFOLDER/$FILENAME
+	losetup -o $(( START1*512 )) --sizelimit $(( END1*512 )) $DEVICE1 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
+	losetup -o $(( START2*512 )) --sizelimit $(( END2*512 )) $DEVICE2 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
 }
 
 umountImg() {

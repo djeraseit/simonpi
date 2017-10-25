@@ -44,8 +44,7 @@ createNetwork() {
 checkNetwork() {
 	if [ "$DNSMASQPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
 		echo -e "[$G+$RST] Shutting down present network for QEMU ..."
-		killNetwork 
-		#2>&1
+		killNetwork 2>&1
 		exit 0
 	fi
 	createNetwork
@@ -74,10 +73,10 @@ run_rpi2() {
 	checkNetwork
 	checkQemu
 	$QEMUARM -cpu arm1176 -m 256 -M versatilepb \
-		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
+		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
 		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
-		-append "root=/dev/mmcblk0p2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop quiet loglevel=0" \
+		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop quiet loglevel=0" \
 		-serial stdio \
 		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
 }
