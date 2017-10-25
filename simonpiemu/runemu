@@ -63,7 +63,7 @@ run_rpi() {
 		-cpu arm1176 -m 256 -M versatilepb \
 		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
-		-append "console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 rw" \
+		-append "console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 rw panic=1" \
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
 }
@@ -76,7 +76,8 @@ run_rpi2() {
 		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
 		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
-		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop quiet loglevel=0" \
+		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop quiet loglevel=0 panic=1" \
+		-no-reboot \
 		-serial stdio \
 		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
 }
@@ -90,7 +91,8 @@ run_rpi3() {
 		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
 		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
-		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop" \
+		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop panic=1" \
+		-no-reboot \
 		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
 }
 
