@@ -115,16 +115,17 @@ checkDeps() {
 }
 
 isMounted() {
-	if [[ $(mount|grep $DEVICE1) ]]; then
+	if [[ $(mount|grep $DEVICE1) ]] && [ $SNDARG = "-r" ]; then
 		echo -e "[$Y!$RST] ${MOUNTFOLDERS[0]} is already mounted"
-		echo -e "[$G+$RST] Unmounting ..."
+	elif [[ $(mount|grep $DEVICE1) ]]; then
+		echo -e "[$Y!$RST] ${MOUNTFOLDERS[0]} is already mounted"
 		umountParts
 		umountImg
 	elif [ ! -f $SIMONPIFOLDER/$FILENAME ]; then
 		echo -e "[$R-$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
 	else
-		echo -e "[$Y!$RST] Mounting $MODEL/${MOUNTFOLDERS[0]}"
-		echo -e "[$Y!$RST] Mounting $MODEL/${MOUNTFOLDERS[1]}"
+		echo -e "[$G+$RST] Mounting $MODEL/${MOUNTFOLDERS[0]}"
+		echo -e "[$G+$RST] Mounting $MODEL/${MOUNTFOLDERS[1]}"
 		mountImg
 		mountParts
 	fi
