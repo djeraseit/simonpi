@@ -11,10 +11,12 @@ NET="${GATEWAY%.1}.0"
 
 # QEMU Variables
 export QEMU_AUDIO_DRV=none
-QEMUPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
+
+# PID for dnsmasq dhcp server 
+DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
 
 killNetwork() {
-	kill -SIGTERM "$QEMUPID"
+	kill -SIGTERM "$DNSMASQPID"
 	$BRCTL delif "$BRIDGE" "$TAP" # Remove tap from bridge
 	$IP link set "$TAP" down
 	$IP link set "$BRIDGE" down
@@ -40,7 +42,7 @@ createNetwork() {
 }
 
 checkNetwork() {
-	if [ "$QEMUPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
+	if [ "$DNSMASQ" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
 		echo -e "[$Y!$RST] Shutting down present network for QEMU ..."
 		killNetwork
 		exit 0
