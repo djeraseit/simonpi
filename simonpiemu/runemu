@@ -30,21 +30,22 @@ createNetwork() {
 	printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
 	sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	$BRCTL addbr "$BRIDGE" # add bridge
-	$IP addr add 192.168.66.1/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
+	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
 	$IP link set "$BRIDGE" up
 	$IP tuntap add dev "$TAP" mode tap # Add tap interface
 	$IP link set "$TAP" up promisc on
 	$BRCTL addif "$BRIDGE" "$TAP" # Bind tap to bridge
 	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
-	$IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE
+	$IPTABLES -t nat -I POSTROUTING -o "$TAP" -j MASQUERADE # Nat configuration
 	echo -e "[$Y!$RST] Turning up a network for QEMU ..."
 	echo -e "[$Y!$RST] Gateway address: $G$GATEWAY$RST"
 }
 
 checkNetwork() {
-	if [ "$DNSMASQ" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
+	if [ "$DNSMASQPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
 		echo -e "[$Y!$RST] Shutting down present network for QEMU ..."
-		killNetwork
+		killNetwork 
+		#2>&1
 		exit 0
 	fi
 	createNetwork
@@ -57,7 +58,7 @@ checkQemu() {
 }
 
 run_rpi() {
-	checkNetwork 2>&1
+	checkNetwork
 	checkQemu
 	$QEMUARM -nographic \
 		-cpu arm1176 -m 256 -M versatilepb \

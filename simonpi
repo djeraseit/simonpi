@@ -89,7 +89,7 @@ EOF
 
 checkFs() {
 	echo -e "[$G+$RST] Checking partitions to prevent failures ..."
-	$VFATCHK $DEVICE1 
+	$VFATCHK $DEVICE1
 	$EXT4CHK $DEVICE2 
 }	
 
@@ -117,9 +117,11 @@ checkDeps() {
 isMounted() {
 	if [[ $(mount|grep $DEVICE1) ]]; then
 		echo -e "[$Y!$RST] ${MOUNTFOLDERS[0]} is already mounted"
+		echo -e "[$G+$RST] Unmounting ..."
+		umountParts
+		umountImg
 	elif [ ! -f $SIMONPIFOLDER/$FILENAME ]; then
 		echo -e "[$R-$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
-		exit 1
 	else
 		echo -e "[$Y!$RST] Mounting $MODEL/${MOUNTFOLDERS[0]}"
 		echo -e "[$Y!$RST] Mounting $MODEL/${MOUNTFOLDERS[1]}"
@@ -146,6 +148,7 @@ customContent() {
 		echo -e "[$Y!$RST] You could add custom content on img copying it under $EXTPKGSFOLDER"
 	fi
 }
+
 checkFolders() {
 	for i in ${MOUNTFOLDERS[@]}; do
 		if [ -d "$SIMONPIFOLDER/$MODEL/$i" ]; then
@@ -159,8 +162,8 @@ checkFolders() {
 
 formatLoDevices() {
 	echo -e "[$G+$RST] Creating partitions on disk image named $FILENAME ..."
-	$VFAT $DEVICE1 
-	$EXT4 $DEVICE2 
+	$VFAT $DEVICE1 > /dev/null 2>&1
+	$EXT4 $DEVICE2 > /dev/null 2>&1
 }
 
 downloadArchArm() {
@@ -220,6 +223,7 @@ umountImg() {
 	echo -e "[$G+$RST] Unmounting disk image named $FILENAME ..."
 	losetup -D
 }
+
 createImg() {
 	if [ -z $GIGA ]; then
 		echo -e "[$R-$RST] Please specify a size in GB"
@@ -229,7 +233,7 @@ createImg() {
 		exit 1
 	fi
 	checkDeps
-	umountParts
+	isMounted
 	downloadArchArm
 
 	if [ -e "$SIMONPIFOLDER/$FILENAME" ]; then
