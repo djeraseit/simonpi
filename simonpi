@@ -242,7 +242,7 @@ createImg() {
 		exit 1
 	else
 		SIZE=$(( GIGA*1000 ))
-		echo -e "[$G+$RST] Creating a $SIZE disk image named $FILENAME ..."
+		echo -e "[$G+$RST] Creating a $SIZE MB disk image named $FILENAME ..."
 		dd if=/dev/zero of="$SIMONPIFOLDER/$FILENAME" bs=1M count="$SIZE" > /dev/null 2>&1
 
 		echo -e "[$G+$RST] Creating partition table on $FILENAME ..."
