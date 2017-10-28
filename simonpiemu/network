@@ -9,7 +9,7 @@ LASTIP="${GATEWAY%.1}.254"
 BROADCAST="${GATEWAY%.1}.255"
 NET="${GATEWAY%.1}.0"
 
-# PID for dnsmasq dhcp server 
+# PID for dnsmasq dhcp server
 DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
 
 killNetwork() {

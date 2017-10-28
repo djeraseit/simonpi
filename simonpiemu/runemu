@@ -34,7 +34,7 @@ run_rpi2() {
 	checkQemu
 	$QEMUARM -nographic \
 		-cpu arm1176 \
-		-m 256 \ 
+		-m 256 \
 		-M versatilepb \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
 		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELVER \
