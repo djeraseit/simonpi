@@ -2,12 +2,13 @@
 
 OPT=.
 . $OPT/simonpiemu/runemu
+. $OPT/simonpiemu/network
+
 
 # You could overwrite paths using VARNAME=value ./simonpi
 
 # Software used in this script.
 AWK=awk
-BRCTL=brctl
 BSDTAR=bsdtar
 DNSMASQ=dnsmasq
 EXT4=mkfs.ext4
@@ -21,7 +22,7 @@ QEMUARM=qemu-system-arm
 VFAT=mkfs.vfat
 VFATCHK=fsck.msdos
 WGET=wget
-PROGS=("$AWK" "$BRCTL" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" "$PS" "$QEMUARM" "$VFAT" "$WGET")
+PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" "$PS" "$QEMUARM" "$VFAT" "$WGET")
 
 # Parameters, Folders and Files
 SNDARG=$2

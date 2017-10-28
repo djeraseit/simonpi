@@ -1,56 +1,12 @@
 #!/bin/sh
 
-KERNELVER=4.4.50
+OPT=.
+. $OPT/simonpiemu/network
 
-# Network Variables
-BRIDGE=rasp-br0
-TAP=rasp-tap0
-GATEWAY=192.168.66.1
-FIRSTIP="${GATEWAY%.1}.2"
-LASTIP="${GATEWAY%.1}.254"
-BROADCAST="${GATEWAY%.1}.255"
-NET="${GATEWAY%.1}.0"
+KERNELVER=4.4.50
 
 # QEMU Variables
 export QEMU_AUDIO_DRV=none
-
-# PID for dnsmasq dhcp server 
-DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
-
-killNetwork() {
-	kill -9 "$DNSMASQPID"
-	$BRCTL delif "$BRIDGE" "$TAP" # Remove tap from bridge
-	$IP link set "$TAP" down
-	$IP link set "$BRIDGE" down
-	$IP tuntap del dev "$TAP" mode tap # Remove tap interface
-	$BRCTL delbr "$BRIDGE"
-	sysctl -w net.ipv4.ip_forward=0 > /dev/null
-}
-
-createNetwork() {
-	# Generate Random MAC ADDRESS to avoid collisions
-	printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
-	sysctl -w net.ipv4.ip_forward=1 > /dev/null
-	$BRCTL addbr "$BRIDGE" # add bridge
-	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
-	$IP link set "$BRIDGE" up
-	$IP tuntap add dev "$TAP" mode tap # Add tap interface
-	$IP link set "$TAP" up promisc on
-	$BRCTL addif "$BRIDGE" "$TAP" # Bind tap to bridge
-	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
-	$IPTABLES -t nat -I POSTROUTING -o "$TAP" -j MASQUERADE # Nat configuration
-	echo -e "[$G+$RST] Turning up a network for QEMU ..."
-	echo -e "[$Y!$RST] Gateway address: $G$GATEWAY$RST"
-}
-
-checkNetwork() {
-	if [ "$DNSMASQPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
-		echo -e "[$G+$RST] Shutting down present network for QEMU ..."
-		killNetwork 2>&1
-		exit 0
-	fi
-	createNetwork
-}
 
 checkQemu() {
 	if [ ! -z "$(pidof $QEMUARM)" ]; then
@@ -62,7 +18,9 @@ run_rpi() {
 	checkNetwork
 	checkQemu
 	$QEMUARM -nographic \
-		-cpu arm1176 -nographic -m 256 -M versatilepb \
+		-cpu arm1176 \
+		-m 256 \
+		-M versatilepb \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
 		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELVER \
 		-append "console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 rw loglevel=0 panic=1" \
@@ -74,8 +32,10 @@ run_rpi() {
 run_rpi2() {
 	checkNetwork
 	checkQemu
-	$QEMUARM \
-		-cpu arm1176 -nographic -m 256 -M versatilepb \
+	$QEMUARM -nographic \
+		-cpu arm1176 \
+		-m 256 \ 
+		-M versatilepb \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
 		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELVER \
 		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop panic=1" \

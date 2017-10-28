@@ -1,0 +1,47 @@
+#!/bin/sh
+
+# Network Variables
+BRIDGE=rasp-br0
+TAP=rasp-tap0
+GATEWAY=192.168.66.1
+FIRSTIP="${GATEWAY%.1}.2"
+LASTIP="${GATEWAY%.1}.254"
+BROADCAST="${GATEWAY%.1}.255"
+NET="${GATEWAY%.1}.0"
+
+# PID for dnsmasq dhcp server 
+DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
+
+killNetwork() {
+	kill -9 $DNSMASQPID
+	$IP link set "$TAP" nomaster # Enslave tap
+	$IP tuntap del dev "$TAP" mode tap # Remove tap
+	$IP link delete "$BRIDGE" type bridge # Remove bridge
+	sysctl -w net.ipv4.ip_forward=0 > /dev/null
+}
+
+createNetwork() {
+	# Generate Random MAC ADDRESS to avoid collisions
+	printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
+	sysctl -w net.ipv4.ip_forward=1 > /dev/null
+	$IP link add "$BRIDGE" type bridge # add bridge
+	$IP	link set $BRIDGE address $BRIDGEMAC
+	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
+	$IP link set "$BRIDGE" up
+	$IP tuntap add dev "$TAP" mode tap # Add tap interface
+	$IP link set "$TAP" up promisc on
+	$IP link set $TAP master "$BRIDGE" # Bind tap to bridge
+	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
+	$IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
+	echo -e "[$G+$RST] Turning up a network for QEMU ..."
+	echo -e "[$Y!$RST] Gateway address: $G$GATEWAY$RST"
+}
+
+checkNetwork() {
+	if [ "$DNSMASQPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
+		echo -e "[$G+$RST] Shutting down present network for QEMU ..."
+		killNetwork 2>&1
+		exit 0
+	fi
+	createNetwork
+}
