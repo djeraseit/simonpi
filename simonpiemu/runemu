@@ -16,45 +16,47 @@ checkQemu() {
 }
 
 run_rpi() {
-	checkNetwork
 	checkQemu
-	$QEMUARM -nographic \
+	checkNetwork
+	$QEMUARM \
+		-nographic \
 		-cpu arm1176 \
 		-m 256 \
 		-M versatilepb \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
-		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELVER \
-		-append "console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 rw loglevel=0 panic=1" \
+		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELRPI \
+		-append "root=/dev/sda2 rw console=ttyAMA0 loglevel=0 panic=1" \
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
 }
 
 run_rpi2() {
-	checkNetwork
 	checkQemu
+	checkNetwork
 	$QEMUARM \
-		-m 256 \
+		-nographic \
+		-m 512 \
 		-M vexpress-a15 \
-		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
+		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELRPI2 \
-		-append "root=/dev/mmcblk0p2 rw loglevel=0 rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop" \
+		-append "root=/dev/mmcblk0p2 rw console=ttyAMA0 loglevel=0 panic=1" \
 		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
 }
 
-# Not working for AArch64. For now it uses same rpi2 params
 run_rpi3() {
-	checkNetwork
 	checkQemu
-	$QEMUARM \
-		-m 256 \
+	checkNetwork
+	$QEMUARM 
+		-nographic\
+		-m 512 \
 		-M vexpress-a15 \
-		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
+		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELRPI2 \
-		-append "root=/dev/mmcblk0p2 rw loglevel=0 rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop" \
+		-append "root=/dev/mmcblk0p2 rw console=ttyAMA0 loglevel=0 panic=1" \
 		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
@@ -65,6 +67,6 @@ run_emu() {
 	case $MODEL in
 		rpi    ) run_rpi ;;
 		rpi-2  ) run_rpi2 ;;
-		rpi-3  ) run_rpi2 ;; #run_rpi3 ;;
+		rpi-3  ) run_rpi3 ;;
 	esac
 }

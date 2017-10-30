@@ -99,8 +99,6 @@ checkModel() {
 		echo "Please select the rpi model"
 		echo "Available:	rpi	rpi-2	rpi-3"
 		exit 1
-	elif [[ $MODEL == rpi-3 ]]; then # Temporary workaround for rpi-3
-		MODEL=rpi-2					 # Sorry no AArch64 support for now
 	fi
 }
 
