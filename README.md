@@ -33,6 +33,7 @@ and X could be mmcblk0 or other block devices
 
 ## For Arch Linux users
 You could find sim-on-pi on AUR
+
 ```yaourt -S simonpi-git```
 
 # Common issues
