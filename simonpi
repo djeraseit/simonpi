@@ -281,7 +281,7 @@ help () {
 	echo "usage: ./simonpi MODEL [<opts>]"
 	echo "	Available MODELs:	rpi	rpi-2	rpi-3"
 	echo "	<opts>	-h			print this message"
-	echo "		-c			check dependencies for this script"
+	echo "		-c			check filesystem integrity for .img file"
 	echo "		-e			purge everything in storage folder"
 	echo "		-k			kill network virtual interfaces"
 	echo "		-l			list files in storage folder"
