@@ -27,7 +27,7 @@ You could transfer your sd img on a valid sdcard using this command:
 where MODEL could be:
 * rpi
 * rpi-2
-* rpi-3 (currently not working AArch64 emulation)
+* rpi-3 (currently not working AArch64 emulation, use rpi-2 for ARMv7 32)
 
 and X could be mmcblk0 or other block devices
 
@@ -38,4 +38,12 @@ You could use:
 ```ss -ntl``` 
 to view conflicts between this script and other services running on port 53.
 
-Raspberry PI 3 currently not working with AArch64. It uses a 32bit kernel image; any suggestions are welcome
+Raspberry PI 3 currently not working with AArch64. Use rpi-2 for rpi-3: it will work with a 32bit kernel image
+
+# PR
+* Fork it 
+* Modify it
+* TEST it
+* Do a Pull Request
+
+any suggestions are welcome

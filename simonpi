@@ -19,10 +19,11 @@ IP=ip
 IPTABLES=iptables
 PS=ps
 QEMUARM=qemu-system-arm
+QEMUARM64=qemu-system-aarch64
 VFAT=mkfs.vfat
 VFATCHK=fsck.msdos
 WGET=wget
-PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" "$PS" "$QEMUARM" "$VFAT" "$WGET")
+PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" "$PS" "$QEMUARM" "$QEMUARM64" "$VFAT" "$WGET")
 
 # Parameters, Folders and Files
 SNDARG=$2
