@@ -3,7 +3,8 @@
 OPT=.
 . $OPT/simonpiemu/network
 
-KERNELVER=4.4.50
+KERNELRPI=4.4.50
+KERNELRPI2=4.9.59
 
 # QEMU Variables
 export QEMU_AUDIO_DRV=none
@@ -25,36 +26,39 @@ run_rpi() {
 		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELVER \
 		-append "console=ttyAMA0 root=/dev/sda2 rootfstype=ext4 rw loglevel=0 panic=1" \
 		-no-reboot \
-		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
+		-net nic,macaddr="$MACADDR" \
+		-net tap,ifname="$TAP",script=no,downscript=no
 }
 
-# QEMU raspi2 support (-M raspi2) lacks of net support. Using versatilepb instead
 run_rpi2() {
 	checkNetwork
 	checkQemu
-	$QEMUARM -nographic \
-		-cpu arm1176 \
+	$QEMUARM \
 		-m 256 \
-		-M versatilepb \
+		-M vexpress-a15 \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
-		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELVER \
-		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop panic=1" \
+		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELRPI2 \
+		-append "root=/dev/mmcblk0p2 rw loglevel=0 rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop" \
+		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-no-reboot \
-		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
+		-net nic,macaddr="$MACADDR" \
+		-net tap,ifname="$TAP",script=no,downscript=no
 }
 
 # Not working for AArch64. For now it uses same rpi2 params
 run_rpi3() {
 	checkNetwork
 	checkQemu
-	qemu-system-aarch64 -nographic \
-		-m 256 -cpu cortex-a53 -M versatilepb \
-		-hda $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
-		-kernel $OPT/simonpiemu/qemu-kernel-simonpi \
-		-initrd $SIMONPIFOLDER/$MODEL/boot/initramfs-linux.img \
-		-append "root=/dev/sda2 rw rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop panic=1" \
+	$QEMUARM \
+		-m 256 \
+		-M vexpress-a15 \
+		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
+		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELRPI2 \
+		-append "root=/dev/mmcblk0p2 rw loglevel=0 rootwait console=ttyAMA0,115200 console=tty1 selinux=0 plymouth.enable=0 smsc95xx.turbo_mode=N dwc_otg.lpm_enable=0 kgdboc=ttyAMA0,115200 elevator=noop" \
+		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-no-reboot \
-		-net nic,macaddr="$MACADDR" -net tap,ifname="$TAP",script=no,downscript=no
+		-net nic,macaddr="$MACADDR" \
+		-net tap,ifname="$TAP",script=no,downscript=no
 }
 
 run_emu() {
