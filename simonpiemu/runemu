@@ -50,7 +50,7 @@ run_rpi2() {
 run_rpi3() {
 	checkQemu
 	checkNetwork
-	$QEMUARM 
+	$QEMUARM \
 		-nographic\
 		-m 512 \
 		-M vexpress-a15 \
