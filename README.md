@@ -31,6 +31,10 @@ where MODEL could be:
 
 and X could be mmcblk0 or other block devices
 
+## For Arch Linux users
+You could find sim-on-pi on AUR
+```yaourt -S simonpi-git```
+
 # Common issues
 This script uses dnsmasq dhcp server to assign ip to guests VM. Please, check your ports on local machine.
 
