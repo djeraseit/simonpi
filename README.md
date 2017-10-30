@@ -46,4 +46,9 @@ Raspberry PI 3 currently not working with AArch64. Use rpi-2 for rpi-3: it will 
 * TEST it
 * Do a Pull Request
 
-any suggestions are welcome
+Any suggestions are welcome
+
+# Used Kernels
+Take a look here for adopted Kernel images:
+
+https://github.com/M0Rf30/qemu-kernels-rpi-arch-arm
