@@ -1,6 +1,5 @@
 #!/bin/sh
 
-OPT=.
 . $OPT/simonpiemu/network
 
 KERNELRPI=4.4.50
