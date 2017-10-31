@@ -27,7 +27,7 @@ run_rpi() {
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
-		umountParts
+	umountParts
 	umountImg
 }
 
