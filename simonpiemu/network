@@ -33,6 +33,7 @@ createNetwork() {
 	$IP link set $TAP master "$BRIDGE" # Bind tap to bridge
 	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
 	$IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
+	#$IPTABLES -A INPUT -p tcp --dport 22 -j ACCEPT
 	echo -e "[$G+$RST] Turning up a network for QEMU ..."
 	echo -e "[$Y!$RST] Gateway address: $G$GATEWAY$RST"
 }

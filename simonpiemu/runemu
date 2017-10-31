@@ -17,8 +17,7 @@ checkQemu() {
 run_rpi() {
 	checkQemu
 	checkNetwork
-	$QEMUARM \
-		-nographic \
+	$QEMUARM -nographic \
 		-cpu arm1176 \
 		-m 256 \
 		-M versatilepb \
@@ -28,15 +27,14 @@ run_rpi() {
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
-	umountParts
+		umountParts
 	umountImg
 }
 
 run_rpi2() {
 	checkQemu
 	checkNetwork
-	$QEMUARM \
-		-nographic \
+	$QEMUARM -nographic \
 		-cpu cortex-a15 \
 		-m 1024 \
 		-M vexpress-a15 \

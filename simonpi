@@ -87,6 +87,8 @@ EOF
 SigLevel = Optional
 Server = http://repo.archlinux.fr/arm
 EOF
+	echo -e "[$G+$RST] Fixing sshd on $FILENAME ..."
+	rm -f $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/ssh_host*
 }
 
 checkFs() {
@@ -122,7 +124,7 @@ isMounted() {
 		umountParts
 		umountImg
 	elif [ ! -f $SIMONPIFOLDER/$FILENAME ]; then
-		echo -e "[$R-$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
+		echo -e "[$Y!$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
 	else
 		echo -e "[$G+$RST] Mounting $MODEL/${MOUNTFOLDERS[0]}"
 		echo -e "[$G+$RST] Mounting $MODEL/${MOUNTFOLDERS[1]}"
@@ -167,23 +169,27 @@ formatLoDevices() {
 	$EXT4 $DEVICE2 > /dev/null 2>&1
 }
 
-downloadArchArm() {
-	echo -e "[$G+$RST] Downloading ..."
-	for i in ${FILES[@]}; do
-		if [ -f $SIMONPIFOLDER/$MODEL/$i ]; then
-			echo -e "[$Y!$RST] $i is present";
-		fi
-		$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress --continue
-	done
-
+integrityCheck() {
 	cd $SIMONPIFOLDER/$MODEL
-	if md5sum -c "$ARCHIMG.md5"; then
+	if md5sum --status -c "$ARCHIMG.md5"; then
 		echo -e "[$G+$RST] Integrity check successfully completed"
-
+		return 0
 	else
 		echo -e "[$R-$RST] Integrity check failed, please retry to download"
 		exit 1
 	fi
+}
+
+downloadArchArm() {
+	echo -e "[$G+$RST] Downloading ..."
+	for i in ${FILES[@]}; do
+		if [ -f $SIMONPIFOLDER/$MODEL/$i ] && [ integrityCheck ]; then
+			echo -e "[$Y!$RST] $i is present";
+		else
+			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress --continue
+			integrityCheck
+		fi
+	done
 }
 
 mountParts() {
@@ -322,4 +328,3 @@ process_args () {
 }
 
 process_args $@;
-
