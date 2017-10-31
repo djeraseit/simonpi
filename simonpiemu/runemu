@@ -28,6 +28,8 @@ run_rpi() {
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
+	umountParts
+	umountImg
 }
 
 run_rpi2() {
@@ -35,7 +37,7 @@ run_rpi2() {
 	checkNetwork
 	$QEMUARM \
 		-nographic \
-		-m 512 \
+		-m 1024 \
 		-M vexpress-a15 \
 		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELRPI2 \
@@ -44,6 +46,8 @@ run_rpi2() {
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
+	umountParts
+	umountImg
 }
 
 # Not working AArch64
@@ -61,6 +65,8 @@ run_rpi3() {
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
+	umountParts
+	umountImg
 }
 
 run_emu() {

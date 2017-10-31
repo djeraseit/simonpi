@@ -115,9 +115,9 @@ checkDeps() {
 }
 
 isMounted() {
-	if [[ $(mount|grep $DEVICE1) ]] && [ $SNDARG = "-r" ]; then
+	if [[ $(mount | grep $DEVICE1) ]] && [ $SNDARG = "-r" ]; then
 		echo -e "[$Y!$RST] ${MOUNTFOLDERS[0]} is already mounted"
-	elif [[ $(mount|grep $DEVICE1) ]]; then
+	elif [[ $(mount | grep $DEVICE1) ]]; then
 		echo -e "[$Y!$RST] ${MOUNTFOLDERS[0]} is already mounted"
 		umountParts
 		umountImg
@@ -275,6 +275,7 @@ purgeEverything() {
 	rm -rf $SIMONPIFOLDER/$MODEL/
 	echo -e "[$G+$RST] Hard cleaning ..."
 }
+
 help () {
 	echo "Create a raw partitioned img for rpi-(1-2-3) emulation on QEMU"
 	echo -e "Default storage is in $G$SIMONPIFOLDER$RST"
