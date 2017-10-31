@@ -37,6 +37,7 @@ run_rpi2() {
 	checkNetwork
 	$QEMUARM \
 		-nographic \
+		-cpu cortex-a15 \
 		-m 1024 \
 		-M vexpress-a15 \
 		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
