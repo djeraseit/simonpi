@@ -83,12 +83,6 @@ Remember to enable sshd on guest if you need it. Type:
 systemctl enable sshd
 
 EOF
-
-	cat << EOF >> $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/pacman.conf
-[archlinuxfr]
-SigLevel = Optional
-Server = http://repo.archlinux.fr/arm
-EOF
 	echo -e "[$G+$RST] Fixing sshd on $FILENAME ..."
 	rm -f $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/ssh_host*
 }
