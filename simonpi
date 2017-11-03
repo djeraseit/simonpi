@@ -228,7 +228,8 @@ umountImg() {
 }
 
 createImg() {
-	if [ -z $GIGA ]; then
+	isaNumber='^[0-9]+$'
+	if ! [[ $GIGA =~ $isaNumber ]] || [ -z $GIGA ]; then
 		echo -e "[$R-$RST] Please specify a size in GB"
 		exit 1
 	elif [ $GIGA -lt 2 ]; then
