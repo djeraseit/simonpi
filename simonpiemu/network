@@ -31,7 +31,7 @@ createNetwork() {
 	$IP tuntap add dev "$TAP" mode tap # Add tap interface
 	$IP link set "$TAP" up promisc on
 	$IP link set $TAP master "$BRIDGE" # Bind tap to bridge
-	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP" -p 6653
+	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
 	$IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
 	echo -e "[$G+$RST] Turning up a network for QEMU ..."
 	echo -e "[$Y!$RST] Gateway address: $G$GATEWAY$RST"
