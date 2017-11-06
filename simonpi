@@ -116,29 +116,30 @@ checkDeps() {
 
 checkMount() {
 	isMounted
-	if [ $IMGMOUNTED == 0 ] && [ $SNDARG == "-r" ];then
-		mountImg
-		mountParts
-	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-r" ]; then
-		mountParts
-	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 1 ] && [ $SNDARG == "-r" ]; then
-		exit 0
-	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-c" ]; then
-		exit 0
-	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 1 ] && [ $SNDARG == "-c" ]; then
-		umountParts
-	elif [ $IMGMOUNTED == 0 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-c" ]; then
-		mountImg
-	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-e" ]; then
-		umountImg
-	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 1 ] && [ $SNDARG == "-e" ]; then
-		umountParts
-		umountImg
-	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-p" ]; then
-		umountImg
-	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 1 ] && [ $SNDARG == "-p" ]; then
-		umountParts
-		umountImg
+	if [ $SNDARG = "-r" ]; then
+		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
+			mountImg
+			mountParts
+		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
+			mountParts
+		fi
+	fi
+		
+	if [ $SNDARG = "-c" ]; then
+		if [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "1" ]; then
+			umountParts
+		elif [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
+			mountImg
+		fi
+	fi
+	
+	if [ $SNDARG = "-e" ] || [ $SNDARG = "-p" ]; then
+		if [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then 
+			umountImg
+		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "1" ]; then
+			umountParts
+			umountImg
+		fi
 	fi
 }
 
