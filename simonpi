@@ -35,6 +35,8 @@ EXTPKGSFOLDER="$SIMONPIFOLDER/$MODEL/pkgs"
 FILENAME="sd-arch-$MODEL-qemu.img"
 ARCHIMG="ArchLinuxARM-$MODEL-latest.tar.gz"
 FILES=("$ARCHIMG" "$ARCHIMG.md5")
+IMGMOUNTED=
+PMOUNTED=
 
 # Loopback devices
 DEVICE1=/dev/loop0
@@ -79,7 +81,7 @@ Written by Gianluca Boiano
 
 In order to update the kernel image with pacman, you have to mount the boot partition.
 Do not add entries for your boot partition to /etc/fstab unless you know what are you doing.
-Remember to enable sshd on guest if you need it. Type: 
+Remember to enable sshd on guest if you need it. Type:
 systemctl enable sshd
 
 EOF
@@ -112,17 +114,46 @@ checkDeps() {
 	done
 }
 
-isMounted() {
-	if [[ $(mount | grep $DEVICE1) ]] && [ $SNDARG = "-r" ]; then
-		echo -e "[$Y!$RST] ${MOUNTFOLDERS[0]} is already mounted"
-	elif [[ $(mount | grep $DEVICE1) ]]; then
-		umountParts
-		umountImg
-	elif [ ! -f $SIMONPIFOLDER/$FILENAME ]; then
-		echo -e "[$Y!$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
-	else
+checkMount() {
+	isMounted
+	if [ $IMGMOUNTED == 0 ] && [ $SNDARG == "-r" ];then
 		mountImg
 		mountParts
+	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-r" ]; then
+		mountParts
+	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 1 ] && [ $SNDARG == "-r" ]; then
+		exit 0
+	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-c" ]; then
+		exit 0
+	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 1 ] && [ $SNDARG == "-c" ]; then
+		umountParts
+	elif [ $IMGMOUNTED == 0 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-c" ]; then
+		mountImg
+	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-e" ]; then
+		umountImg
+	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 1 ] && [ $SNDARG == "-e" ]; then
+		umountParts
+		umountImg
+	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 0 ] && [ $SNDARG == "-p" ]; then
+		umountImg
+	elif [ $IMGMOUNTED == 1 ] && [ $PMOUNTED == 1 ] && [ $SNDARG == "-p" ]; then
+		umountParts
+		umountImg
+	fi
+}
+
+isMounted() {
+	if [ ! -f $SIMONPIFOLDER/$FILENAME ]; then
+		echo -e "[$Y!$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
+	elif [[ $(mount | grep $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}) ]]; then
+		IMGMOUNTED=1
+		PMOUNTED=1
+	elif [[ ! $(mount | grep $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}) ]] && [[ $(mount | grep $DEVICE1) ]]; then
+		IMGMOUNTED=0
+		PMOUNTED=1
+	else
+		IMGMOUNTED=0
+		PMOUNTED=0
 	fi
 }
 
@@ -308,13 +339,13 @@ process_args () {
 		*     ) checkModel ;;
 	esac
 	case "$2" in
-		-c	  ) umountParts && checkFs ;;
-		-e	  ) umountParts && umountImg && purge && purgeEverything ;;
+		-c	  ) checkMount && checkFs ;;
+		-e	  ) checkMount && purge && purgeEverything ;;
 		-k	  ) checkNetwork ;;
 		-l	  ) listStorage ;;
 		-m	  ) mountImg && mountParts ;;
-		-p	  ) umountParts && umountImg && purge ;;
-		-r    ) isMounted && run_emu ;;
+		-p	  ) checkMount && purge ;;
+		-r    ) checkMount && run_emu ;;
 		-s    ) createImg ;;
 		-u    ) umountParts && umountImg ;;
 		*     ) echo 'Please type -h for details' ;;
