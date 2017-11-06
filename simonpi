@@ -116,14 +116,11 @@ isMounted() {
 	if [[ $(mount | grep $DEVICE1) ]] && [ $SNDARG = "-r" ]; then
 		echo -e "[$Y!$RST] ${MOUNTFOLDERS[0]} is already mounted"
 	elif [[ $(mount | grep $DEVICE1) ]]; then
-		echo -e "[$Y!$RST] ${MOUNTFOLDERS[0]} is already mounted"
 		umountParts
 		umountImg
 	elif [ ! -f $SIMONPIFOLDER/$FILENAME ]; then
 		echo -e "[$Y!$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
 	else
-		echo -e "[$G+$RST] Mounting $MODEL/${MOUNTFOLDERS[0]}"
-		echo -e "[$G+$RST] Mounting $MODEL/${MOUNTFOLDERS[1]}"
 		mountImg
 		mountParts
 	fi
@@ -312,11 +309,11 @@ process_args () {
 	esac
 	case "$2" in
 		-c	  ) umountParts && checkFs ;;
-		-e	  ) umountParts && purge && purgeEverything ;;
+		-e	  ) umountParts && umountImg && purge && purgeEverything ;;
 		-k	  ) checkNetwork ;;
 		-l	  ) listStorage ;;
 		-m	  ) mountImg && mountParts ;;
-		-p	  ) umountParts && purge ;;
+		-p	  ) umountParts && umountImg && purge ;;
 		-r    ) isMounted && run_emu ;;
 		-s    ) createImg ;;
 		-u    ) umountParts && umountImg ;;
