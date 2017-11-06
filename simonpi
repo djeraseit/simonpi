@@ -179,13 +179,13 @@ integrityCheck() {
 downloadArchArm() {
 	echo -e "[$G+$RST] Downloading ..."
 	for i in ${FILES[@]}; do
-		if [ -f $SIMONPIFOLDER/$MODEL/$i ] && [ integrityCheck ]; then
+		if [ -f $SIMONPIFOLDER/$MODEL/$i ]; then
 			echo -e "[$Y!$RST] $i is present";
 		else
 			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress --continue
-			integrityCheck
 		fi
 	done
+	integrityCheck
 }
 
 mountParts() {
