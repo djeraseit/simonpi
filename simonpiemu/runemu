@@ -3,7 +3,7 @@
 . $OPT/simonpiemu/network
 
 KERNELRPI=4.4.50
-KERNELRPI2=4.9.60
+KERNELRPI2=4.9.61
 
 # QEMU Variables
 export QEMU_AUDIO_DRV=none
