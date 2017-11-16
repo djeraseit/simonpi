@@ -2,9 +2,6 @@
 
 . $OPT/simonpiemu/network
 
-KERNELRPI=4.4.50
-KERNELRPI2=4.9.61
-
 # QEMU Variables
 export QEMU_AUDIO_DRV=none
 
@@ -22,7 +19,7 @@ run_rpi() {
 		-m 256 \
 		-M versatilepb \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
-		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELRPI \
+		-kernel $OPT/simonpiemu/qemu-kernel-rpi \
 		-append "root=/dev/sda2 rw console=ttyAMA0 loglevel=0 panic=1" \
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
@@ -39,7 +36,7 @@ run_rpi2() {
 		-m 1024 \
 		-M vexpress-a15 \
 		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
-		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELRPI2 \
+		-kernel $OPT/simonpiemu/qemu-kernel-rpi-2 \
 		-append "root=/dev/mmcblk0p2 rw console=ttyAMA0 loglevel=0 panic=1" \
 		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-no-reboot \
@@ -57,7 +54,7 @@ run_rpi3() {
 		-m 2048 \
 		-M vexpress-a15 \
 		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
-		-kernel $OPT/simonpiemu/qemu-kernel-$KERNELRPI2-aarch64 \
+		-kernel $OPT/simonpiemu/qemu-kernel-rpi-3 \
 		-append "root=/dev/mmcblk0p2 rw console=ttyAMA0 panic=1" \
 		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-net nic,macaddr="$MACADDR" \
