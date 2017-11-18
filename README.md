@@ -54,4 +54,4 @@ Any suggestions are welcome
 # Used Kernels
 Take a look here for adopted Kernel images:
 
-https://github.com/M0Rf30/qemu-kernels-rpi-arch-arm
+https://github.com/robertfoster/qemu-kernels-rpi-arch-arm
