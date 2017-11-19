@@ -116,6 +116,10 @@ checkDeps() {
 
 checkMount() {
 	isMounted
+	if [ -z $IMGMOUNTED ] || [ -z $PMOUNTED ]; then
+		exit 1
+	fi	
+
 	if [ $SNDARG = "-r" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mountImg
@@ -344,11 +348,11 @@ process_args () {
 		-e	  ) checkMount && purge && purgeEverything ;;
 		-k	  ) checkNetwork ;;
 		-l	  ) listStorage ;;
-		-m	  ) mountImg && mountParts ;;
+		-m	  ) isMounted && mountImg && mountParts ;;
 		-p	  ) checkMount && purge ;;
 		-r    ) checkMount && run_emu ;;
 		-s    ) createImg ;;
-		-u    ) umountParts && umountImg ;;
+		-u    ) isMounted && umountParts && umountImg ;;
 		*     ) echo 'Please type -h for details' ;;
 	esac
 }
