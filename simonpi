@@ -123,7 +123,7 @@ checkMount() {
 			mountParts
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			mountParts
-		else	
+		else
 			exit 1
 		fi
 	fi
@@ -133,13 +133,15 @@ checkMount() {
 			umountParts
 		elif [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mountImg
-		else 
+		else
 			exit 1
 		fi
 	fi
 
 	if [ $SNDARG = "-e" ] || [ $SNDARG = "-p" ]; then
-		if [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
+		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
+			return
+		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			umountImg
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "1" ]; then
 			umountParts
