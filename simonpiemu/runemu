@@ -5,6 +5,35 @@
 # QEMU Variables
 export QEMU_AUDIO_DRV=none
 
+finalizeIt() {
+	umountParts
+	umountImg
+	unlock
+	checkNetwork
+}
+
+initChecks() {
+	checkLock
+	checkQemu
+	checkNetwork
+}
+
+checkLock() {
+	if [ ! -f /tmp/simonpi.lock ]; then
+		lock
+	else
+		echo -e "[$R-$RST] Already in use. Please check for other instances"
+	fi
+}
+
+lock() {
+	touch /tmp/simonpi.lock
+}
+
+unlock() {
+	rm /tmp/simonpi.lock
+}
+
 checkQemu() {
 	if [ ! -z "$(pidof $QEMUARM)" ]; then
 		pkill "$QEMUARM"
@@ -12,8 +41,6 @@ checkQemu() {
 }
 
 run_rpi() {
-	checkQemu
-	checkNetwork
 	$QEMUARM -nographic \
 		-cpu arm1176 \
 		-m 256 \
@@ -24,13 +51,9 @@ run_rpi() {
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
-	umountParts
-	umountImg
 }
 
 run_rpi2() {
-	checkQemu
-	checkNetwork
 	$QEMUARM -nographic \
 		-cpu cortex-a15 \
 		-m 1024 \
@@ -42,13 +65,9 @@ run_rpi2() {
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
-	umountParts
-	umountImg
 }
 
 run_rpi3() {
-	checkQemu
-	checkNetwork
 	$QEMUARM64 -nographic \
 		-cpu cortex-a53 \
 		-m 2048 \
@@ -59,14 +78,12 @@ run_rpi3() {
 		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
-	umountParts
-	umountImg
 }
 
 run_emu() {
 	case $MODEL in
-		rpi    ) run_rpi ;;
-		rpi-2  ) run_rpi2 ;;
-		rpi-3  ) run_rpi3 ;;
+		rpi    ) initChecks && run_rpi && finalizeIt ;;
+		rpi-2  ) initChecks && run_rpi2 && finalizeIt ;;
+		rpi-3  ) initChecks && run_rpi3 && finalizeIt ;;
 	esac
 }

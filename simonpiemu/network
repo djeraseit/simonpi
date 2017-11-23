@@ -25,7 +25,7 @@ createNetwork() {
 	printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
 	sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	$IP link add "$BRIDGE" type bridge # add bridge
-	$IP	link set $BRIDGE address $BRIDGEMAC
+	$IP link set $BRIDGE address $BRIDGEMAC
 	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
 	$IP link set "$BRIDGE" up
 	$IP tuntap add dev "$TAP" mode tap # Add tap interface
@@ -38,7 +38,7 @@ createNetwork() {
 }
 
 checkNetwork() {
-	if [ "$DNSMASQPID" ] && [ ! -z "$DNSMASQPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
+	if [ ! -z "$DNSMASQPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
 		echo -e "[$G+$RST] Shutting down present network for QEMU ..."
 		killNetwork > /dev/null 2>&1
 		exit 0
