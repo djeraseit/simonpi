@@ -41,7 +41,7 @@ checkNetwork() {
 	if [ ! -z "$DNSMASQPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
 		echo -e "[$G+$RST] Shutting down present network for QEMU ..."
 		killNetwork > /dev/null 2>&1
-		exit 0
+		return
 	fi
 	createNetwork
 }

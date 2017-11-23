@@ -2,36 +2,47 @@
 
 . $OPT/simonpiemu/network
 
+LOCKFILE=/tmp/simonpi.lock
+ANOTHERINSTANCE=
+
 # QEMU Variables
 export QEMU_AUDIO_DRV=none
 
 finalizeIt() {
 	umountParts
 	umountImg
-	unlock
 	checkNetwork
+	unlock
 }
 
 initChecks() {
 	checkLock
-	checkQemu
-	checkNetwork
+	if [ $ANOTHERINSTANCE = "0" ]; then
+		checkQemu
+		checkNetwork
+		lock
+	else 
+		echo -e "[$R-$RST] Already in use. Please check for other instances"
+		exit 1
+	fi
 }
 
 checkLock() {
 	if [ ! -f /tmp/simonpi.lock ]; then
-		lock
+		ANOTHERINSTANCE=0
 	else
-		echo -e "[$R-$RST] Already in use. Please check for other instances"
+		ANOTHERINSTANCE=1
 	fi
 }
 
 lock() {
-	touch /tmp/simonpi.lock
+	touch $LOCKFILE
+	echo -e "[$G+$RST] Locked for one instance"
 }
 
 unlock() {
-	rm /tmp/simonpi.lock
+	rm $LOCKFILE
+	echo -e "[$G+$RST] Unlocked"
 }
 
 checkQemu() {
