@@ -58,7 +58,7 @@ run_rpi() {
 		-M versatilepb \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
 		-kernel $OPT/simonpiemu/qemu-kernel-rpi \
-		-append "root=/dev/sda2 rw console=ttyAMA0 loglevel=0 panic=1" \
+		-append "root=/dev/sda2 rw console=ttyAMA0 loglevel=0 panic=1 quiet" \
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
@@ -71,7 +71,7 @@ run_rpi2() {
 		-M vexpress-a15 \
 		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-rpi-2 \
-		-append "root=/dev/mmcblk0p2 rw console=ttyAMA0 loglevel=0 panic=1" \
+		-append "root=/dev/mmcblk0p2 rw console=ttyAMA0 loglevel=0 panic=1 quiet" \
 		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
@@ -85,7 +85,7 @@ run_rpi3() {
 		-M vexpress-a15 \
 		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-rpi-3 \
-		-append "root=/dev/mmcblk0p2 rw console=ttyAMA0 panic=1" \
+		-append "root=/dev/mmcblk0p2 rw console=ttyAMA0 panic=1 quiet" \
 		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
