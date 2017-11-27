@@ -21,7 +21,7 @@ initChecks() {
 		checkQemu
 		checkNetwork
 		lock
-	else 
+	else
 		echo -e "[$R-$RST] Already in use. Please check for other instances"
 		exit 1
 	fi
