@@ -81,8 +81,12 @@ Written by Gianluca Boiano
 
 In order to update the kernel image with pacman, you have to mount the boot partition.
 Do not add entries for your boot partition to /etc/fstab unless you know what are you doing.
+
 Remember to enable sshd on guest if you need it. Type:
 systemctl enable sshd
+
+To set tty lines type:
+stty rows 28 columns 212
 
 EOF
 	echo -e "[$G+$RST] Fixing sshd on $FILENAME ..."
