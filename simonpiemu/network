@@ -13,11 +13,12 @@ NET="${GATEWAY%.1}.0"
 DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
 
 killNetwork() {
-		kill -9 "$DNSMASQPID"
-		$IP link set "$TAP" nomaster # Enslave tap
-		$IP tuntap del dev "$TAP" mode tap # Remove tap
-		$IP link delete "$BRIDGE" type bridge # Remove bridge
-		sysctl -w net.ipv4.ip_forward=0 > /dev/null
+	checkQemu
+	kill -9 "$DNSMASQPID"
+	$IP link set "$TAP" nomaster # Enslave tap
+	$IP tuntap del dev "$TAP" mode tap # Remove tap
+	$IP link delete "$BRIDGE" type bridge # Remove bridge
+	sysctl -w net.ipv4.ip_forward=0 > /dev/null
 }
 
 createNetwork() {
