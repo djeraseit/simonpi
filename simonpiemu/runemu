@@ -86,7 +86,7 @@ run_rpi3() {
 		-sd $SIMONPIFOLDER/sd-arch-$MODEL-qemu.img \
 		-kernel $OPT/simonpiemu/qemu-kernel-rpi-3 \
 		-append "root=/dev/mmcblk0p2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet" \
-		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
+		-dtb $OPT/simonpiemu/vexpress-v2f-1xv7-ca53x2.dtb \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
 }
