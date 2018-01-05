@@ -154,8 +154,6 @@ checkMount() {
 		elif [ $PMOUNTED = "1" ]; then
 			umountParts
 			umountImg
-		else
-			exit 1
 		fi
 	fi
 }
