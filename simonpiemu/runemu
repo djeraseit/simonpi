@@ -56,9 +56,10 @@ run_rpi() {
 		-cpu arm1176 \
 		-m 256 \
 		-M versatilepb \
-		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,format=raw \
+		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=scsi,format=raw \
 		-kernel $OPT/simonpiemu/qemu-kernel-rpi \
 		-append "root=/dev/sda2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet" \
+		-semihosting \
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
@@ -69,10 +70,12 @@ run_rpi2() {
 		-cpu cortex-a15 \
 		-m 1024 \
 		-M vexpress-a15 \
+		-smp cpus=2 \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=sd,format=raw \
 		-kernel $OPT/simonpiemu/qemu-kernel-rpi-2 \
 		-append "root=/dev/mmcblk0p2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet" \
 		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
+		-semihosting \
 		-no-reboot \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
@@ -87,6 +90,7 @@ run_rpi3() {
 		-kernel $OPT/simonpiemu/qemu-kernel-rpi-3 \
 		-append "root=/dev/mmcblk0p2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet" \
 		-dtb $OPT/simonpiemu/vexpress-v2f-1xv7-ca53x2.dtb \
+		-semihosting \
 		-net nic,macaddr="$MACADDR" \
 		-net tap,ifname="$TAP",script=no,downscript=no
 }
