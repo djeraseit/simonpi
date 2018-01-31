@@ -31,6 +31,9 @@ initChecks() {
 checkLock() {
     if [ ! -f $LOCKFILE ] && [ $QEMUKILLED = "1" ]; then
         ANOTHERINSTANCE=0
+    elif [ -f $LOCKFILE ] && [ $QEMUKILLED = "1" ]; then
+        ANOTHERINSTANCE=0
+        unlock
     else
         ANOTHERINSTANCE=1
     fi
