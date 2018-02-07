@@ -21,7 +21,7 @@ PS=ps
 QEMUARM=qemu-system-arm
 QEMUARM64=qemu-system-aarch64
 VFAT=mkfs.vfat
-VFATCHK=fsck.msdos
+VFATCHK=fsck.vfat
 WGET=wget
 PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" "$PS" "$QEMUARM" "$QEMUARM64" "$VFAT" "$WGET")
 
@@ -295,9 +295,9 @@ createImg() {
 		dd if=/dev/zero of="$SIMONPIFOLDER/$FILENAME" bs=1M count="$SIZE" > /dev/null 2>&1
 
 		echo -e "[$G+$RST] Creating partition table on $FILENAME ..."
-		(echo o; echo n; echo p; echo 1; echo 8192; echo 212991; echo t; echo c; echo a; \
-		echo n; echo p; echo 2; echo 212992; echo ; echo a; echo 1; \
-		echo p; echo w; echo q) | $FDISK "$SIMONPIFOLDER/$FILENAME" >/dev/null 2>&1
+		(echo o; echo n; echo p; echo 1; echo 8192; echo +100M; echo t; echo c; \
+		echo n; echo p; echo 2; echo 8192; echo ; echo ; echo w) | \
+		$FDISK -H 255 -S 63 "$SIMONPIFOLDER/$FILENAME" >/dev/null 2>&1
 	fi
 	sync
 	mountImg
