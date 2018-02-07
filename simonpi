@@ -91,6 +91,7 @@ stty rows 28 columns 212
 EOF
 	echo -e "[$G+$RST] Fixing sshd on $FILENAME ..."
 	rm -f $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/ssh_host*
+	sync
 }
 
 checkFs() {
@@ -183,6 +184,7 @@ customContent() {
 			for i in $(ls $EXTPKGSFOLDER); do
 				echo -e "	[$G+$RST] Copying $i in /home/alarm ..."
 				cp $EXTPKGSFOLDER/$i $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/home/alarm
+				sync
 			done
 		else
 			echo -e "[$Y!$RST] $EXTPKGSFOLDER is empty"
@@ -209,6 +211,7 @@ formatLoDevices() {
 	echo -e "[$G+$RST] Creating partitions on disk image named $FILENAME ..."
 	$VFAT -F 32 $DEVICE1 > /dev/null 2>&1
 	$EXT4 $DEVICE2 > /dev/null 2>&1
+	sync
 }
 
 integrityCheck() {
@@ -237,7 +240,7 @@ downloadArchArm() {
 mountParts() {
 	checkFolders
 	echo -e "[$G+$RST] Mounting partitions of $FILENAME ..."
-	mount -t msdos $DEVICE1 "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}"
+	mount $DEVICE1 "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}"
 	mount $DEVICE2 "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
 }
 
@@ -305,11 +308,11 @@ createImg() {
 	mountParts
 	echo -e "[$G+$RST] Extracting $ARCHIMG to $FILENAME ..."
 	$BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
-	echo -e "[$G+$RST] Syncing ..."
 	sync
 	presetsGen
 	customContent
 	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/boot/* $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}
+	sync
 	umountParts
 	umountImg
 	echo -e "[$G+$RST] DONE"
