@@ -207,7 +207,7 @@ checkFolders() {
 
 formatLoDevices() {
 	echo -e "[$G+$RST] Creating partitions on disk image named $FILENAME ..."
-	$VFAT $DEVICE1 > /dev/null 2>&1
+	$VFAT -F 32 $DEVICE1 > /dev/null 2>&1
 	$EXT4 $DEVICE2 > /dev/null 2>&1
 }
 
