@@ -1,10 +1,11 @@
 #!/bin/bash
 
-set -xe
-
 echo "===> Update&install all needed packages"
 
-pacman -Suy --noconfirm --noprogressbar binutils fakeroot git dnsmasq dosfstools iproute2 iptables qemu-headless-arch-extra sudo wget
+pacman -Suy --noconfirm --noprogressbar binutils \ 
+		fakeroot git dnsmasq dosfstools \
+		iproute2 iptables qemu-headless-arch-extra \
+		sudo wget
 
 echo "===> enable sudo from nobody with nopasword, for 'sudo -u nobody makepkg -i' to work"
 echo "nobody ALL=(ALL:ALL) NOPASSWD: ALL" | (VISUAL="tee -a" EDITOR="tee -a" visudo)
