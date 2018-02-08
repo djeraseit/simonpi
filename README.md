@@ -22,7 +22,7 @@ Powered with :heart: by Arch Linux Arm images
 
 You could transfer your sd img on a valid sdcard using this command:
 
-```dd if=sd-arch-MODEL-qemu.img of=/dev/sdX```
+```dd if=sd-arch-MODEL-qemu.img of=/dev/sdX bs=4M```
 
 where MODEL could be:
 * rpi
