@@ -2,7 +2,7 @@
 
 echo "===> Update&install all needed packages"
 
-pacman -Suy --noconfirm --noprogressbar binutils \ 
+pacman -Suy --noconfirm --noprogressbar binutils \
 		fakeroot git dnsmasq dosfstools \
 		iproute2 iptables qemu-headless-arch-extra \
 		sudo wget
