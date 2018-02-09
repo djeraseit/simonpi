@@ -37,6 +37,10 @@ ARCHIMG="ArchLinuxARM-$MODEL-latest.tar.gz"
 FILES=("$ARCHIMG" "$ARCHIMG.md5")
 IMGMOUNTED=
 PMOUNTED=
+START1=
+START2=
+LENGHT1=
+LENGHT2=
 
 # Loopback devices
 DEVICE1=/dev/loop0
@@ -124,6 +128,7 @@ checkMount() {
 
 	if [ $SNDARG = "-r" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
+			mapImg
 			mountImg
 			mountParts
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
@@ -137,6 +142,7 @@ checkMount() {
 
 	if [ $SNDARG = "-c" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
+			mapImg
 			mountImg
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			return
@@ -261,14 +267,18 @@ listStorage() {
 	ls $SIMONPIFOLDER/$MODEL
 }
 
-mountImg() {
-	echo -e "[$G+$RST] Mounting disk image named $FILENAME ..."
+mapImg() {
+	echo -e "[$G+$RST] Mapping lenghts of partitions ..."
 	START1=$(fdisk -lo Start $SIMONPIFOLDER/$FILENAME | tail -n 2 | head -n -1)
 	START2=$(fdisk -lo Start $SIMONPIFOLDER/$FILENAME | tail -n 1)
-	END1=$(fdisk -lo Sectors $SIMONPIFOLDER/$FILENAME | tail -n 2 | head -n -1)
-	END2=$(fdisk -lo Sectors $SIMONPIFOLDER/$FILENAME | tail -n 1)
-	losetup -o $(( START1*512 )) --sizelimit $(( END1*512 )) $DEVICE1 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
-	losetup -o $(( START2*512 )) --sizelimit $(( END2*512 )) $DEVICE2 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
+	LENGTH1=$(fdisk -lo Sectors $SIMONPIFOLDER/$FILENAME | tail -n 2 | head -n -1)
+	LENGHT2=$(fdisk -lo Sectors $SIMONPIFOLDER/$FILENAME | tail -n 1)
+}
+
+mountImg() {
+	echo -e "[$G+$RST] Mounting disk image named $FILENAME ..."
+	losetup -o $(( START1*512 )) --sizelimit $(( LENGHT1*512 )) $DEVICE1 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
+	losetup -o $(( START2*512 )) --sizelimit $(( LENGHT2*512 )) $DEVICE2 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
 }
 
 umountImg() {
@@ -303,6 +313,7 @@ createImg() {
 		$FDISK -H 255 -S 63 "$SIMONPIFOLDER/$FILENAME" >/dev/null 2>&1
 	fi
 	sync
+	mapImg
 	mountImg
 	formatLoDevices
 	mountParts
@@ -336,7 +347,7 @@ help () {
 	echo "	<opts>	-h			print this message"
 	echo "		-c			check filesystem integrity for .img file"
 	echo "		-e			purge everything in storage folder"
-	echo "		-k			kill network virtual interfaces"
+	echo "		-k			kill other instances and network virtual interfaces"
 	echo "		-l			list files in storage folder"
 	echo "		-m			mount only loop devices ($DEVICE1, $DEVICE2)"
 	echo "		-p			purge everything except Arch Linux archives"
