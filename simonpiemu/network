@@ -3,6 +3,7 @@
 # Network Variables
 BRIDGE=rasp-br0
 TAP=rasp-tap0
+TAPDOCK=docker0
 GATEWAY=192.168.66.1
 FIRSTIP="${GATEWAY%.1}.2"
 LASTIP="${GATEWAY%.1}.254"
@@ -11,6 +12,11 @@ NET="${GATEWAY%.1}.0"
 
 # PID for dnsmasq dhcp server
 DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
+
+generateMAC() {
+	# Generate Random MAC ADDRESS to avoid collisions
+	printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
+}
 
 killNetwork() {
 	checkQemu
@@ -22,11 +28,9 @@ killNetwork() {
 }
 
 createNetwork() {
-	# Generate Random MAC ADDRESS to avoid collisions
-	printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
 	sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	$IP link add "$BRIDGE" type bridge # add bridge
-#	$IP link set $BRIDGE address $GATEWAY
+# $IP link set $BRIDGE address $GATEWAY
 	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
 	$IP link set "$BRIDGE" up
 	$IP tuntap add dev "$TAP" mode tap # Add tap interface

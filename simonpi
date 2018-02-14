@@ -71,7 +71,7 @@ presetsGen() {
 #
 # <file system> <dir>   <type>  <options>       <dump>  <pass>
 EOF
-	cat << 'EOF' > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/motd
+	cat << EOF > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/motd
 
         __                                                                        __
    ____/\_\    ___ ___                      ___     ___                    _____ /\_\
@@ -91,7 +91,6 @@ systemctl enable sshd
 
 To set tty lines type:
 stty rows 28 columns 212
-
 EOF
 	echo -e "[$G+$RST] Fixing sshd on $FILENAME ..."
 	rm -f $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/ssh_host*

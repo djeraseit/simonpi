@@ -2,17 +2,21 @@
 
 . $OPT/simonpiemu/network
 
+# Control Vars
 LOCKFILE=/tmp/simonpi.lock
 ANOTHERINSTANCE=
+DOCKER=
 QEMUKILLED=1
 
-# QEMU Variables
+# QEMU Vars
 export QEMU_AUDIO_DRV=none
 
 finalizeIt() {
     umountParts
     umountImg
-    checkNetwork
+    if [ $DOCKER = "0" ]; then
+        checkNetwork
+    fi
     unlock
 }
 
@@ -20,11 +24,29 @@ initChecks() {
     checkLock
     if [ $ANOTHERINSTANCE = "0" ]; then
         checkQemu
-        checkNetwork
+        checkDocker
+        if [ $DOCKER = "0" ]; then
+            generateMAC
+            NETWORKCMD=" -net nic,macaddr=$MACADDR -net tap,ifname=$TAP,script=no,downscript=no"
+            checkNetwork
+        else
+            generateMAC
+            NETWORKCMD=" -net nic,macaddr=$MACADDR -net tap,ifname=$TAPDOCK,script=no,downscript=no"
+        fi
         lock
     else
         echo -e "[$R-$RST] Already in use. Please check for other instances"
         exit 1
+    fi
+}
+
+checkDocker() {
+    if [ -f /.dockerenv ]; then
+        DOCKER=1
+        echo -e "[$Y!$RST] In a Docker container ..."
+    else
+        DOCKER=0
+        echo -e "[$Y!$RST] Out of a Docker container ..."
     fi
 }
 
@@ -59,47 +81,50 @@ checkQemu() {
 }
 
 run_rpi() {
-    $QEMUARM -nographic \
+    QEMURPI="$QEMUARM -nographic \
         -cpu arm1176 \
         -m 256 \
         -M versatilepb \
         -drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=scsi,format=raw \
         -kernel $OPT/simonpiemu/qemu-kernel-rpi \
-        -append "root=/dev/sda2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet" \
+        -append \"root=/dev/sda2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet\" \
         -semihosting \
-        -no-reboot \
-        -net nic,macaddr="$MACADDR" \
-        -net tap,ifname="$TAP",script=no,downscript=no
+        -no-reboot"
+
+    QEMURPI+=$NETWORKCMD
+    eval $QEMURPI
 }
 
 run_rpi2() {
-    $QEMUARM -nographic \
+    QEMURPI2="$QEMUARM -nographic \
         -cpu cortex-a15 \
         -m 1024 \
         -M vexpress-a15 \
         -smp cpus=2 \
         -drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=sd,format=raw \
         -kernel $OPT/simonpiemu/qemu-kernel-rpi-2 \
-        -append "root=/dev/mmcblk0p2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet" \
+        -append \"root=/dev/mmcblk0p2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet\" \
         -dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
         -semihosting \
-        -no-reboot \
-        -net nic,macaddr="$MACADDR" \
-        -net tap,ifname="$TAP",script=no,downscript=no
+        -no-reboot"
+
+    QEMURPI2+=$NETWORKCMD
+    eval $QEMURPI2
 }
 
 run_rpi3() {
-    $QEMUARM64 -nographic \
+    QEMURPI3="$QEMUARM64 -nographic \
         -cpu cortex-a53 \
         -m 2048 \
         -M vexpress-a15 \
         -drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=sd,format=raw \
         -kernel $OPT/simonpiemu/qemu-kernel-rpi-3 \
-        -append "root=/dev/mmcblk0p2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1" \
+        -append \"root=/dev/mmcblk0p2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1\" \
         -dtb $OPT/simonpiemu/vexpress-v2f-1xv7-ca53x2.dtb \
-        -semihosting \
-        -net nic,macaddr="$MACADDR" \
-        -net tap,ifname="$TAP",script=no,downscript=no
+        -semihosting"
+
+    QEMURPI3+=$NETWORKCMD
+    eval $QEMURPI3
 }
 
 run_emu() {
