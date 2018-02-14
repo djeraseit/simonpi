@@ -30,13 +30,13 @@ killNetwork() {
 createNetwork() {
 	sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	$IP link add "$BRIDGE" type bridge # add bridge
-# $IP link set $BRIDGE address $GATEWAY
+	# $IP link set $BRIDGE address $GATEWAY
 	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
 	$IP link set "$BRIDGE" up
 	$IP tuntap add dev "$TAP" mode tap # Add tap interface
 	$IP link set "$TAP" up promisc on
 	$IP link set $TAP master "$BRIDGE" # Bind tap to bridge
-        $IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
+	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
 	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
 	$IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
 	echo -e "[$G+$RST] Turning up a network for QEMU ..."
