@@ -66,12 +66,12 @@ fi
 presetsGen() {
 	echo -e "[$G+$RST] Injecting a motd and fstab to $FILENAME ..."
 	# Prevent vfat corruption for boot partition
-	cat << EOF > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab
+	cat <<EOF > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab
 # /etc/fstab: static file system information
 #
 # <file system> <dir>   <type>  <options>       <dump>  <pass>
 EOF
-	cat << EOF > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/motd
+	cat <<'EOF' > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/motd
 
         __                                                                        __
    ____/\_\    ___ ___                      ___     ___                    _____ /\_\
