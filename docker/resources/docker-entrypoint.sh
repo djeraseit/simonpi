@@ -14,6 +14,10 @@ echo "===> FIX stupid bug when sudo inside docker"
 #http://bit-traveler.blogspot.com/2015/11/sudo-error-within-docker-container-arch.html
 sed -e "/nice/s/\*/#*/" -i /etc/security/limits.conf
 
+echo "===> Networking settings ..."
+    mkdir -p /dev/net
+    mknod /dev/net/tun c 10 $(grep '\<tun\>' /proc/misc | cut -f 1 -d' ')
+
 ## install_from_aur
 install_from_aur() {
 	local name=$1
