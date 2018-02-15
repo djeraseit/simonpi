@@ -31,7 +31,7 @@ initChecks() {
 			checkNetwork
 		else
 			generateMAC
-			NETWORKCMD=" -net nic,macaddr=$MACADDR -net tap,ifname=$TAPDOCK,script=no,downscript=no"
+			NETWORKCMD=" -net nic,macaddr=$MACADDR -net user,hostfwd=tcp::2222-:22"
 		fi
 		lock
 	else

@@ -3,8 +3,8 @@
 echo "===> Update&install all needed packages"
 
 pacman -Suy --noconfirm --noprogressbar binutils \
-		fakeroot git dnsmasq dosfstools \
-		iproute2 iptables qemu-headless-arch-extra \
+		fakeroot dnsmasq dosfstools \
+		iproute2 qemu-headless-arch-extra \
 		sudo wget libseccomp
 
 echo "===> enable sudo from nobody with nopasword, for 'sudo -u nobody makepkg -i' to work"
@@ -16,24 +16,26 @@ sed -e "/nice/s/\*/#*/" -i /etc/security/limits.conf
 
 echo "===> Networking settings ..."
     mkdir -p /dev/net
-    mknod /dev/net/tun c 10 $(grep '\<tun\>' /proc/misc | cut -f 1 -d' ')
+    mknod /dev/net/tun c 10 200
 
 ## install_from_aur
 install_from_aur() {
 	local name=$1
-	local tmpdir=/home/$name
-	git clone https://aur.archlinux.org/$name.git $tmpdir
-	chown nobody:nobody -R $tmpdir
-	pushd $tmpdir
+	cd /home
+	wget https://aur.archlinux.org/cgit/aur.git/snapshot/$name.tar.gz
+	tar xvf $name.tar.gz
+	chown nobody:nobody -R $name
+	cd $name
 	sudo -Eu nobody makepkg --noconfirm --nosign -si
-	popd
-	rm -rf $tmpdir
+	cd ..
+	rm -rf $name
 }
 
-echo "===> install yaourt"
+echo "===> install simonpi"
 install_from_aur simonpi-git
 
 echo "===> cleanup"
+yes Y | pacman -Rscn git
 yes Y | pacman -Scc
 
 echo "===> DONE $0 $*"
