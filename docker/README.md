@@ -24,3 +24,7 @@ Type
 ```
 ssh alarm@localhost -p 2222
 ```
+default password for alarm (arch linux arm) user is
+```
+alarm
+```
