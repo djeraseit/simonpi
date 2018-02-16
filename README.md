@@ -36,6 +36,9 @@ You could find sim-on-pi on AUR
 
 ```yaourt -S simonpi-git```
 
+## Docker image
+See the **How to** into **docker** folder
+
 # Common issues
 This script uses dnsmasq dhcp server to assign ip to guests VM. Please, check your ports on local machine.
 
