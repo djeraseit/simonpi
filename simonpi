@@ -1,9 +1,6 @@
 #!/bin/sh
 
 OPT=.
-. $OPT/simonpiemu/runemu
-. $OPT/simonpiemu/network
-
 
 # You could overwrite paths using VARNAME=value ./simonpi
 
@@ -52,10 +49,13 @@ G='\e[0;32m'
 Y='\e[0;33m'
 RST='\e[0m'
 
+. $OPT/simonpiemu/runemu
+. $OPT/simonpiemu/network
+
 # Must be root to use this tool
 if [[ ! $EUID -eq 0 ]];then
 	if [[ -x "$(command -v sudo)" ]]; then
-		exec sudo bash "$0" "$@"
+		exec sudo -E bash "$0" "$@"
 		exit $?
 	else
 		echo -e "[$Y!$RST] sudo is needed. Please run this script as root or install sudo."

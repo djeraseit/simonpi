@@ -1,7 +1,5 @@
 #!/bin/sh
 
-. $OPT/simonpiemu/network
-
 # Control Vars
 LOCKFILE=/tmp/simonpi.lock
 ANOTHERINSTANCE=
