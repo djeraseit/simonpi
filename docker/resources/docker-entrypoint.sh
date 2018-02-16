@@ -28,7 +28,7 @@ install_from_aur() {
 	cd $name
 	sudo -Eu nobody makepkg --noconfirm --nosign -si
 	cd ..
-	rm -rf $name.tar.gz
+	rm -rf $name
 }
 
 echo "===> install simonpi"
