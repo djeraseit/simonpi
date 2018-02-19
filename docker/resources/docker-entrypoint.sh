@@ -1,42 +1,31 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "===> Update&install all needed packages"
 
-pacman -Suy --noconfirm --noprogressbar binutils \
-		fakeroot dnsmasq dosfstools \
-		iproute2 qemu-headless-arch-extra \
-		sudo wget libseccomp
-
-echo "===> enable sudo from nobody with nopasword, for 'sudo -u nobody makepkg -i' to work"
-echo "nobody ALL=(ALL:ALL) NOPASSWD: ALL" | (VISUAL="tee -a" EDITOR="tee -a" visudo)
-
-echo "===> FIX stupid bug when sudo inside docker"
-#http://bit-traveler.blogspot.com/2015/11/sudo-error-within-docker-container-arch.html
-sed -e "/nice/s/\*/#*/" -i /etc/security/limits.conf
-
+apk update && apk add --no-cache binutils e2fsprogs util-linux iproute2 \
+		libarchive-tools bash sudo dnsmasq wget unzip tar iptables \
+		coreutils qemu-system-arm qemu-system-aarch64
+		
 echo "===> Networking settings ..."
     mkdir -p /dev/net
     mknod /dev/net/tun c 10 200
 
-## install_from_aur
-install_from_aur() {
-	local name=$1
+## install_from_git
+install_from_git() {
 	cd /home
-	wget https://aur.archlinux.org/cgit/aur.git/snapshot/$name.tar.gz
-	tar xvf $name.tar.gz
-	chown nobody:nobody -R $name
-	cd $name
-	sudo -Eu nobody makepkg --noconfirm --nosign -si
+	wget https://github.com/M0Rf30/simonpi/archive/master.zip
+	unzip master.zip
+	cd simonpi-master
+	install -Dm755 simonpi /usr/bin/simonpi
+	install -dm755 /opt/simonpiemu/
+	cp simonpiemu/* /opt/simonpiemu/
+	sed -i "s/OPT=./OPT=\/opt/g" /usr/bin/simonpi
 	cd ..
-	rm -rf $name
+	rm -rf simonpi-master master.zip
 }
 
 echo "===> install simonpi"
-install_from_aur simonpi-git
-
-echo "===> cleanup"
-yes Y | pacman -Rscn git
-yes Y | pacman -Scc
+install_from_git simonpi
 
 echo "===> DONE $0 $*"
 

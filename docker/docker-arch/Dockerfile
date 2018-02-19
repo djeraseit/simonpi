@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM base/archlinux:latest
 LABEL maintainer="Gianluca Boiano <morf3089@gmail.com>"
 
 COPY resources /
