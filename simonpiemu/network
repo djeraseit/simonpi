@@ -30,8 +30,6 @@ killNetwork() {
 createNetwork() {
 	sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	$IP link add "$BRIDGE" type bridge # add bridge
-	# $IP link set $BRIDGE address $GATEWAY
-	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
 	$IP link set "$BRIDGE" up
 	$IP tuntap add dev "$TAP" mode tap # Add tap interface
 	$IP link set "$TAP" up promisc on
