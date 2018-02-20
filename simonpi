@@ -64,6 +64,16 @@ if [[ ! $EUID -eq 0 ]];then
 fi
 
 presetsGen() {
+	if [[ $MODEL == rpi ]]; then
+		echo -e "[$G+$RST] Injecting sda udev rules into $FILENAME ..."
+		# It allows qemu virtualization and scsi functionality
+		cat <<'EOF' > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/udev/rules.d/90-qemu.rules
+KERNEL=="sda", SYMLINK+="mmcblk0"
+KERNEL=="sda?", SYMLINK+="mmcblk0p%n"
+KERNEL=="sda2", SYMLINK+="root"
+EOF
+	fi
+
 	echo -e "[$G+$RST] Injecting a motd and fstab to $FILENAME ..."
 	# Prevent vfat corruption for boot partition
 	cat <<EOF > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab
