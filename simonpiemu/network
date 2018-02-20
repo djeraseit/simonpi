@@ -9,6 +9,7 @@ FIRSTIP="${GATEWAY%.1}.2"
 LASTIP="${GATEWAY%.1}.254"
 BROADCAST="${GATEWAY%.1}.255"
 NET="${GATEWAY%.1}.0"
+NETWORKISUP=
 
 # PID for dnsmasq dhcp server
 DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
@@ -20,7 +21,9 @@ generateMAC() {
 
 killNetwork() {
 	checkQemu
-	kill -9 "$DNSMASQPID"
+	if [ ! -z $DNSMASQPID ]; then
+		kill -9 "$DNSMASQPID"
+	fi
 	$IP link set "$TAP" nomaster # Enslave tap
 	$IP tuntap del dev "$TAP" mode tap # Remove tap
 	$IP link delete "$BRIDGE" type bridge # Remove bridge
@@ -30,22 +33,31 @@ killNetwork() {
 createNetwork() {
 	sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	$IP link add "$BRIDGE" type bridge # add bridge
-	$IP link set "$BRIDGE" up
+	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface 
 	$IP tuntap add dev "$TAP" mode tap # Add tap interface
-	$IP link set "$TAP" up promisc on
 	$IP link set $TAP master "$BRIDGE" # Bind tap to bridge
-	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
+	$IP link set "$BRIDGE" up
+	$IP link set "$TAP" up promisc on
 	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
 	$IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
-	echo -e "[$G+$RST] Turning up a network for QEMU ..."
 	echo -e "[$Y!$RST] Gateway address: $G$GATEWAY$RST"
+}
+
+manageNetwork(){
+	if [ $NETWORKISUP = "0" ]; then
+		echo -e "[$G+$RST] Turning up a network for QEMU ..."
+		createNetwork
+	else
+		echo -e "[$G+$RST] Shutting down present network for QEMU ..."
+		killNetwork
+	fi
 }
 
 checkNetwork() {
 	if [ ! -z "$DNSMASQPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
-		echo -e "[$G+$RST] Shutting down present network for QEMU ..."
-		killNetwork > /dev/null 2>&1
-		return
+		NETWORKISUP=1
+	else
+		NETWORKISUP=0
 	fi
-	createNetwork
+	manageNetwork
 }

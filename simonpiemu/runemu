@@ -24,9 +24,9 @@ initChecks() {
 		checkQemu
 		checkDocker
 		if [ $DOCKER = "0" ]; then
+			checkNetwork
 			generateMAC
 			NETWORKCMD=" -net nic,macaddr=$MACADDR -net tap,ifname=$TAP,script=no,downscript=no"
-			checkNetwork
 		else
 			generateMAC
 			NETWORKCMD=" -net nic,macaddr=$MACADDR -net user,hostfwd=tcp::2222-:22"
@@ -71,7 +71,7 @@ unlock() {
 
 checkQemu() {
 	if [ ! -z "$(pidof $QEMUARM)" ]; then
-		pkill "$QEMUARM"
+		kill -SIGTERM "$(pidof $QEMUARM)"
 		QEMUKILLED=1
 	else
 		QEMUKILLED=0

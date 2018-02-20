@@ -118,6 +118,8 @@ checkModel() {
 		echo "Please select the rpi model"
 		echo "Available:	rpi	rpi-2	rpi-3"
 		exit 1
+	elif [ $MODEL = "rpi-3" ]; then
+		QEMUARM=$QEMUARM64
 	fi
 }
 
