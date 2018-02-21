@@ -67,8 +67,6 @@ run_rpi() {
 		-M versatilepb \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=scsi,format=raw \
 		-kernel $OPT/simonpiemu/qemu-kernel-rpi \
-		-append \"root=/dev/sda2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet\" \
-		-dtb $OPT/simonpiemu/versatile-pb.dtb \
 		-semihosting \
 		-no-reboot"
 
