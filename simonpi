@@ -356,7 +356,7 @@ help () {
 	echo "	<opts>	-h			print this message"
 	echo "		-c			check filesystem integrity for .img file"
 	echo "		-e			purge everything in storage folder"
-	echo "		-k			kill other instances and network virtual interfaces"
+	echo "		-k			kill every instance and network virtual interface"
 	echo "		-l			list files in storage folder"
 	echo "		-m			mount only loop devices ($DEVICE1, $DEVICE2)"
 	echo "		-p			purge everything except Arch Linux archives"

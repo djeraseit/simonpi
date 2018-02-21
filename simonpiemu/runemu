@@ -54,8 +54,11 @@ checkQemu() {
 killQemu() {
 	if [ $QEMUISRUNNING = "1" ]; then
 		echo -e "[$G+$RST] Killing QEMU instance ..."
-		kill -SIGTERM "$(pidof $QEMUARM)"
-	else
+		if [ ! -z "$(pidof $QEMUARM)" ]; then
+			kill -SIGTERM "$(pidof $QEMUARM)"
+		else
+			kill -SIGTERM "$(pidof $QEMUARM64)"
+		fi	else
 		echo -e "[$Y!$RST] QEMU is not running ..."
 	fi
 }
