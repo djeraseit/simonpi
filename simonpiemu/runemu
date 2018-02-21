@@ -44,7 +44,7 @@ checkDocker() {
 }
 
 checkQemu() {
-	if [ ! -z "$(pidof $QEMUARM)" ]; then
+	if [ ! -z "$(pidof $QEMUARM)" ] || [ ! -z "$(pidof $QEMUARM64)" ]; then
 		QEMUISRUNNING=1
 	else
 		QEMUISRUNNING=0
