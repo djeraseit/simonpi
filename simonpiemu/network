@@ -24,12 +24,14 @@ killNetwork() {
 		kill -9 "$DNSMASQPID"
 	fi
 
-	if [ -d "/sys/class/net/$BRIDGE" ]; then
+	while [ -d "/sys/class/net/$BRIDGE" ] || [ -d "/sys/class/net/$TAP" ]; do
 		$IP link set "$TAP" nomaster # Enslave tap
+		$IP link set "$BRIDGE" down
+		$IP link set "$TAP" down
 		$IP tuntap del dev "$TAP" mode tap # Remove tap
 		$IP link delete "$BRIDGE" type bridge # Remove bridge
 		sysctl -w net.ipv4.ip_forward=0 > /dev/null
-	fi
+	done
 }
 
 createNetwork() {
