@@ -1,10 +1,8 @@
 #!/bin/sh
 
 # Control Vars
-LOCKFILE=/tmp/simonpi.lock
-ANOTHERINSTANCE=
 DOCKER=
-QEMUKILLED=1
+QEMUISRUNNING=
 
 # QEMU Vars
 export QEMU_AUDIO_DRV=none
@@ -13,25 +11,22 @@ finalizeIt() {
 	umountParts
 	umountImg
 	if [ $DOCKER = "0" ]; then
-		checkNetwork
+		killNetwork > /dev/null 2>&1
 	fi
-	unlock
 }
 
 initChecks() {
-	checkLock
-	if [ $ANOTHERINSTANCE = "0" ]; then
-		checkQemu
+	checkQemu
+	if [ $QEMUISRUNNING = "0" ]; then
 		checkDocker
 		if [ $DOCKER = "0" ]; then
-			checkNetwork
+			createNetwork
 			generateMAC
 			NETWORKCMD=" -net nic,macaddr=$MACADDR -net tap,ifname=$TAP,script=no,downscript=no"
 		else
 			generateMAC
 			NETWORKCMD=" -net nic,macaddr=$MACADDR -net user,hostfwd=tcp::2222-:22"
 		fi
-		lock
 	else
 		echo -e "[$R-$RST] Already in use. Please check for other instances"
 		exit 1
@@ -48,33 +43,20 @@ checkDocker() {
 	fi
 }
 
-checkLock() {
-	if [ ! -f $LOCKFILE ] && [ $QEMUKILLED = "1" ]; then
-		ANOTHERINSTANCE=0
-	elif [ -f $LOCKFILE ] && [ $QEMUKILLED = "1" ]; then
-		ANOTHERINSTANCE=0
-		unlock
+checkQemu() {
+	if [ ! -z "$(pidof $QEMUARM)" ]; then
+		QEMUISRUNNING=1
 	else
-		ANOTHERINSTANCE=1
+		QEMUISRUNNING=0
 	fi
 }
 
-lock() {
-	touch $LOCKFILE
-	echo -e "[$G+$RST] Locked for one instance"
-}
-
-unlock() {
-	rm $LOCKFILE
-	echo -e "[$G+$RST] Unlocked"
-}
-
-checkQemu() {
-	if [ ! -z "$(pidof $QEMUARM)" ]; then
+killQemu() {
+	if [ $QEMUISRUNNING = "1" ]; then
+		echo -e "[$G+$RST] Killing QEMU instance ..."
 		kill -SIGTERM "$(pidof $QEMUARM)"
-		QEMUKILLED=1
 	else
-		QEMUKILLED=0
+		echo -e "[$Y!$RST] QEMU is not running ..."
 	fi
 }
 

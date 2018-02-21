@@ -384,7 +384,7 @@ process_args () {
 	case "$2" in
 		-c	  ) checkMount && checkFs ;;
 		-e	  ) checkMount && purge && purgeEverything ;;
-		-k	  ) checkNetwork ;;
+		-k	  ) checkQemu && killQemu && killNetwork ;;
 		-l	  ) listStorage ;;
 		-m	  ) isMounted && mountImg && mountParts ;;
 		-p	  ) checkMount && purge ;;

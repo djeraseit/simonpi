@@ -3,13 +3,11 @@
 # Network Variables
 BRIDGE=rasp-br0
 TAP=rasp-tap0
-TAPDOCK=docker0
 GATEWAY=192.168.66.1
 FIRSTIP="${GATEWAY%.1}.2"
 LASTIP="${GATEWAY%.1}.254"
 BROADCAST="${GATEWAY%.1}.255"
 NET="${GATEWAY%.1}.0"
-NETWORKISUP=
 
 # PID for dnsmasq dhcp server
 DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
@@ -20,20 +18,25 @@ generateMAC() {
 }
 
 killNetwork() {
-	checkQemu
+	echo -e "[$G+$RST] Shutting down present network for QEMU ..."
+
 	if [ ! -z $DNSMASQPID ]; then
 		kill -9 "$DNSMASQPID"
 	fi
-	$IP link set "$TAP" nomaster # Enslave tap
-	$IP tuntap del dev "$TAP" mode tap # Remove tap
-	$IP link delete "$BRIDGE" type bridge # Remove bridge
-	sysctl -w net.ipv4.ip_forward=0 > /dev/null
+
+	if [ -d "/sys/class/net/$BRIDGE" ]; then
+		$IP link set "$TAP" nomaster # Enslave tap
+		$IP tuntap del dev "$TAP" mode tap # Remove tap
+		$IP link delete "$BRIDGE" type bridge # Remove bridge
+		sysctl -w net.ipv4.ip_forward=0 > /dev/null
+	fi
 }
 
 createNetwork() {
+	echo -e "[$G+$RST] Turning up a network for QEMU ..."
 	sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	$IP link add "$BRIDGE" type bridge # add bridge
-	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface 
+	$IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
 	$IP tuntap add dev "$TAP" mode tap # Add tap interface
 	$IP link set $TAP master "$BRIDGE" # Bind tap to bridge
 	$IP link set "$BRIDGE" up
@@ -41,23 +44,4 @@ createNetwork() {
 	$DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
 	$IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
 	echo -e "[$Y!$RST] Gateway address: $G$GATEWAY$RST"
-}
-
-manageNetwork(){
-	if [ $NETWORKISUP = "0" ]; then
-		echo -e "[$G+$RST] Turning up a network for QEMU ..."
-		createNetwork
-	else
-		echo -e "[$G+$RST] Shutting down present network for QEMU ..."
-		killNetwork
-	fi
-}
-
-checkNetwork() {
-	if [ ! -z "$DNSMASQPID" ] || [ -d "/sys/class/net/$BRIDGE" ] || [ $SNDARG = "-k" ]; then
-		NETWORKISUP=1
-	else
-		NETWORKISUP=0
-	fi
-	manageNetwork
 }
