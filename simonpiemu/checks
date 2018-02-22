@@ -1,0 +1,28 @@
+#!/bin/bash
+
+finalizeIt() {
+	presetsDel
+	umountParts
+	umountImg
+	if [ $DOCKER = "0" ]; then
+		killNetwork
+	fi
+}
+
+initChecks() {
+	checkQemu
+	if [ $QEMUISRUNNING = "0" ]; then
+		checkDocker
+		if [ $DOCKER = "0" ]; then
+			createNetwork
+			generateMAC
+			NETWORKCMD=" -net nic,macaddr=$MACADDR -net tap,ifname=$TAP,script=no,downscript=no"
+		else
+			generateMAC
+			NETWORKCMD=" -net nic,macaddr=$MACADDR -net user,hostfwd=tcp::2222-:22"
+		fi
+	else
+		echo -e "[$R-$RST] Already in use. Please check for other instances"
+		exit 1
+	fi
+}

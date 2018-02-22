@@ -1,0 +1,27 @@
+#!/bin/bash
+
+ARCHIMG="ArchLinuxARM-$MODEL-latest.tar.gz"
+FILES=("$ARCHIMG" "$ARCHIMG.md5")
+
+integrityCheck() {
+	cd $SIMONPIFOLDER/$MODEL
+	if md5sum --status -c "$ARCHIMG.md5"; then
+		echo -e "[$G+$RST] Integrity check successfully completed"
+		return 0
+	else
+		echo -e "[$R-$RST] Integrity check failed, please retry to download"
+		exit 1
+	fi
+}
+
+downloadArchArm() {
+	echo -e "[$G+$RST] Downloading ..."
+	for i in ${FILES[@]}; do
+		if [ -f $SIMONPIFOLDER/$MODEL/$i ]; then
+			echo -e "[$Y!$RST] $i is present";
+		else
+			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress --continue
+		fi
+	done
+	integrityCheck
+}

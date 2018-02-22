@@ -26,33 +26,23 @@ PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" "$PS" "$
 SNDARG=$2
 GIGA=$3
 MODEL=$1
-SIMONPIFOLDER=~/.simonpi
-MOUNTFOLDERS=("boot" "root")
-EXTPKGSFOLDER="$SIMONPIFOLDER/$MODEL/pkgs"
-BOOTPATH="$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}"
-ROOTPATH="$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
 FILENAME="sd-arch-$MODEL-qemu.img"
-ARCHIMG="ArchLinuxARM-$MODEL-latest.tar.gz"
-FILES=("$ARCHIMG" "$ARCHIMG.md5")
-IMGMOUNTED=
-PMOUNTED=
-START1=
-START2=
-LENGHT1=
-LENGHT2=
 
-# Loopback devices
-DEVICE1=/dev/loop0
-DEVICE2=/dev/loop1
+# Importing external scripts
+. $OPT/simonpiemu/checks
+. $OPT/simonpiemu/docker
+. $OPT/simonpiemu/storage
+. $OPT/simonpiemu/custom
+. $OPT/simonpiemu/archimage
+. $OPT/simonpiemu/network
+. $OPT/simonpiemu/qemu
+. $OPT/simonpiemu/runemu
 
 # Text Colors
 R='\e[0;31m'
 G='\e[0;32m'
 Y='\e[0;33m'
 RST='\e[0m'
-
-. $OPT/simonpiemu/runemu
-. $OPT/simonpiemu/network
 
 # Must be root to use this tool
 if [[ ! $EUID -eq 0 ]];then
@@ -64,72 +54,6 @@ if [[ ! $EUID -eq 0 ]];then
 		exit 1
 	fi
 fi
-
-presetsGen() {
-	echo -e "[$G+$RST] Adding needed changes for emulation into $FILENAME ..."
-
-	if [[ $MODEL == rpi ]]; then
-		# It allows qemu virtualization and scsi functionality
-		cat <<'EOF' > $ROOTPATH/etc/udev/rules.d/90-qemu.rules
-KERNEL=="sda", SYMLINK+="mmcblk0"
-KERNEL=="sda?", SYMLINK+="mmcblk0p%n"
-KERNEL=="sda2", SYMLINK+="root"
-EOF
-	fi
-
-	# Prevent vfat corruption for boot partition
-	mv $ROOTPATH/etc/fstab $ROOTPATH/etc/fstab-off
-
-	cat <<'EOF' > $ROOTPATH/etc/motd
-
-        __                                                                        __
-   ____/\_\    ___ ___                      ___     ___                    _____ /\_\
-  /',__\/\ \ /' __` __`\      _______      / __`\ /' _ `\      _______    /\ '__`\/\ \
- /\__, `\ \ \/\ \/\ \/\ \    /\______\    /\ \L\ \/\ \/\ \    /\______\   \ \ \L\ \ \ \
- \/\____/\ \_\ \_\ \_\ \_\   \/______/    \ \____/\ \_\ \_\   \/______/    \ \ ,__/\ \_\
-  \/___/  \/_/\/_/\/_/\/_/                 \/___/  \/_/\/_/                 \ \ \/  \/_/
-                                                                             \ \_\
-                                                                              \/_/
-Written by Gianluca Boiano
-
-In order to update the kernel image with pacman, you have to mount the boot partition.
-Do not add entries for your boot partition to /etc/fstab unless you know what are you doing.
-
-Remember to enable sshd on guest if you need it. Type:
-systemctl enable sshd
-
-To set tty lines type:
-stty rows 28 columns 212
-EOF
-
-	# systemd-modules-load fix
-	mv $ROOTPATH/etc/modules-load.d/raspberrypi.conf \
-	$ROOTPATH/etc/modules-load.d/raspberrypi-off
-
-	sync
-}
-
-presetsDel() {
-	echo -e "[$G+$RST] Removing needed changes for emulation from $FILENAME ..."
-
-	if [[ $MODEL == rpi ]]; then
-		rm $ROOTPATH/etc/udev/rules.d/90-qemu.rules
-	fi
-	mv $ROOTPATH/etc/fstab-off $ROOTPATH/etc/fstab
-
-	rm $ROOTPATH/etc/motd
-
-	mv $ROOTPATH/etc/modules-load.d/raspberrypi-off \
-	$ROOTPATH/etc/modules-load.d/raspberrypi.conf
-
-	sync
-}
-
-checkFs() {
-	echo -e "[$G+$RST] Checking partitions to prevent failures ..."
-	$VFATCHK $DEVICE1
-	$EXT4CHK $DEVICE2
-}
 
 checkModel() {
 	if [[ $MODEL != rpi* ]]; then
@@ -150,110 +74,6 @@ checkDeps() {
 	done
 }
 
-checkMount() {
-	if [ $SNDARG = "-c" ]; then
-		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			mapImg
-			mountImg
-		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
-			return
-		elif [ $PMOUNTED = "1" ]; then
-			umountParts
-		else
-			exit 1
-		fi
-	fi
-
-	if [ $SNDARG = "-e" ] || [ $SNDARG = "-p" ]; then
-		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			return
-		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
-			umountImg
-		elif [ $PMOUNTED = "1" ]; then
-			umountParts
-			umountImg
-		fi
-	fi
-
-	if [ $SNDARG = "-m" ]; then
-		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			mapImg
-			mountImg
-			mountParts
-		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
-			mountParts
-		elif [ $PMOUNTED = "1" ]; then
-			return
-		else
-			exit 1
-		fi
-	fi
-
-	if [ $SNDARG = "-r" ]; then
-		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			mapImg
-			mountImg
-			mountParts
-		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
-			mountParts
-		elif [ $PMOUNTED = "1" ]; then
-			return
-		else
-			exit 1
-		fi
-	fi
-
-	if [ $SNDARG = "-u" ]; then
-		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			echo -e "[$G!$RST] $FILENAME disk image not mounted"
-		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
-			umountImg
-		elif [ $PMOUNTED = "1" ]; then
-			umountParts
-			umountImg
-		else
-			exit 1
-		fi
-	fi
-}
-
-isMounted() {
-	if [ ! -f $SIMONPIFOLDER/$FILENAME ]; then
-		echo -e "[$Y!$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
-		IMGMOUNTED=2
-		PMOUNTED=2
-	elif [[ $(mount | grep $BOOTPATH) ]]; then
-		IMGMOUNTED=1
-		PMOUNTED=1
-	elif [[ ! $(mount | grep $BOOTPATH) ]] && [[ $(mount | grep $DEVICE1) ]]; then
-		IMGMOUNTED=0
-		PMOUNTED=1
-	else
-		IMGMOUNTED=0
-		PMOUNTED=0
-	fi
-}
-
-customContent() {
-	if [ -d $EXTPKGSFOLDER ]; then
-		echo -e "[$Y!$RST] $EXTPKGSFOLDER folder is present"
-		if [ "$(ls $EXTPKGSFOLDER)" ]; then
-			echo -e "[$Y!$RST] Copying custom content to $FILENAME ..."
-			for i in $(ls $EXTPKGSFOLDER); do
-				echo -e "	[$G+$RST] Copying $i in /home/alarm ..."
-				cp $EXTPKGSFOLDER/$i $ROOTPATH/home/alarm
-				sync
-			done
-		else
-			echo -e "[$Y!$RST] $EXTPKGSFOLDER is empty"
-		fi
-	else
-		echo -e "[$Y!$RST] $EXTPKGSFOLDER folder not present. Creating ..."
-		mkdir -p $EXTPKGSFOLDER
-		echo -e "[$Y!$RST] You could add custom content on img copying it under $EXTPKGSFOLDER"
-	fi
-}
-
 checkFolders() {
 	for i in ${MOUNTFOLDERS[@]}; do
 		if [ -d "$SIMONPIFOLDER/$MODEL/$i" ]; then
@@ -263,79 +83,6 @@ checkFolders() {
 			mkdir -p "$SIMONPIFOLDER/$MODEL/$i"
 		fi
 	done
-}
-
-formatLoDevices() {
-	echo -e "[$G+$RST] Creating partitions on disk image named $FILENAME ..."
-	$VFAT -n boot -F 32 $DEVICE1 > /dev/null 2>&1
-	$EXT4 -L rootfs $DEVICE2 > /dev/null 2>&1
-	sync
-}
-
-integrityCheck() {
-	cd $SIMONPIFOLDER/$MODEL
-	if md5sum --status -c "$ARCHIMG.md5"; then
-		echo -e "[$G+$RST] Integrity check successfully completed"
-		return 0
-	else
-		echo -e "[$R-$RST] Integrity check failed, please retry to download"
-		exit 1
-	fi
-}
-
-downloadArchArm() {
-	echo -e "[$G+$RST] Downloading ..."
-	for i in ${FILES[@]}; do
-		if [ -f $SIMONPIFOLDER/$MODEL/$i ]; then
-			echo -e "[$Y!$RST] $i is present";
-		else
-			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress --continue
-		fi
-	done
-	integrityCheck
-}
-
-mountParts() {
-	checkFolders
-	echo -e "[$G+$RST] Mounting partitions of $FILENAME ..."
-	mount $DEVICE1 "$BOOTPATH"
-	mount $DEVICE2 "$ROOTPATH"
-}
-
-umountParts() {
-	echo -e "[$G+$RST] Umounting partitions of $FILENAME ..."
-	mountpointloop1=$(grep $DEVICE1 /proc/mounts | cut -d ' ' -f 2)
-	mountpointloop2=$(grep $DEVICE2 /proc/mounts | cut -d ' ' -f 2)
-	mountpoints=("$mountpointloop1" "$mountpointloop2")
-
-	for i in ${mountpoints[@]}; do
-		umount "$i"
-	done
-}
-
-listStorage() {
-	checkFolders
-	echo -e "[$Y!$RST] Content of $SIMONPIFOLDER/$MODEL"
-	ls $SIMONPIFOLDER/$MODEL
-}
-
-mapImg() {
-	echo -e "[$G+$RST] Mapping lenghts of partitions ..."
-	START1=$(fdisk -lo Start $SIMONPIFOLDER/$FILENAME | tail -n 2 | head -n -1)
-	START2=$(fdisk -lo Start $SIMONPIFOLDER/$FILENAME | tail -n 1)
-	LENGTH1=$(fdisk -lo Sectors $SIMONPIFOLDER/$FILENAME | tail -n 2 | head -n -1)
-	LENGHT2=$(fdisk -lo Sectors $SIMONPIFOLDER/$FILENAME | tail -n 1)
-}
-
-mountImg() {
-	echo -e "[$G+$RST] Mounting disk image named $FILENAME ..."
-	losetup -o $(( START1*512 )) --sizelimit $(( LENGHT1*512 )) $DEVICE1 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
-	losetup -o $(( START2*512 )) --sizelimit $(( LENGHT2*512 )) $DEVICE2 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
-}
-
-umountImg() {
-	echo -e "[$G+$RST] Unmounting disk image named $FILENAME ..."
-	losetup -D
 }
 
 createImg() {
@@ -378,16 +125,6 @@ createImg() {
 	umountParts
 	umountImg
 	echo -e "[$G+$RST] DONE"
-}
-
-purge () {
-	rm -rf $SIMONPIFOLDER/$FILENAME
-	echo -e "[$G+$RST] Soft cleaning ..."
-}
-
-purgeEverything() {
-	rm -rf $SIMONPIFOLDER/$MODEL/
-	echo -e "[$G+$RST] Hard cleaning ..."
 }
 
 help () {
