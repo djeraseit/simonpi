@@ -66,8 +66,9 @@ if [[ ! $EUID -eq 0 ]];then
 fi
 
 presetsGen() {
+	echo -e "[$G+$RST] Adding needed changes for emulation into $FILENAME ..."
+
 	if [[ $MODEL == rpi ]]; then
-		echo -e "[$G+$RST] Injecting sda udev rules into $FILENAME ..."
 		# It allows qemu virtualization and scsi functionality
 		cat <<'EOF' > $ROOTPATH/etc/udev/rules.d/90-qemu.rules
 KERNEL=="sda", SYMLINK+="mmcblk0"
@@ -76,15 +77,9 @@ KERNEL=="sda2", SYMLINK+="root"
 EOF
 	fi
 
-	echo -e "[$G+$RST] Injecting a motd and fstab to $FILENAME ..."
 	# Prevent vfat corruption for boot partition
-	mv $ROOTPATH/etc/fstab \
-	$ROOTPATH/etc/fstab.off
-	cat <<EOF > $ROOTPATH/etc/fstab
-# /etc/fstab: static file system information
-#
-# <file system> <dir>   <type>  <options>       <dump>  <pass>
-EOF
+	mv $ROOTPATH/etc/fstab $ROOTPATH/etc/fstab-off
+
 	cat <<'EOF' > $ROOTPATH/etc/motd
 
         __                                                                        __
@@ -106,17 +101,12 @@ systemctl enable sshd
 To set tty lines type:
 stty rows 28 columns 212
 EOF
-	echo -e "[$G+$RST] Fixing sshd on $FILENAME ..."
-	mkdir $ROOTPATH/etc/ssh/off
 
-	for i in $(ls $ROOTPATH/etc/ssh/ssh_host*); do
-		mv $ROOTPATH/etc/ssh/$i \
-		$ROOTPATH/etc/ssh/off/
-	done
-
-	echo -e "[$G+$RST] Disable rpi modules for qemu on $FILENAME ..."
+	# systemd-modules-load fix
 	mv $ROOTPATH/etc/modules-load.d/raspberrypi.conf \
-	$ROOTPATH/etc/modules-load.d/raspberrypi.conf.off
+	$ROOTPATH/etc/modules-load.d/raspberrypi-off
+
+	sync
 }
 
 presetsDel() {
@@ -125,17 +115,11 @@ presetsDel() {
 	if [[ $MODEL == rpi ]]; then
 		rm $ROOTPATH/etc/udev/rules.d/90-qemu.rules
 	fi
-	mv $ROOTPATH/etc/fstab.off \
-	$ROOTPATH/etc/fstab
+	mv $ROOTPATH/etc/fstab-off $ROOTPATH/etc/fstab
 
 	rm $ROOTPATH/etc/motd
-	for i in $(ls $ROOTPATH/ssh_host*); do
-		mv $ROOTPATH/etc/ssh/off/$i \
-		$ROOTPATH/etc/ssh/
-	done
-	rm -rf $ROOTPATH/etc/ssh/off/
 
-	mv $ROOTPATH/etc/modules-load.d/raspberrypi.conf.off \
+	mv $ROOTPATH/etc/modules-load.d/raspberrypi-off \
 	$ROOTPATH/etc/modules-load.d/raspberrypi.conf
 
 	sync
