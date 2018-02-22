@@ -1,5 +1,6 @@
 #!/bin/bash
 
+set -x
 OPT=.
 
 # You could overwrite paths using VARNAME=value ./simonpi
@@ -55,7 +56,7 @@ RST='\e[0m'
 # Must be root to use this tool
 if [[ ! $EUID -eq 0 ]];then
 	if [[ -x "$(command -v sudo)" ]]; then
-		exec sudo -E bash "$0" "$@"
+		exec sudo -u root -E bash "$0" "$@"
 		exit $?
 	else
 		echo -e "[$Y!$RST] sudo is needed. Please run this script as root or install sudo."
@@ -76,6 +77,8 @@ EOF
 
 	echo -e "[$G+$RST] Injecting a motd and fstab to $FILENAME ..."
 	# Prevent vfat corruption for boot partition
+	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab \
+	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab.off
 	cat <<EOF > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab
 # /etc/fstab: static file system information
 #
@@ -103,7 +106,32 @@ To set tty lines type:
 stty rows 28 columns 212
 EOF
 	echo -e "[$G+$RST] Fixing sshd on $FILENAME ..."
-	rm -f $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/ssh_host*
+	mkdir $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/off
+
+	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/ssh_host* \
+	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/off/
+
+	echo -e "[$G+$RST] Disable rpi modules for qemu on $FILENAME ..."
+	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/modules-load.d/raspberry.conf \
+	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/modules-load.d/raspberry.conf.off
+}
+
+presetsDel() {
+	if [[ $MODEL == rpi ]]; then
+		rm $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/udev/rules.d/90-qemu.rules
+	fi
+	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab.off \
+	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab
+
+	rm $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/motd
+
+	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/off/ssh_host* \
+	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/
+	rm -rf $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/off/
+
+	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/modules-load.d/raspberry.conf.off \
+	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/modules-load.d/raspberry.conf
+
 	sync
 }
 
@@ -133,15 +161,15 @@ checkDeps() {
 }
 
 checkMount() {
-	isMounted
-
 	if [ $SNDARG = "-r" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mapImg
 			mountImg
 			mountParts
+			presetsGen
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			mountParts
+			presetsGen
 		elif [ $PMOUNTED = "1" ]; then
 			return
 		else
@@ -170,6 +198,20 @@ checkMount() {
 		elif [ $PMOUNTED = "1" ]; then
 			umountParts
 			umountImg
+		fi
+	fi
+
+	if [ $SNDARG = "-m" ]; then
+		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
+			mapImg
+			mountImg
+			mountParts
+		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
+			mountParts
+		elif [ $PMOUNTED = "1" ]; then
+			return
+		else
+			exit 1
 		fi
 	fi
 }
@@ -329,7 +371,6 @@ createImg() {
 	echo -e "[$G+$RST] Extracting $ARCHIMG to $FILENAME ..."
 	$BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
 	sync
-	presetsGen
 	customContent
 	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/boot/* $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}
 	sync
@@ -384,9 +425,9 @@ process_args () {
 		-e	  ) checkMount && purge && purgeEverything ;;
 		-k	  ) checkQemu && killQemu && killNetwork ;;
 		-l	  ) listStorage ;;
-		-m	  ) isMounted && mountImg && mountParts ;;
-		-p	  ) checkMount && purge ;;
-		-r    ) checkMount && run_emu ;;
+		-m	  ) isMounted && checkMount ;;
+		-p	  ) isMounted && checkMount && purge ;;
+		-r    ) isMounted && checkMount && run_emu ;;
 		-s    ) createImg ;;
 		-u    ) isMounted && umountParts && umountImg ;;
 		*     ) echo 'Please type -h for details' ;;
