@@ -8,6 +8,7 @@ QEMUISRUNNING=
 export QEMU_AUDIO_DRV=none
 
 finalizeIt() {
+	presetsDel
 	umountParts
 	umountImg
 	if [ $DOCKER = "0" ]; then

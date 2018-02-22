@@ -1,6 +1,5 @@
 #!/bin/bash
 
-set -x
 OPT=.
 
 # You could overwrite paths using VARNAME=value ./simonpi
@@ -30,6 +29,8 @@ MODEL=$1
 SIMONPIFOLDER=~/.simonpi
 MOUNTFOLDERS=("boot" "root")
 EXTPKGSFOLDER="$SIMONPIFOLDER/$MODEL/pkgs"
+BOOTPATH="$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}"
+ROOTPATH="$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
 FILENAME="sd-arch-$MODEL-qemu.img"
 ARCHIMG="ArchLinuxARM-$MODEL-latest.tar.gz"
 FILES=("$ARCHIMG" "$ARCHIMG.md5")
@@ -56,7 +57,7 @@ RST='\e[0m'
 # Must be root to use this tool
 if [[ ! $EUID -eq 0 ]];then
 	if [[ -x "$(command -v sudo)" ]]; then
-		exec sudo -u root -E bash "$0" "$@"
+		exec sudo -E bash "$0" "$@"
 		exit $?
 	else
 		echo -e "[$Y!$RST] sudo is needed. Please run this script as root or install sudo."
@@ -68,7 +69,7 @@ presetsGen() {
 	if [[ $MODEL == rpi ]]; then
 		echo -e "[$G+$RST] Injecting sda udev rules into $FILENAME ..."
 		# It allows qemu virtualization and scsi functionality
-		cat <<'EOF' > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/udev/rules.d/90-qemu.rules
+		cat <<'EOF' > $ROOTPATH/etc/udev/rules.d/90-qemu.rules
 KERNEL=="sda", SYMLINK+="mmcblk0"
 KERNEL=="sda?", SYMLINK+="mmcblk0p%n"
 KERNEL=="sda2", SYMLINK+="root"
@@ -77,14 +78,14 @@ EOF
 
 	echo -e "[$G+$RST] Injecting a motd and fstab to $FILENAME ..."
 	# Prevent vfat corruption for boot partition
-	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab \
-	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab.off
-	cat <<EOF > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab
+	mv $ROOTPATH/etc/fstab \
+	$ROOTPATH/etc/fstab.off
+	cat <<EOF > $ROOTPATH/etc/fstab
 # /etc/fstab: static file system information
 #
 # <file system> <dir>   <type>  <options>       <dump>  <pass>
 EOF
-	cat <<'EOF' > $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/motd
+	cat <<'EOF' > $ROOTPATH/etc/motd
 
         __                                                                        __
    ____/\_\    ___ ___                      ___     ___                    _____ /\_\
@@ -106,31 +107,36 @@ To set tty lines type:
 stty rows 28 columns 212
 EOF
 	echo -e "[$G+$RST] Fixing sshd on $FILENAME ..."
-	mkdir $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/off
+	mkdir $ROOTPATH/etc/ssh/off
 
-	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/ssh_host* \
-	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/off/
+	for i in $(ls $ROOTPATH/etc/ssh/ssh_host*); do
+		mv $ROOTPATH/etc/ssh/$i \
+		$ROOTPATH/etc/ssh/off/
+	done
 
 	echo -e "[$G+$RST] Disable rpi modules for qemu on $FILENAME ..."
-	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/modules-load.d/raspberry.conf \
-	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/modules-load.d/raspberry.conf.off
+	mv $ROOTPATH/etc/modules-load.d/raspberrypi.conf \
+	$ROOTPATH/etc/modules-load.d/raspberrypi.conf.off
 }
 
 presetsDel() {
+	echo -e "[$G+$RST] Removing needed changes for emulation from $FILENAME ..."
+
 	if [[ $MODEL == rpi ]]; then
-		rm $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/udev/rules.d/90-qemu.rules
+		rm $ROOTPATH/etc/udev/rules.d/90-qemu.rules
 	fi
-	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab.off \
-	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/fstab
+	mv $ROOTPATH/etc/fstab.off \
+	$ROOTPATH/etc/fstab
 
-	rm $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/motd
+	rm $ROOTPATH/etc/motd
+	for i in $(ls $ROOTPATH/ssh_host*); do
+		mv $ROOTPATH/etc/ssh/off/$i \
+		$ROOTPATH/etc/ssh/
+	done
+	rm -rf $ROOTPATH/etc/ssh/off/
 
-	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/off/ssh_host* \
-	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/
-	rm -rf $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/ssh/off/
-
-	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/modules-load.d/raspberry.conf.off \
-	$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/etc/modules-load.d/raspberry.conf
+	mv $ROOTPATH/etc/modules-load.d/raspberrypi.conf.off \
+	$ROOTPATH/etc/modules-load.d/raspberrypi.conf
 
 	sync
 }
@@ -161,22 +167,6 @@ checkDeps() {
 }
 
 checkMount() {
-	if [ $SNDARG = "-r" ]; then
-		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			mapImg
-			mountImg
-			mountParts
-			presetsGen
-		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
-			mountParts
-			presetsGen
-		elif [ $PMOUNTED = "1" ]; then
-			return
-		else
-			exit 1
-		fi
-	fi
-
 	if [ $SNDARG = "-c" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mapImg
@@ -214,6 +204,33 @@ checkMount() {
 			exit 1
 		fi
 	fi
+
+	if [ $SNDARG = "-r" ]; then
+		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
+			mapImg
+			mountImg
+			mountParts
+		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
+			mountParts
+		elif [ $PMOUNTED = "1" ]; then
+			return
+		else
+			exit 1
+		fi
+	fi
+
+	if [ $SNDARG = "-u" ]; then
+		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
+			echo -e "[$G!$RST] $FILENAME disk image not mounted"
+		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
+			umountImg
+		elif [ $PMOUNTED = "1" ]; then
+			umountParts
+			umountImg
+		else
+			exit 1
+		fi
+	fi
 }
 
 isMounted() {
@@ -221,10 +238,10 @@ isMounted() {
 		echo -e "[$Y!$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
 		IMGMOUNTED=2
 		PMOUNTED=2
-	elif [[ $(mount | grep $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}) ]]; then
+	elif [[ $(mount | grep $BOOTPATH) ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-	elif [[ ! $(mount | grep $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}) ]] && [[ $(mount | grep $DEVICE1) ]]; then
+	elif [[ ! $(mount | grep $BOOTPATH) ]] && [[ $(mount | grep $DEVICE1) ]]; then
 		IMGMOUNTED=0
 		PMOUNTED=1
 	else
@@ -240,7 +257,7 @@ customContent() {
 			echo -e "[$Y!$RST] Copying custom content to $FILENAME ..."
 			for i in $(ls $EXTPKGSFOLDER); do
 				echo -e "	[$G+$RST] Copying $i in /home/alarm ..."
-				cp $EXTPKGSFOLDER/$i $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/home/alarm
+				cp $EXTPKGSFOLDER/$i $ROOTPATH/home/alarm
 				sync
 			done
 		else
@@ -297,8 +314,8 @@ downloadArchArm() {
 mountParts() {
 	checkFolders
 	echo -e "[$G+$RST] Mounting partitions of $FILENAME ..."
-	mount $DEVICE1 "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}"
-	mount $DEVICE2 "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
+	mount $DEVICE1 "$BOOTPATH"
+	mount $DEVICE2 "$ROOTPATH"
 }
 
 umountParts() {
@@ -369,10 +386,10 @@ createImg() {
 	formatLoDevices
 	mountParts
 	echo -e "[$G+$RST] Extracting $ARCHIMG to $FILENAME ..."
-	$BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
+	$BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$ROOTPATH"
 	sync
 	customContent
-	mv $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}/boot/* $SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}
+	mv $ROOTPATH/boot/* $BOOTPATH
 	sync
 	umountParts
 	umountImg
@@ -421,15 +438,15 @@ process_args () {
 		*     ) checkModel ;;
 	esac
 	case "$2" in
-		-c	  ) checkMount && checkFs ;;
-		-e	  ) checkMount && purge && purgeEverything ;;
+		-c	  ) isMounted && checkMount && checkFs ;;
+		-e	  ) isMounted && checkMount && purge && purgeEverything ;;
 		-k	  ) checkQemu && killQemu && killNetwork ;;
 		-l	  ) listStorage ;;
 		-m	  ) isMounted && checkMount ;;
 		-p	  ) isMounted && checkMount && purge ;;
-		-r    ) isMounted && checkMount && run_emu ;;
+		-r    ) isMounted && checkMount && presetsGen && run_emu ;;
 		-s    ) createImg ;;
-		-u    ) isMounted && umountParts && umountImg ;;
+		-u    ) isMounted && checkMount ;;
 		*     ) echo 'Please type -h for details' ;;
 	esac
 }
