@@ -1,5 +1,5 @@
 #!/bin/bash
-set -x
+
 OPT=.
 
 # You could overwrite paths using VARNAME=value ./simonpi
@@ -96,7 +96,7 @@ createImg() {
 	fi
 	checkDeps
 	isMounted
-	downloadArchArm
+	downloadImage
 
 	if [ -e "$SIMONPIFOLDER/$FILENAME" ]; then
 		echo -e "[$Y!$RST] An $FILENAME file already exists. Please delete it"

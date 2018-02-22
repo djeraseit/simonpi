@@ -22,8 +22,6 @@ run_rpi2() {
 		-smp cpus=2 \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=sd,format=raw \
 		-kernel $OPT/simonpiemu/qemu-kernel-rpi-2 \
-		-append \"root=/dev/mmcblk0p2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1 quiet\" \
-		-dtb $OPT/simonpiemu/vexpress-v2p-ca15-tc1.dtb \
 		-semihosting \
 		-no-reboot"
 

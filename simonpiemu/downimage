@@ -14,7 +14,7 @@ integrityCheck() {
 	fi
 }
 
-downloadArchArm() {
+downloadImage() {
 	echo -e "[$G+$RST] Downloading ..."
 	for i in ${FILES[@]}; do
 		if [ -f $SIMONPIFOLDER/$MODEL/$i ]; then
