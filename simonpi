@@ -1,5 +1,5 @@
 #!/bin/bash
-
+set -x
 OPT=.
 
 # You could overwrite paths using VARNAME=value ./simonpi
@@ -33,7 +33,7 @@ FILENAME="sd-arch-$MODEL-qemu.img"
 . $OPT/simonpiemu/docker
 . $OPT/simonpiemu/storage
 . $OPT/simonpiemu/custom
-. $OPT/simonpiemu/archimage
+. $OPT/simonpiemu/downimage
 . $OPT/simonpiemu/network
 . $OPT/simonpiemu/qemu
 . $OPT/simonpiemu/runemu
