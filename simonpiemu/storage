@@ -28,8 +28,8 @@ checkFolders() {
 
 checkFs() {
 	echo -e "[$G+$RST] Checking partitions to prevent failures ..."
-	$VFATCHK $DEVICE1
-	$EXT4CHK $DEVICE2
+	$VFATCHK -p $DEVICE1
+	$EXT4CHK -p $DEVICE2
 }
 
 checkMount() {
