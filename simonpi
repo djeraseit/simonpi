@@ -33,7 +33,7 @@ FILENAME="sd-arch-$MODEL-qemu.img"
 . $OPT/simonpiemu/docker
 . $OPT/simonpiemu/storage
 . $OPT/simonpiemu/custom
-. $OPT/simonpiemu/downimage
+. $OPT/simonpiemu/images
 . $OPT/simonpiemu/network
 . $OPT/simonpiemu/qemu
 . $OPT/simonpiemu/runemu
@@ -45,15 +45,17 @@ Y='\e[0;33m'
 RST='\e[0m'
 
 # Must be root to use this tool
-if [[ ! $EUID -eq 0 ]];then
-	if [[ -x "$(command -v sudo)" ]]; then
-		exec sudo -E bash "$0" "$@"
-		exit $?
-	else
-		echo -e "[$Y!$RST] sudo is needed. Please run this script as root or install sudo."
-		exit 1
+checkRoot() {
+	if [[ ! $EUID -eq 0 ]];then
+		if [[ -x "$(command -v sudo)" ]]; then
+			exec sudo -E bash "$0" "$@"
+			exit $?
+		else
+			echo -e "[$Y!$RST] sudo is needed. Please run this script as root or install sudo."
+			exit 1
+		fi
 	fi
-fi
+}
 
 checkModel() {
 	if [[ $MODEL != rpi* ]]; then
@@ -74,73 +76,20 @@ checkDeps() {
 	done
 }
 
-checkFolders() {
-	for i in ${MOUNTFOLDERS[@]}; do
-		if [ -d "$SIMONPIFOLDER/$MODEL/$i" ]; then
-			echo -e "[$Y!$RST] $MODEL/$i folder is present"
-		else
-			echo -e "[$G+$RST] Creating $MODEL/$i folder ..."
-			mkdir -p "$SIMONPIFOLDER/$MODEL/$i"
-		fi
-	done
-}
-
-createImg() {
-	isaNumber='^[0-9]+$'
-	if ! [[ $GIGA =~ $isaNumber ]] || [ -z $GIGA ]; then
-		echo -e "[$R-$RST] Please specify a size in GB"
-		exit 1
-	elif [ $GIGA -lt 2 ]; then
-		echo -e "[$R-$RST] Please specify a size >= 2 GB"
-		exit 1
-	fi
-	checkDeps
-	isMounted
-	downloadImage
-
-	if [ -e "$SIMONPIFOLDER/$FILENAME" ]; then
-		echo -e "[$Y!$RST] An $FILENAME file already exists. Please delete it"
-		exit 1
-	else
-		SIZE=$(( GIGA*256 ))
-		echo -e "[$G+$RST] Creating a $GIGA GB disk image named $FILENAME ..."
-		dd if=/dev/zero of="$SIMONPIFOLDER/$FILENAME" bs=4M count="$SIZE" > /dev/null 2>&1
-
-		echo -e "[$G+$RST] Creating partition table on $FILENAME ..."
-		(echo o; echo n; echo p; echo 1; echo 8192; echo +100M; echo t; echo c; \
-		echo n; echo p; echo 2; echo 8192; echo ; echo ; echo w) | \
-		$FDISK -H 255 -S 63 "$SIMONPIFOLDER/$FILENAME" >/dev/null 2>&1
-	fi
-	sync
-	mapImg
-	mountImg
-	formatLoDevices
-	mountParts
-	echo -e "[$G+$RST] Extracting $ARCHIMG to $FILENAME ..."
-	$BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$ROOTPATH"
-	sync
-	customContent
-	mv $ROOTPATH/boot/* $BOOTPATH
-	sync
-	umountParts
-	umountImg
-	echo -e "[$G+$RST] DONE"
-}
-
 help () {
 	echo "Create a raw partitioned img for rpi-(1-2-3) emulation on QEMU"
 	echo -e "Default storage is in $G$SIMONPIFOLDER$RST"
 	echo "usage: ./simonpi MODEL [<opts>]"
 	echo "	Available MODELs:	rpi	rpi-2	rpi-3"
 	echo "	<opts>	-h			print this message"
-	echo "		-c			check filesystem integrity for .img file"
+	echo "		-c			check filesystem integrity of disk image"
 	echo "		-e			purge everything in storage folder"
 	echo "		-k			kill every instance and network virtual interface"
 	echo "		-l			list files in storage folder"
 	echo "		-m			mount only loop devices ($DEVICE1, $DEVICE2)"
-	echo "		-p			purge everything except Arch Linux archives"
+	echo "		-p			purge everything except for downloaded archives"
 	echo "		-r			run QEMU processor emulator for defined model"
-	echo "		-s	<size in G>	write a partitioned raw .img file with Arch Linux"
+	echo "		-s	<size in G>	write a partitioned raw image disk with Arch Linux"
 	echo "		-u			unmount ${MOUNTFOLDERS[0]} and ${MOUNTFOLDERS[1]} folders"
 	echo "examples:"
 	echo "	./simonpi rpi-3 -s 2		create a 2GB sd .img for rpi-3"
@@ -159,16 +108,16 @@ process_args () {
 		*     ) checkModel ;;
 	esac
 	case "$2" in
-		-c	  ) isMounted && checkMount && checkFs ;;
-		-e	  ) isMounted && checkMount && purge && purgeEverything ;;
-		-k	  ) checkQemu && killQemu && killNetwork ;;
-		-l	  ) listStorage ;;
-		-m	  ) isMounted && checkMount ;;
-		-p	  ) isMounted && checkMount && purge ;;
-		-r    ) isMounted && checkMount && presetsGen && run_emu ;;
-		-s    ) createImg ;;
-		-u    ) isMounted && checkMount ;;
-		*     ) echo 'Please type -h for details' ;;
+		-c	  ) checkRoot $@ && isMounted && checkMount && checkFs ;;
+		-e	  ) checkRoot $@ && isMounted && checkMount && purge && purgeEverything ;;
+		-k	  ) checkRoot $@ && checkQemu && killQemu && killNetwork ;;
+		-l	  ) checkRoot $@ && listStorage ;;
+		-m	  ) checkRoot $@ && isMounted && checkMount ;;
+		-p	  ) checkRoot $@ && isMounted && checkMount && purge ;;
+		-r    ) checkRoot $@ && isMounted && checkMount && presetsGen && run_emu ;;
+		-s    ) checkRoot $@ && createArchImg ;;
+		-u    ) checkRoot $@ && isMounted && checkMount ;;
+ 		*    ) help ;;
 	esac
 }
 

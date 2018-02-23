@@ -43,7 +43,7 @@ EOF
 	# systemd-modules-load fix
 	if [ -f $ROOTPATH/etc/modules-load.d/raspberrypi.conf ]; then
 		mv $ROOTPATH/etc/modules-load.d/raspberrypi.conf \
-		$ROOTPATH/etc/modules-load.d/raspberrypi-off
+			$ROOTPATH/etc/modules-load.d/raspberrypi-off
 	fi
 	sync
 }
@@ -62,7 +62,7 @@ presetsDel() {
 	fi
 	if [ -f $ROOTPATH/etc/modules-load.d/raspberrypi-off ]; then
 		mv $ROOTPATH/etc/modules-load.d/raspberrypi-off \
-		$ROOTPATH/etc/modules-load.d/raspberrypi.conf
+			$ROOTPATH/etc/modules-load.d/raspberrypi.conf
 	fi
 	sync
 }

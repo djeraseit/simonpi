@@ -15,6 +15,17 @@ LENGHT2=
 DEVICE1=/dev/loop0
 DEVICE2=/dev/loop1
 
+checkFolders() {
+	for i in ${MOUNTFOLDERS[@]}; do
+		if [ -d "$SIMONPIFOLDER/$MODEL/$i" ]; then
+			echo -e "[$Y!$RST] $MODEL/$i folder is present"
+		else
+			echo -e "[$G+$RST] Creating $MODEL/$i folder ..."
+			mkdir -p "$SIMONPIFOLDER/$MODEL/$i"
+		fi
+	done
+}
+
 checkFs() {
 	echo -e "[$G+$RST] Checking partitions to prevent failures ..."
 	$VFATCHK $DEVICE1

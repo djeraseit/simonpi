@@ -1,0 +1,69 @@
+#!/bin/bash
+
+ARCHIMG="ArchLinuxARM-$MODEL-latest.tar.gz"
+FILES=("$ARCHIMG" "$ARCHIMG.md5")
+
+integrityCheck() {
+	cd $SIMONPIFOLDER/$MODEL
+	if md5sum --status -c "$ARCHIMG.md5"; then
+		echo -e "[$G+$RST] Integrity check successfully completed"
+		return 0
+	else
+		echo -e "[$R-$RST] Integrity check failed, please retry to download"
+		exit 1
+	fi
+}
+
+downloadArchImage() {
+	echo -e "[$G+$RST] Downloading ..."
+	for i in ${FILES[@]}; do
+		if [ -f $SIMONPIFOLDER/$MODEL/$i ]; then
+			echo -e "[$Y!$RST] $i is present";
+		else
+			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress --continue
+		fi
+	done
+	integrityCheck
+}
+
+createArchImg() {
+	isaNumber='^[0-9]+$'
+	if ! [[ $GIGA =~ $isaNumber ]] || [ -z $GIGA ]; then
+		echo -e "[$R-$RST] Please specify a size in GB"
+		exit 1
+	elif [ $GIGA -lt 2 ]; then
+		echo -e "[$R-$RST] Please specify a size >= 2 GB"
+		exit 1
+	fi
+	checkDeps
+	isMounted
+	downloadArchImage
+
+	if [ -e "$SIMONPIFOLDER/$FILENAME" ]; then
+		echo -e "[$Y!$RST] An $FILENAME file already exists. Please delete it"
+		exit 1
+	else
+		SIZE=$(( GIGA*256 ))
+		echo -e "[$G+$RST] Creating a $GIGA GB disk image named $FILENAME ..."
+		dd if=/dev/zero of="$SIMONPIFOLDER/$FILENAME" bs=4M count="$SIZE" > /dev/null 2>&1
+
+		echo -e "[$G+$RST] Creating partition table on $FILENAME ..."
+		(echo o; echo n; echo p; echo 1; echo 8192; echo +100M; echo t; echo c; \
+			echo n; echo p; echo 2; echo 8192; echo ; echo ; echo w) | \
+			$FDISK -H 255 -S 63 "$SIMONPIFOLDER/$FILENAME" >/dev/null 2>&1
+	fi
+	sync
+	mapImg
+	mountImg
+	formatLoDevices
+	mountParts
+	echo -e "[$G+$RST] Extracting $ARCHIMG to $FILENAME ..."
+	$BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$ROOTPATH"
+	sync
+	customContent
+	mv $ROOTPATH/boot/* $BOOTPATH
+	sync
+	umountParts
+	umountImg
+	echo -e "[$G+$RST] DONE"
+}
