@@ -1,0 +1,19 @@
+
+        __                                                                        __
+   ____/\_\    ___ ___                      ___     ___                    _____ /\_\
+  /',__\/\ \ /' __` __`\      _______      / __`\ /' _ `\      _______    /\ '__`\/\ \
+ /\__, `\ \ \/\ \/\ \/\ \    /\______\    /\ \L\ \/\ \/\ \    /\______\   \ \ \L\ \ \ \
+ \/\____/\ \_\ \_\ \_\ \_\   \/______/    \ \____/\ \_\ \_\   \/______/    \ \ ,__/\ \_\
+  \/___/  \/_/\/_/\/_/\/_/                 \/___/  \/_/\/_/                 \ \ \/  \/_/
+                                                                             \ \_\
+                                                                              \/_/
+Written by Gianluca Boiano
+
+In order to update the kernel image with pacman, you have to mount the boot partition.
+Do not add entries for your boot partition to /etc/fstab unless you know what are you doing.
+
+Remember to enable sshd on guest if you need it. Type:
+systemctl enable sshd
+
+To set tty lines type:
+stty rows 28 columns 212
