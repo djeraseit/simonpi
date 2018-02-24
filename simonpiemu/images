@@ -58,12 +58,13 @@ createArchImg() {
 	formatLoDevices
 	mountParts
 	echo -e "[$G+$RST] Extracting $ARCHIMG to $FILENAME ..."
-	$BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$ROOTPATH"
+	sudo $BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$ROOTPATH"
 	sync
 	customContent
-	mv $ROOTPATH/boot/* $BOOTPATH
+	sudo -E mv $ROOTPATH/boot/* $BOOTPATH
 	sync
 	umountParts
 	umountImg
+	sudo chown $USER:$USER $SIMONPIFOLDER/$FILENAME
 	echo -e "[$G+$RST] DONE"
 }

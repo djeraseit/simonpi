@@ -28,8 +28,8 @@ checkFolders() {
 
 checkFs() {
 	echo -e "[$G+$RST] Checking partitions to prevent failures ..."
-	$VFATCHK -p $DEVICE1
-	$EXT4CHK -p $DEVICE2
+	$VFATCHK -p $DEVICE1 > /dev/null 2>&1
+	$EXT4CHK -p $DEVICE2 > /dev/null 2>&1
 }
 
 checkMount() {
@@ -122,16 +122,16 @@ isMounted() {
 
 formatLoDevices() {
 	echo -e "[$G+$RST] Creating partitions on disk image named $FILENAME ..."
-	$VFAT -n boot -F 32 $DEVICE1 > /dev/null 2>&1
-	$EXT4 -L rootfs $DEVICE2 > /dev/null 2>&1
+	sudo -E $VFAT -n boot -F 32 $DEVICE1 > /dev/null 2>&1
+	sudo -E $EXT4 -L rootfs $DEVICE2 > /dev/null 2>&1
 	sync
 }
 
 mountParts() {
 	checkFolders
 	echo -e "[$G+$RST] Mounting partitions of $FILENAME ..."
-	mount $DEVICE1 "$BOOTPATH"
-	mount $DEVICE2 "$ROOTPATH"
+	sudo -E mount $DEVICE1 "$BOOTPATH"
+	sudo -E mount $DEVICE2 "$ROOTPATH"
 }
 
 umountParts() {
@@ -141,7 +141,7 @@ umountParts() {
 	mountpoints=("$mountpointloop1" "$mountpointloop2")
 
 	for i in ${mountpoints[@]}; do
-		umount "$i"
+		sudo -E umount "$i"
 	done
 }
 
@@ -161,13 +161,15 @@ mapImg() {
 
 mountImg() {
 	echo -e "[$G+$RST] Mounting disk image named $FILENAME ..."
-	losetup -o $(( START1*512 )) --sizelimit $(( LENGHT1*512 )) $DEVICE1 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
-	losetup -o $(( START2*512 )) --sizelimit $(( LENGHT2*512 )) $DEVICE2 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
+	sudo -E losetup -o $(( START1*512 )) --sizelimit $(( LENGHT1*512 )) \
+	$DEVICE1 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
+	sudo -E losetup -o $(( START2*512 )) --sizelimit $(( LENGHT2*512 )) \
+	$DEVICE2 $SIMONPIFOLDER/$FILENAME > /dev/null 2>&1
 }
 
 umountImg() {
 	echo -e "[$G+$RST] Unmounting disk image named $FILENAME ..."
-	losetup -D
+	sudo -E losetup -D
 }
 
 purge () {

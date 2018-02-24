@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Enable this for debug purpose only
+#set -x
+
 OPT=.
 
 # You could overwrite paths using VARNAME=value ./simonpi
@@ -17,12 +20,15 @@ IPTABLES=iptables
 PS=ps
 QEMUARM=qemu-system-arm
 QEMUARM64=qemu-system-aarch64
+SUDO=sudo
 VFAT=mkfs.vfat
 VFATCHK=fsck.vfat
 WGET=wget
-PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" "$PS" "$QEMUARM" "$QEMUARM64" "$VFAT" "$WGET")
+PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" \
+"$PS" "$QEMUARM" "$QEMUARM64" "$SUDO" "$VFAT" "$WGET")
 
 # Parameters, Folders and Files
+USER=$(whoami)
 SNDARG=$2
 GIGA=$3
 MODEL=$1
@@ -43,19 +49,6 @@ R='\e[0;31m'
 G='\e[0;32m'
 Y='\e[0;33m'
 RST='\e[0m'
-
-# Must be root to use this tool
-checkRoot() {
-	if [[ ! $EUID -eq 0 ]];then
-		if [[ -x "$(command -v sudo)" ]]; then
-			exec sudo -E bash "$0" "$@"
-			exit $?
-		else
-			echo -e "[$Y!$RST] sudo is needed. Please run this script as root or install sudo."
-			exit 1
-		fi
-	fi
-}
 
 checkModel() {
 	if [[ $MODEL != rpi* ]]; then
@@ -78,7 +71,9 @@ checkDeps() {
 
 help () {
 	echo "Create a raw partitioned img for rpi-(1-2-3) emulation on QEMU"
+	echo ""
 	echo -e "Default storage is in $G$SIMONPIFOLDER$RST"
+	echo ""
 	echo "usage: ./simonpi MODEL [<opts>]"
 	echo "	Available MODELs:	rpi	rpi-2	rpi-3"
 	echo "	<opts>	-h			print this message"
@@ -89,7 +84,7 @@ help () {
 	echo "		-m			mount only loop devices ($DEVICE1, $DEVICE2)"
 	echo "		-p			purge everything except for downloaded archives"
 	echo "		-r			run QEMU processor emulator for defined model"
-	echo "		-s	<size in G>	write a partitioned raw image disk with Arch Linux"
+	echo "		-s	<size in GB>	write a partitioned raw image disk with Arch Linux"
 	echo "		-u			unmount ${MOUNTFOLDERS[0]} and ${MOUNTFOLDERS[1]} folders"
 	echo "examples:"
 	echo "	./simonpi rpi-3 -s 2		create a 2GB sd .img for rpi-3"
@@ -107,16 +102,17 @@ process_args () {
 		-*    ) help ;;
 		*     ) checkModel ;;
 	esac
+
 	case "$2" in
-		-c	  ) checkRoot $@ && isMounted && checkMount && checkFs ;;
-		-e	  ) checkRoot $@ && isMounted && checkMount && purge && purgeEverything ;;
-		-k	  ) checkRoot $@ && checkQemu && killQemu && killNetwork ;;
-		-l	  ) checkRoot $@ && listStorage ;;
-		-m	  ) checkRoot $@ && isMounted && checkMount ;;
-		-p	  ) checkRoot $@ && isMounted && checkMount && purge ;;
-		-r    ) checkRoot $@ && isMounted && checkMount && presetsGen && run_emu ;;
-		-s    ) checkRoot $@ && createArchImg ;;
-		-u    ) checkRoot $@ && isMounted && checkMount ;;
+		-c	  ) isMounted && checkMount && checkFs ;;
+		-e	  ) isMounted && checkMount && purge && purgeEverything ;;
+		-k	  ) checkQemu && killQemu && killNetwork ;;
+		-l	  ) listStorage ;;
+		-m	  ) isMounted && checkMount ;;
+		-p	  ) isMounted && checkMount && purge ;;
+		-r    ) isMounted && checkMount && presetsGen && run_emu ;;
+		-s    ) createArchImg ;;
+		-u    ) isMounted && checkMount ;;
  		*    ) help ;;
 	esac
 }
