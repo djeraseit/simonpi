@@ -25,7 +25,7 @@ VFAT=mkfs.vfat
 VFATCHK=fsck.vfat
 WGET=wget
 PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" \
-"$PS" "$QEMUARM" "$QEMUARM64" "$SUDO" "$VFAT" "$WGET")
+	"$PS" "$QEMUARM" "$QEMUARM64" "$SUDO" "$VFAT" "$WGET")
 
 # Parameters, Folders and Files
 USER=$(whoami)
