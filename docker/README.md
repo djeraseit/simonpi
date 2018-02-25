@@ -9,8 +9,8 @@ docker pull m0rf30/simonpi
 
 Please run
 ```
-docker run -ti  -v /dev:/dev -v ~/.simonpi:/root/.simonpi m0rf30/simonpi
-docker run -ti  -v /dev:/dev -v ~/.simonpi:/root/.simonpi m0rf30/simonpi simonpi rpi-X -s Y
+docker run -ti --privileged -v /dev:/dev -v ~/.simonpi:/root/.simonpi m0rf30/simonpi
+docker run -ti --privileged -v /dev:/dev -v ~/.simonpi:/root/.simonpi m0rf30/simonpi simonpi rpi-X -s Y
 ```
 to generate a Raspberry Pi X image of Y GB
 
