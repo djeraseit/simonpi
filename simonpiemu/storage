@@ -76,6 +76,7 @@ checkMount() {
 
 	if [ $SNDARG = "-r" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
+			checkRoot
 			mapImg
 			mountImg
 			checkFs
@@ -106,15 +107,15 @@ checkMount() {
 
 isMounted() {
 	if [ ! -f $SIMONPIFOLDER/$FILENAME ]; then
-		echo -e "[$Y!$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME."
+		echo -e "[$Y!$RST] No sd image to use on QEMU. Perhaps you have purged $FILENAME"
 		IMGMOUNTED=2
 		PMOUNTED=2
 	elif [[ $(mount | grep $BOOTPATH) ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=1
 	elif [[ ! $(mount | grep $BOOTPATH) ]] && [[ $(mount | grep $DEVICE1) ]]; then
-		IMGMOUNTED=0
-		PMOUNTED=1
+		IMGMOUNTED=1
+		PMOUNTED=0
 	else
 		IMGMOUNTED=0
 		PMOUNTED=0

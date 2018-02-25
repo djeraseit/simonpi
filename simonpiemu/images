@@ -38,6 +38,7 @@ createArchImg() {
 	checkDeps
 	isMounted
 	downloadArchImage
+	checkRoot
 
 	if [ -e "$SIMONPIFOLDER/$FILENAME" ]; then
 		echo -e "[$Y!$RST] An $FILENAME file already exists. Please delete it"

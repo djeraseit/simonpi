@@ -1,5 +1,14 @@
 #!/bin/bash
 
+# Must be root for some ops
+checkRoot() {
+	if [[ $(sudo whoami) != "root" ]]; then
+		echo -e "[$R-$RST] Sim-on-Pi will not continue"
+		echo -e "[$R-$RST] Please type your user password or run this script as root"
+		exit 1
+	fi
+}
+
 finalizeIt() {
 	presetsDel
 	umountParts
