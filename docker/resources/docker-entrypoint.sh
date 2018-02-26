@@ -18,7 +18,7 @@ install_from_git() {
 	cd simonpi-master
 	install -Dm755 simonpi /usr/bin/simonpi
 	install -dm755 /opt/simonpiemu/
-	cp simonpiemu/* /opt/simonpiemu/
+	cp -r simonpiemu/* /opt/simonpiemu/
 	sed -i "s/OPT=./OPT=\/opt/g" /usr/bin/simonpi
 	cd ..
 	rm -rf simonpi-master master.zip
