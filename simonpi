@@ -35,14 +35,14 @@ MODEL=$1
 FILENAME="sd-arch-$MODEL-qemu.img"
 
 # Importing external scripts
-. $OPT/simonpiemu/checks
-. $OPT/simonpiemu/docker
-. $OPT/simonpiemu/storage
-. $OPT/simonpiemu/custom
-. $OPT/simonpiemu/images
-. $OPT/simonpiemu/network
-. $OPT/simonpiemu/qemu
-. $OPT/simonpiemu/runemu
+. $OPT/simonpiemu/scripts/checks
+. $OPT/simonpiemu/scripts/docker
+. $OPT/simonpiemu/scripts/storage
+. $OPT/simonpiemu/scripts/custom
+. $OPT/simonpiemu/scripts/images
+. $OPT/simonpiemu/scripts/network
+. $OPT/simonpiemu/scripts/qemu
+. $OPT/simonpiemu/scripts/runemu
 
 # Text Colors
 R='\e[0;31m'

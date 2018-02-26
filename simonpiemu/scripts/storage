@@ -22,7 +22,7 @@ checkFolders() {
 		else
 			echo -e "[$G+$RST] Creating $MODEL/$i folder ..."
 			mkdir -p "$SIMONPIFOLDER/$MODEL/$i"
-			chown -R $USER:$USER $i
+			chown -R $USER:$USER "$SIMONPIFOLDER/$MODEL/$i"
 		fi
 	done
 }

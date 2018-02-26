@@ -6,7 +6,7 @@ run_rpi() {
 		-m 256 \
 		-M versatilepb \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=scsi,format=raw \
-		-kernel $OPT/simonpiemu/qemu-kernel-rpi \
+		-kernel $OPT/simonpiemu/kernels/qemu-kernel-rpi \
 		-semihosting \
 		-no-reboot"
 
@@ -21,7 +21,7 @@ run_rpi2() {
 		-M vexpress-a15 \
 		-smp cpus=2 \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=sd,format=raw \
-		-kernel $OPT/simonpiemu/qemu-kernel-rpi-2 \
+		-kernel $OPT/simonpiemu/kernels/qemu-kernel-rpi-2 \
 		-semihosting \
 		-no-reboot"
 
@@ -35,8 +35,8 @@ run_rpi3() {
 		-m 2048 \
 		-M vexpress-a15 \
 		-drive file=$SIMONPIFOLDER/sd-arch-$MODEL-qemu.img,if=sd,format=raw \
-		-kernel $OPT/simonpiemu/qemu-kernel-rpi-3 \
-		-dtb $OPT/simonpiemu/vexpress-v2f-1xv7-ca53x2.dtb \
+		-kernel $OPT/simonpiemu/kernels/qemu-kernel-rpi-3 \
+		-dtb $OPT/simonpiemu/dtbs/vexpress-v2f-1xv7-ca53x2.dtb \
 		-semihosting"
 
 	QEMURPI3+=$NETWORKCMD
