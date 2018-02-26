@@ -32,7 +32,10 @@ USER=$(whoami)
 SNDARG=$2
 GIGA=$3
 MODEL=$1
+IMGPATH=$3
+SIMONPIFOLDER=~/.simonpi
 FILENAME="sd-arch-$MODEL-qemu.img"
+ARCHIMGPATH=$SIMONPIFOLDER/$FILENAME
 
 # Importing external scripts
 . $OPT/simonpiemu/scripts/checks
@@ -80,6 +83,7 @@ help () {
 	echo "		-c			check filesystem integrity of disk image"
 	echo "		-e			purge everything in storage folder"
 	echo "		-k			kill every instance and network virtual interface"
+	echo "		-i	<path/to/img>	Run a custom disk image like Raspbian one"
 	echo "		-l			list files in storage folder"
 	echo "		-m			mount only loop devices ($DEVICE1, $DEVICE2)"
 	echo "		-p			purge everything except for downloaded archives"
@@ -106,6 +110,7 @@ process_args () {
 	case "$2" in
 		-c	  ) isMounted && checkMount && checkFs ;;
 		-e	  ) isMounted && checkMount && purge && purgeEverything ;;
+		-i    ) runCustomImg && isMounted && checkMount && presetsGen && run_emu ;;
 		-k	  ) checkQemu && killQemu && killNetwork ;;
 		-l	  ) listStorage ;;
 		-m	  ) isMounted && checkMount ;;

@@ -1,11 +1,11 @@
 #!/bin/bash
 
-ARCHIMG="ArchLinuxARM-$MODEL-latest.tar.gz"
-FILES=("$ARCHIMG" "$ARCHIMG.md5")
+ARCHISO="ArchLinuxARM-$MODEL-latest.tar.gz"
+FILES=("$ARCHISO" "$ARCHISO.md5")
 
 integrityCheck() {
 	cd $SIMONPIFOLDER/$MODEL
-	if md5sum --status -c "$ARCHIMG.md5"; then
+	if md5sum --status -c "$ARCHISO.md5"; then
 		echo -e "[$G+$RST] Integrity check successfully completed"
 		return 0
 	else
@@ -40,32 +40,48 @@ createArchImg() {
 	downloadArchImage
 	checkRoot
 
-	if [ -e "$SIMONPIFOLDER/$FILENAME" ]; then
-		echo -e "[$Y!$RST] An $FILENAME file already exists. Please delete it"
+	if [ -e "$ARCHIMGPATH" ]; then
+		echo -e "[$Y!$RST] An ${ARCHIMGPATH##*/} file already exists. Please delete it"
 		exit 1
 	else
 		SIZE=$(( GIGA*256 ))
-		echo -e "[$G+$RST] Creating a $GIGA GB disk image named $FILENAME ..."
-		dd if=/dev/zero of="$SIMONPIFOLDER/$FILENAME" bs=4M count="$SIZE" > /dev/null 2>&1
+		echo -e "[$G+$RST] Creating a $GIGA GB disk image named ${ARCHIMGPATH##*/} ..."
+		dd if=/dev/zero of="$ARCHIMGPATH" bs=4M count="$SIZE" > /dev/null 2>&1
 
-		echo -e "[$G+$RST] Creating partition table on $FILENAME ..."
+		echo -e "[$G+$RST] Creating partition table on ${ARCHIMGPATH##*/} ..."
 		(echo o; echo n; echo p; echo 1; echo 8192; echo +100M; echo t; echo c; \
 			echo n; echo p; echo 2; echo 8192; echo ; echo ; echo w) | \
-			$FDISK -H 255 -S 63 "$SIMONPIFOLDER/$FILENAME" >/dev/null 2>&1
+			$FDISK -H 255 -S 63 "$ARCHIMGPATH" >/dev/null 2>&1
 	fi
 	sync
 	mapImg
 	mountImg
 	formatLoDevices
 	mountParts
-	echo -e "[$G+$RST] Extracting $ARCHIMG to $FILENAME ..."
-	sudo $BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHIMG -C "$ROOTPATH"
+	echo -e "[$G+$RST] Extracting $ARCHISO to ${ARCHIMGPATH##*/} ..."
+	sudo $BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHISO -C "$ROOTPATH"
 	sync
 	customContent
 	sudo -E mv $ROOTPATH/boot/* $BOOTPATH
 	sync
 	umountParts
 	umountImg
-	sudo chown $USER:$USER $SIMONPIFOLDER/$FILENAME
+	sudo chown $USER:$USER $ARCHIMGPATH
 	echo -e "[$G+$RST] DONE"
+}
+
+runCustomImg() {
+	if [ -z $IMGPATH ]; then
+		echo -e "[$R-$RST] Please specify an image path"
+		exit 1
+	elif [ ! -f $IMGPATH ]; then
+		echo -e "[$R-$RST] File not found"
+		exit 1
+	elif [ $(file $IMGPATH | cut -d  ' ' -f 2) != "DOS/MBR" ]; then
+		echo -e "[$R-$RST] Please specify a valid disk image"
+		exit 1
+	else
+		echo -e "[$R+$RST] Running with disk image named ${IMGPATH##*/}"
+		ARCHIMGPATH=$IMGPATH
+	fi
 }
