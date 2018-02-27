@@ -81,7 +81,7 @@ runCustomImg() {
 		echo -e "[$R-$RST] Please specify a valid disk image"
 		exit 1
 	else
-		echo -e "[$R+$RST] Running with disk image named ${IMGPATH##*/}"
+		echo -e "[$G+$RST] Running with disk image named ${IMGPATH##*/}"
 		ARCHIMGPATH=$IMGPATH
 	fi
 }
