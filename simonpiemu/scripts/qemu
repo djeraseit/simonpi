@@ -15,12 +15,17 @@ checkQemu() {
 
 killQemu() {
 	if [ $QEMUISRUNNING = "1" ]; then
-		echo -e "[$PASS] Killing QEMU instance ..."
+		echo -e "[$PASS] Killing QEMU instances ..."
 		if [ ! -z "$(pidof $QEMUARM)" ]; then
-			kill -SIGTERM "$(pidof $QEMUARM)"
+			for i in $(pidof $QEMUARM); do
+				kill -SIGTERM "$i"
+			done
 		else
-			kill -SIGTERM "$(pidof $QEMUARM64)"
-		fi	else
+			for i in $(pidof $QEMUARM64); do
+				kill -SIGTERM "$i"
+			done
+		fi
+	else
 		echo -e "[$WARN] QEMU is not running ..."
 	fi
 }

@@ -18,12 +18,26 @@ generateMAC() {
 	MACADDR=$(printf "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )))
 }
 
-killNetwork() {
-	echo -e "[$PASS] Shutting down present network for QEMU ..."
+checkTap() {
+	if [ -d "/sys/class/net/$TAP" ]; then
+		TAPON=1
+		TAP=rasp-tap$(( ${TAP##rasp-tap} + 1 ))
+	else
+		TAPON=0
+	fi
+}
 
+killDnsmasq() {
 	if [ ! -z $DNSMASQPID ]; then
 		sudo -E kill -9 "$DNSMASQPID"
 	fi
+}
+
+
+killNetwork() {
+	echo -e "[$PASS] Shutting down present network for QEMU ..."
+
+	killDnsmasq
 
 	while [ -d "/sys/class/net/$BRIDGE" ] || [ -d "/sys/class/net/$TAP" ]; do
 		sudo -E $IP link set "$TAP" nomaster > /dev/null 2>&1 # Enslave tap
@@ -33,19 +47,42 @@ killNetwork() {
 	done
 }
 
+fkillNetwork() {
+	echo -e "[$PASS] Forced network shutdown for QEMU ..."
+
+	killDnsmasq
+
+	while [ -d "/sys/class/net/$BRIDGE" ] || [[ ! -z $(ls /sys/class/net | grep rasp-tap) ]]; do
+		for i in $(ls /sys/class/net | grep rasp-tap); do
+			sudo -E $IP link set "$i" nomaster > /dev/null 2>&1 # Enslave tap
+			sudo -E $IP tuntap del dev "$i" mode tap > /dev/null  2>&1 # Remove tap
+			sudo -E $IP link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
+			sudo -E sysctl -w net.ipv4.ip_forward=$IPFORWARD > /dev/null
+		done
+	done
+}
+
 createNetwork() {
 	echo -e "[$PASS] Turning up a network for QEMU ..."
 	if [ $IPFORWARD != "1" ]; then
 		sudo -E sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	fi
 
-	sudo -E $IP link add "$BRIDGE" type bridge # add bridge
-	sudo -E $IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
+	if [ $TAPON -eq 0 ]; then
+		sudo -E $IP link add "$BRIDGE" type bridge # add bridge
+		sudo -E $IP addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
+		sudo -E $IP link set "$BRIDGE" up
+	fi
+
 	sudo -E $IP tuntap add dev "$TAP" mode tap # Add tap interface
 	sudo -E $IP link set $TAP master "$BRIDGE" # Bind tap to bridge
-	sudo -E $IP link set "$BRIDGE" up
 	sudo -E $IP link set "$TAP" up promisc on
-	sudo -E $DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
+
+
+	if [ -z $DNSMASQPID ]; then
+		sudo -E $DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
+	fi
+
 	sudo -E $IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
 	echo -e "[$WARN] Gateway address: $G$GATEWAY$RST"
 }

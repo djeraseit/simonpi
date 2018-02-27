@@ -11,8 +11,8 @@ LENGHT1=
 LENGHT2=
 
 # Loopback devices
-DEVICE1=/dev/loop0
-DEVICE2=/dev/loop1
+DEVICE1=$(losetup -f)
+DEVICE2=/dev/loop$(( ${DEVICE1##*/loop} + 1 ))
 
 checkFolders() {
 	for i in ${MOUNTFOLDERS[@]}; do
@@ -32,11 +32,19 @@ checkFs() {
 	sudo -E $EXT4CHK -p $DEVICE2 > /dev/null 2>&1
 }
 
+checkLoop() {
+	if [ ${DEVICE2##*/loop} -gt 5  ]; then
+		echo -e "[$FAIL] No more loopback devices available"
+		exit 1
+	fi
+}
+
 checkMount() {
 	if [ $SNDARG = "-c" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			checkRoot
 			mapImg
+			checkLoop
+			checkRoot
 			mountImg
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
@@ -64,8 +72,9 @@ checkMount() {
 
 	if [ $SNDARG = "-m" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			checkRoot
 			mapImg
+			checkLoop
+			checkRoot
 			mountImg
 			checkFs
 			mountParts
@@ -82,12 +91,14 @@ checkMount() {
 
 	if [ $SNDARG = "-r" ] || [ $SNDARG = "-i" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			checkRoot
 			mapImg
+			checkLoop
+			checkRoot
 			mountImg
 			checkFs
 			mountParts
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
+			checkRoot
 			mountParts
 		elif [ $PMOUNTED = "1" ]; then
 			return
@@ -98,7 +109,7 @@ checkMount() {
 
 	if [ $SNDARG = "-u" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
-			echo -e "[$G!$RST] ${ARCHIMGPATH##*/} disk image not mounted"
+			echo -e "[$WARN] ${ARCHIMGPATH##*/} disk image not mounted"
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
 			umountImg
@@ -171,9 +182,9 @@ mapImg() {
 mountImg() {
 	echo -e "[$PASS] Mounting disk image named ${ARCHIMGPATH##*/} ..."
 	sudo -E losetup -o $(( START1*512 )) --sizelimit $(( LENGHT1*512 )) \
-	$DEVICE1 $ARCHIMGPATH > /dev/null 2>&1
+		$DEVICE1 $ARCHIMGPATH > /dev/null 2>&1
 	sudo -E losetup -o $(( START2*512 )) --sizelimit $(( LENGHT2*512 )) \
-	$DEVICE2 $ARCHIMGPATH > /dev/null 2>&1
+		$DEVICE2 $ARCHIMGPATH > /dev/null 2>&1
 }
 
 umountImg() {

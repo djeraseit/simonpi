@@ -31,7 +31,7 @@ downloadArchImage() {
 
 createArchImg() {
 	isaNumber='^[0-9]+$'
-	
+
 	if ! [[ $GIGA =~ $isaNumber ]] || [ -z $GIGA ]; then
 		echo -e "[$FAIL] Please specify a size in GB"
 		exit 1
@@ -61,6 +61,7 @@ createArchImg() {
 	sync
 	mapImg
 	checkRoot
+	checkLoop
 	mountImg
 	formatLoDevices
 	mountParts

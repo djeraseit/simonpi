@@ -107,16 +107,16 @@ process_args () {
 	esac
 
 	case "$2" in
-		-c	  ) isMounted && checkMount && checkFs ;;
-		-e	  ) isMounted && checkMount && purge && purgeEverything ;;
-		-i    ) runCustomImg && isMounted && checkMount && presetsGen && run_emu ;;
-		-k	  ) checkQemu && killQemu && killNetwork ;;
+		-c	  ) isMounted && checkLoop && checkMount && checkFs ;;
+		-e	  ) isMounted && checkLoop && checkMount && purge && purgeEverything ;;
+		-i    ) runCustomImg && isMounted && checkLoop && checkMount && presetsGen && run_emu ;;
+		-k	  ) checkQemu && killQemu && fkillNetwork ;;
 		-l	  ) listStorage ;;
-		-m	  ) isMounted && checkMount ;;
-		-p	  ) isMounted && checkMount && purge ;;
-		-r    ) isMounted && checkMount && presetsGen && run_emu ;;
+		-m	  ) isMounted && checkLoop && checkMount ;;
+		-p	  ) isMounted && checkLoop && checkMount && purge ;;
+		-r    ) isMounted && checkLoop && checkMount && presetsGen && run_emu ;;
 		-s    ) createArchImg ;;
-		-u    ) isMounted && checkMount ;;
+		-u    ) isMounted && checkLoop && checkMount ;;
  		*    ) help ;;
 	esac
 }
