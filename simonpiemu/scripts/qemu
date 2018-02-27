@@ -18,11 +18,11 @@ killQemu() {
 		echo -e "[$PASS] Killing QEMU instances ..."
 		if [ ! -z "$(pidof $QEMUARM)" ]; then
 			for i in $(pidof $QEMUARM); do
-				kill -SIGTERM "$i"
+				kill -9 "$i"
 			done
 		else
 			for i in $(pidof $QEMUARM64); do
-				kill -SIGTERM "$i"
+				kill -9 "$i"
 			done
 		fi
 	else
