@@ -13,6 +13,7 @@ finalizeIt() {
 	presetsDel
 	umountParts
 	umountImg
+
 	if [ $DOCKER = "0" ]; then
 		killNetwork
 	fi
@@ -20,6 +21,7 @@ finalizeIt() {
 
 initChecks() {
 	checkQemu
+
 	if [ $QEMUISRUNNING = "0" ]; then
 		checkDocker
 		if [ $DOCKER = "0" ]; then

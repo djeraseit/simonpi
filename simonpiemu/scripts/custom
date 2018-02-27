@@ -15,6 +15,7 @@ presetsGen() {
 		sudo -E mv $ROOTPATH/etc/fstab $ROOTPATH/etc/fstab-off
 		sudo -E cp $OPT/simonpiemu/assets/fstab $ROOTPATH/etc/fstab
 	fi
+
 	sudo -E cp $OPT/simonpiemu/assets/motd $ROOTPATH/etc/
 
 	# systemd-modules-load fix
@@ -22,25 +23,29 @@ presetsGen() {
 		sudo -E mv $ROOTPATH/etc/modules-load.d/raspberrypi.conf \
 		$ROOTPATH/etc/modules-load.d/raspberrypi-off
 	fi
+
 	sync
 }
 
 presetsDel() {
 	echo -e "[$PASS] Removing needed changes for emulation from ${ARCHIMGPATH##*/} ..."
-
 	if [[ $MODEL == rpi ]]; then
 		sudo -E rm $ROOTPATH/etc/udev/rules.d/90-qemu.rules
 	fi
+
 	if [ -f $ROOTPATH/etc/fstab-off ]; then
 		sudo -E mv $ROOTPATH/etc/fstab-off $ROOTPATH/etc/fstab
 	fi
+
 	if [ -f $ROOTPATH/etc/motd ]; then
 		sudo -E rm $ROOTPATH/etc/motd
 	fi
+
 	if [ -f $ROOTPATH/etc/modules-load.d/raspberrypi-off ]; then
 		sudo -E mv $ROOTPATH/etc/modules-load.d/raspberrypi-off \
 			$ROOTPATH/etc/modules-load.d/raspberrypi.conf
 	fi
+
 	sync
 }
 
