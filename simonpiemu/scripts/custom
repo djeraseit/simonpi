@@ -3,7 +3,7 @@
 EXTPKGSFOLDER="$SIMONPIFOLDER/$MODEL/pkgs"
 
 presetsGen() {
-	echo -e "[$G+$RST] Adding needed changes for emulation into ${ARCHIMGPATH##*/} ..."
+	echo -e "[$PASS] Adding needed changes for emulation into ${ARCHIMGPATH##*/} ..."
 
 	if [[ $MODEL == rpi ]]; then
 		# It allows qemu virtualization and scsi functionality
@@ -26,7 +26,7 @@ presetsGen() {
 }
 
 presetsDel() {
-	echo -e "[$G+$RST] Removing needed changes for emulation from ${ARCHIMGPATH##*/} ..."
+	echo -e "[$PASS] Removing needed changes for emulation from ${ARCHIMGPATH##*/} ..."
 
 	if [[ $MODEL == rpi ]]; then
 		sudo -E rm $ROOTPATH/etc/udev/rules.d/90-qemu.rules
@@ -50,7 +50,7 @@ customContent() {
 		if [ "$(ls $EXTPKGSFOLDER)" ]; then
 			echo -e "[$Y!$RST] Copying custom content to ${ARCHIMGPATH##*/} ..."
 			for i in $(ls $EXTPKGSFOLDER); do
-				echo -e "	[$G+$RST] Copying $i in /home/alarm ..."
+				echo -e "	[$PASS] Copying $i in /home/alarm ..."
 				sudo -E cp $EXTPKGSFOLDER/$i $ROOTPATH/home/alarm
 				sync
 			done

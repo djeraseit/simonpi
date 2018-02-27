@@ -17,9 +17,9 @@ DEVICE2=/dev/loop1
 checkFolders() {
 	for i in ${MOUNTFOLDERS[@]}; do
 		if [ -d "$SIMONPIFOLDER/$MODEL/$i" ]; then
-			echo -e "[$Y!$RST] $MODEL/$i folder is present"
+			echo -e "[$WARN] $MODEL/$i folder is present"
 		else
-			echo -e "[$G+$RST] Creating $MODEL/$i folder ..."
+			echo -e "[$PASS] Creating $MODEL/$i folder ..."
 			mkdir -p "$SIMONPIFOLDER/$MODEL/$i"
 			chown -R $USER:$USER "$SIMONPIFOLDER/$MODEL/$i"
 		fi
@@ -27,7 +27,7 @@ checkFolders() {
 }
 
 checkFs() {
-	echo -e "[$G+$RST] Checking partitions to prevent failures ..."
+	echo -e "[$PASS] Checking partitions to prevent failures ..."
 	sudo -E $VFATCHK -p $DEVICE1 > /dev/null 2>&1
 	sudo -E $EXT4CHK -p $DEVICE2 > /dev/null 2>&1
 }
@@ -114,7 +114,7 @@ checkMount() {
 
 isMounted() {
 	if [ ! -f $ARCHIMGPATH ]; then
-		echo -e "[$Y!$RST] No sd image to use on QEMU. Perhaps you have purged ${ARCHIMGPATH##*/}"
+		echo -e "[$WARN] No sd image to use on QEMU. Perhaps you have purged ${ARCHIMGPATH##*/}"
 		IMGMOUNTED=2
 		PMOUNTED=2
 	elif [[ $(mount | grep $BOOTPATH) ]]; then
@@ -130,7 +130,7 @@ isMounted() {
 }
 
 formatLoDevices() {
-	echo -e "[$G+$RST] Creating partitions on disk image named ${ARCHIMGPATH##*/} ..."
+	echo -e "[$PASS] Creating partitions on disk image named ${ARCHIMGPATH##*/} ..."
 	sudo -E $VFAT -n boot -F 32 $DEVICE1 > /dev/null 2>&1
 	sudo -E $EXT4 -L rootfs $DEVICE2 > /dev/null 2>&1
 	sync
@@ -138,13 +138,13 @@ formatLoDevices() {
 
 mountParts() {
 	checkFolders
-	echo -e "[$G+$RST] Mounting partitions of ${ARCHIMGPATH##*/} ..."
+	echo -e "[$PASS] Mounting partitions of ${ARCHIMGPATH##*/} ..."
 	sudo -E mount $DEVICE1 "$BOOTPATH"
 	sudo -E mount $DEVICE2 "$ROOTPATH"
 }
 
 umountParts() {
-	echo -e "[$G+$RST] Umounting partitions of ${ARCHIMGPATH##*/} ..."
+	echo -e "[$PASS] Umounting partitions of ${ARCHIMGPATH##*/} ..."
 	mountpointloop1=$(grep $DEVICE1 /proc/mounts | cut -d ' ' -f 2)
 	mountpointloop2=$(grep $DEVICE2 /proc/mounts | cut -d ' ' -f 2)
 	mountpoints=("$mountpointloop1" "$mountpointloop2")
@@ -156,12 +156,12 @@ umountParts() {
 
 listStorage() {
 	checkFolders
-	echo -e "[$Y!$RST] Content of $SIMONPIFOLDER/$MODEL"
+	echo -e "[$WARN] Content of $SIMONPIFOLDER/$MODEL"
 	ls $SIMONPIFOLDER/$MODEL
 }
 
 mapImg() {
-	echo -e "[$G+$RST] Mapping lenghts of partitions ..."
+	echo -e "[$PASS] Mapping lenghts of partitions ..."
 	START1=$(fdisk -lo Start $ARCHIMGPATH | tail -n 2 | head -n -1)
 	START2=$(fdisk -lo Start $ARCHIMGPATH | tail -n 1)
 	LENGTH1=$(fdisk -lo Sectors $ARCHIMGPATH | tail -n 2 | head -n -1)
@@ -169,7 +169,7 @@ mapImg() {
 }
 
 mountImg() {
-	echo -e "[$G+$RST] Mounting disk image named ${ARCHIMGPATH##*/} ..."
+	echo -e "[$PASS] Mounting disk image named ${ARCHIMGPATH##*/} ..."
 	sudo -E losetup -o $(( START1*512 )) --sizelimit $(( LENGHT1*512 )) \
 	$DEVICE1 $ARCHIMGPATH > /dev/null 2>&1
 	sudo -E losetup -o $(( START2*512 )) --sizelimit $(( LENGHT2*512 )) \
@@ -177,16 +177,16 @@ mountImg() {
 }
 
 umountImg() {
-	echo -e "[$G+$RST] Unmounting disk image named ${ARCHIMGPATH##*/} ..."
+	echo -e "[$PASS] Unmounting disk image named ${ARCHIMGPATH##*/} ..."
 	sudo -E losetup -D
 }
 
 purge () {
-	sudo -E rm -rf $ARCHIMGPATH
-	echo -e "[$G+$RST] Soft cleaning ..."
+	echo -e "[$PASS] Soft cleaning ..."
+	rm -rf $ARCHIMGPATH
 }
 
 purgeEverything() {
-	sudo -E rm -rf $SIMONPIFOLDER/$MODEL/
-	echo -e "[$G+$RST] Hard cleaning ..."
+	echo -e "[$PASS] Hard cleaning ..."
+	rm -rf $SIMONPIFOLDER/$MODEL/
 }

@@ -15,11 +15,11 @@ DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
 
 generateMAC() {
 	# Generate Random MAC ADDRESS to avoid collisions
-	printf -v MACADDR "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff ))
+	MACADDR=$(printf "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )))
 }
 
 killNetwork() {
-	echo -e "[$G+$RST] Shutting down present network for QEMU ..."
+	echo -e "[$PASS] Shutting down present network for QEMU ..."
 
 	if [ ! -z $DNSMASQPID ]; then
 		sudo -E kill -9 "$DNSMASQPID"
@@ -34,7 +34,7 @@ killNetwork() {
 }
 
 createNetwork() {
-	echo -e "[$G+$RST] Turning up a network for QEMU ..."
+	echo -e "[$PASS] Turning up a network for QEMU ..."
 	if [ $IPFORWARD != "1" ]; then
 		sudo -E sysctl -w net.ipv4.ip_forward=1 > /dev/null
 	fi
@@ -46,5 +46,5 @@ createNetwork() {
 	sudo -E $IP link set "$TAP" up promisc on
 	sudo -E $DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
 	sudo -E $IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
-	echo -e "[$Y!$RST] Gateway address: $G$GATEWAY$RST"
+	echo -e "[$WARN] Gateway address: $G$GATEWAY$RST"
 }

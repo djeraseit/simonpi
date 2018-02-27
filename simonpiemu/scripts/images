@@ -6,21 +6,21 @@ FILES=("$ARCHISO" "$ARCHISO.md5")
 integrityCheck() {
 	cd $SIMONPIFOLDER/$MODEL
 	if md5sum --status -c "$ARCHISO.md5"; then
-		echo -e "[$G+$RST] Integrity check successfully completed"
-		return 0
+		echo -e "[$PASS] Integrity check successfully completed"
 	else
-		echo -e "[$R-$RST] Integrity check failed, please retry to download"
+		echo -e "[$FAIL] Integrity check failed, please retry to download"
+		purgeEverything
 		exit 1
 	fi
 }
 
 downloadArchImage() {
-	echo -e "[$G+$RST] Downloading ..."
+	echo -e "[$PASS] Downloading ..."
 	for i in ${FILES[@]}; do
 		if [ -f $SIMONPIFOLDER/$MODEL/$i ]; then
-			echo -e "[$Y!$RST] $i is present";
+			echo -e "[$WARN] $i is present";
 		else
-			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress --continue
+			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress
 		fi
 	done
 	integrityCheck
@@ -28,37 +28,40 @@ downloadArchImage() {
 
 createArchImg() {
 	isaNumber='^[0-9]+$'
+	
 	if ! [[ $GIGA =~ $isaNumber ]] || [ -z $GIGA ]; then
-		echo -e "[$R-$RST] Please specify a size in GB"
+		echo -e "[$FAIL] Please specify a size in GB"
 		exit 1
 	elif [ $GIGA -lt 2 ]; then
-		echo -e "[$R-$RST] Please specify a size >= 2 GB"
+		echo -e "[$FAIL] Please specify a size >= 2 GB"
 		exit 1
 	fi
+
 	checkDeps
 	isMounted
 	downloadArchImage
-	checkRoot
 
 	if [ -e "$ARCHIMGPATH" ]; then
-		echo -e "[$Y!$RST] An ${ARCHIMGPATH##*/} file already exists. Please delete it"
+		echo -e "[$WARN] An ${ARCHIMGPATH##*/} file already exists. Please delete it"
 		exit 1
 	else
 		SIZE=$(( GIGA*256 ))
-		echo -e "[$G+$RST] Creating a $GIGA GB disk image named ${ARCHIMGPATH##*/} ..."
+		echo -e "[$PASS] Creating a $GIGA GB disk image named ${ARCHIMGPATH##*/} ..."
 		dd if=/dev/zero of="$ARCHIMGPATH" bs=4M count="$SIZE" > /dev/null 2>&1
 
-		echo -e "[$G+$RST] Creating partition table on ${ARCHIMGPATH##*/} ..."
+		echo -e "[$PASS] Creating partition table on ${ARCHIMGPATH##*/} ..."
 		(echo o; echo n; echo p; echo 1; echo 8192; echo +100M; echo t; echo c; \
 			echo n; echo p; echo 2; echo 8192; echo ; echo ; echo w) | \
 			$FDISK -H 255 -S 63 "$ARCHIMGPATH" >/dev/null 2>&1
 	fi
+
 	sync
 	mapImg
+	checkRoot
 	mountImg
 	formatLoDevices
 	mountParts
-	echo -e "[$G+$RST] Extracting $ARCHISO to ${ARCHIMGPATH##*/} ..."
+	echo -e "[$PASS] Extracting $ARCHISO to ${ARCHIMGPATH##*/} ..."
 	sudo $BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHISO -C "$ROOTPATH"
 	sync
 	customContent
@@ -67,21 +70,21 @@ createArchImg() {
 	umountParts
 	umountImg
 	sudo chown $USER:$USER $ARCHIMGPATH
-	echo -e "[$G+$RST] DONE"
+	echo -e "[$PASS] DONE"
 }
 
 runCustomImg() {
 	if [ -z $IMGPATH ]; then
-		echo -e "[$R-$RST] Please specify an image path"
+		echo -e "[$FAIL] Please specify an image path"
 		exit 1
 	elif [ ! -f $IMGPATH ]; then
-		echo -e "[$R-$RST] File not found"
+		echo -e "[$FAIL] File not found"
 		exit 1
 	elif [ $(file $IMGPATH | cut -d  ' ' -f 2) != "DOS/MBR" ]; then
-		echo -e "[$R-$RST] Please specify a valid disk image"
+		echo -e "[$FAIL] Please specify a valid disk image"
 		exit 1
 	else
-		echo -e "[$G+$RST] Running with disk image named ${IMGPATH##*/}"
+		echo -e "[$PASS] Running with disk image named ${IMGPATH##*/}"
 		ARCHIMGPATH=$IMGPATH
 	fi
 }

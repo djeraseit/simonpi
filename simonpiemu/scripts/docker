@@ -5,9 +5,9 @@ DOCKER=
 checkDocker() {
 	if [ -f /.dockerenv ]; then
 		DOCKER=1
-		echo -e "[$Y!$RST] In a Docker container ..."
+		echo -e "[$WARN] In a Docker container ..."
 	else
 		DOCKER=0
-		echo -e "[$Y!$RST] Out of a Docker container ..."
+		echo -e "[$WARN] Out of a Docker container ..."
 	fi
 }

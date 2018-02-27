@@ -3,8 +3,8 @@
 # Must be root for some ops
 checkRoot() {
 	if [[ $(sudo whoami) != "root" ]]; then
-		echo -e "[$R-$RST] Sim-on-Pi will not continue"
-		echo -e "[$R-$RST] Please type your user password or run this script as root"
+		echo -e "[$FAIL] Sim-on-Pi will not continue"
+		echo -e "[$FAIL] Please type your user password or run this script as root"
 		exit 1
 	fi
 }
@@ -31,7 +31,7 @@ initChecks() {
 			NETWORKCMD=" -net nic,macaddr=$MACADDR -net user,hostfwd=tcp::2222-:22"
 		fi
 	else
-		echo -e "[$R-$RST] Already in use. Please check for other instances"
+		echo -e "[$FAIL] Already in use. Please check for other instances"
 		exit 1
 	fi
 }

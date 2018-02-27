@@ -48,10 +48,9 @@ ARCHIMGPATH=$SIMONPIFOLDER/$FILENAME
 . $OPT/simonpiemu/scripts/runemu
 
 # Text Colors
-R='\e[0;31m'
-G='\e[0;32m'
-Y='\e[0;33m'
-RST='\e[0m'
+FAIL='\e[0;31m FAIL \e[0m'
+PASS='\e[0;32m  OK  \e[0m'
+WARN='\e[0;33m WARN \e[0m'
 
 checkModel() {
 	if [[ $MODEL != rpi* ]]; then
@@ -64,9 +63,9 @@ checkModel() {
 checkDeps() {
 	for i in "${PROGS[@]}"; do
 		if [ $(which $i 2>/dev/null) ]; then
-			echo -e "[$G+$RST] $i executable found"
+			echo -e "[$PASS] $i executable found"
 		else
-			echo -e "[$R-$RST] $i executable not found. Please install it on your distro"
+			echo -e "[$FAIL] $i executable not found. Please install it on your distro"
 			exit 1;
 		fi
 	done
