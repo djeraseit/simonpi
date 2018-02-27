@@ -124,14 +124,18 @@ checkMount() {
 }
 
 isMounted() {
-	if [ ! -f $ARCHIMGPATH ]; then
+	if [ ! -f $ARCHIMGPATH ] && ! [[ $(mount | grep $ROOTPATH) ]]; then
 		echo -e "[$WARN] No sd image to use on QEMU. Perhaps you have purged ${ARCHIMGPATH##*/}"
 		IMGMOUNTED=2
 		PMOUNTED=2
-	elif [[ $(mount | grep $BOOTPATH) ]]; then
+	elif [[ $(mount | grep $ROOTPATH) ]] && [[ $(mount | grep $ROOTPATH | cut -d " " -f 1) != "${ARCHIMGPATH##*/}" ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-	elif [[ ! $(mount | grep $BOOTPATH) ]] && [[ $(mount | grep $DEVICE1) ]]; then
+		ARCHIMGPATH=$(mount | grep $ROOTPATH | cut -d " " -f 1)
+	elif [[ $(mount | grep $ROOTPATH) ]]; then
+		IMGMOUNTED=1
+		PMOUNTED=1
+	elif [[ ! $(mount | grep $ROOTPATH) ]] && [[ $(mount | grep $DEVICE1) ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=0
 	else
@@ -156,13 +160,8 @@ mountParts() {
 
 umountParts() {
 	echo -e "[$PASS] Umounting partitions of ${ARCHIMGPATH##*/} ..."
-	mountpointloop1=$(grep $DEVICE1 /proc/mounts | cut -d ' ' -f 2)
-	mountpointloop2=$(grep $DEVICE2 /proc/mounts | cut -d ' ' -f 2)
-	mountpoints=("$mountpointloop1" "$mountpointloop2")
-
-	for i in ${mountpoints[@]}; do
-		sudo -E umount "$i"
-	done
+	sudo -E umount "$BOOTPATH"
+	sudo -E umount "$ROOTPATH"
 }
 
 listStorage() {
