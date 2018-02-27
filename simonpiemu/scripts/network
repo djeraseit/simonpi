@@ -80,7 +80,10 @@ createNetwork() {
 
 
 	if [ -z $DNSMASQPID ]; then
+		echo -e "[$PASS] Turning up dnsmasq for guest IP assignament ..."
 		sudo -E $DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
+	else
+		echo -e "[$FAIL] Failed to start dnsmasq, perhaps port 53 is busy ..."
 	fi
 
 	sudo -E $IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
