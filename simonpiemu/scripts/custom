@@ -51,20 +51,20 @@ presetsDel() {
 
 customContent() {
 	if [ -d $EXTPKGSFOLDER ]; then
-		echo -e "[$Y!$RST] $EXTPKGSFOLDER folder is present"
+		echo -e "[$WARN] $EXTPKGSFOLDER folder is present"
 		if [ "$(ls $EXTPKGSFOLDER)" ]; then
-			echo -e "[$Y!$RST] Copying custom content to ${ARCHIMGPATH##*/} ..."
+			echo -e "[$WARN] Copying custom content to ${ARCHIMGPATH##*/} ..."
 			for i in $(ls $EXTPKGSFOLDER); do
 				echo -e "	[$PASS] Copying $i in /home/alarm ..."
 				sudo -E cp $EXTPKGSFOLDER/$i $ROOTPATH/home/alarm
 				sync
 			done
 		else
-			echo -e "[$Y!$RST] $EXTPKGSFOLDER is empty"
+			echo -e "[$WARN] $EXTPKGSFOLDER is empty"
 		fi
 	else
-		echo -e "[$Y!$RST] $EXTPKGSFOLDER folder not present. Creating ..."
+		echo -e "[$WARN] $EXTPKGSFOLDER folder not present. Creating ..."
 		mkdir -p $EXTPKGSFOLDER
-		echo -e "[$Y!$RST] You could add custom content on img copying it under $EXTPKGSFOLDER"
+		echo -e "[$WARN] You could add custom content on img copying it under $EXTPKGSFOLDER"
 	fi
 }
