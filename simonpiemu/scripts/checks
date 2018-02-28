@@ -13,8 +13,8 @@ finalizeIt() {
 	presetsDel
 	umountParts
 	umountImg
-
-	if [ $DOCKER = "0" ]; then
+	checkQemu
+	if [ $DOCKER = "0" ] && [ $QEMUISRUNNING = "0" ]; then
 		killNetwork
 	fi
 }

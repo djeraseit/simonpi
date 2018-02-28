@@ -93,5 +93,5 @@ createNetwork() {
 	fi
 
 	sudo -E $IPTABLES -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
-	echo -e "[$WARN] Gateway address: $G$GATEWAY$RST"
+	echo -e "[$PASS] Gateway address: $G$GATEWAY$RST"
 }
