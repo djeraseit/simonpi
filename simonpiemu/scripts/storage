@@ -13,6 +13,7 @@ LENGHT2=
 # Loopback devices
 DEVICE1=$(losetup -f)
 DEVICE2=/dev/loop$(( ${DEVICE1##*/loop} + 1 ))
+CUSTOMIMG=$(losetup -l $ DEVICE2 | cut -d " " -f 15 | tail -n +2 | head -n +1)
 
 checkFolders() {
 	for i in ${MOUNTFOLDERS[@]}; do
@@ -128,10 +129,10 @@ isMounted() {
 		echo -e "[$WARN] No sd image to use on QEMU. Perhaps you have purged ${ARCHIMGPATH##*/}"
 		IMGMOUNTED=2
 		PMOUNTED=2
-	elif [[ $(mount | grep $ROOTPATH) ]] && [[ $(mount | grep $ROOTPATH | cut -d " " -f 1) != "${ARCHIMGPATH##*/}" ]]; then
+	elif [[ $(mount | grep $ROOTPATH) ]] && [[ ${CUSTOMIMG##*/} != "${ARCHIMGPATH##*/}" ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-		ARCHIMGPATH=$(mount | grep $ROOTPATH | cut -d " " -f 1)
+		ARCHIMGPATH=$CUSTOMIMG
 	elif [[ $(mount | grep $ROOTPATH) ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=1
