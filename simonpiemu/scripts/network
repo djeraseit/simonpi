@@ -81,11 +81,13 @@ createNetwork() {
 
 	if [ -z $DNSMASQPID ] && [[ -z $(ss -ntl | grep :53) ]]; then
 		echo -e "[$PASS] Turning up dnsmasq for guest IP assignament ..."
-		sudo -E $DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
+		sudo -E $DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" \
+		--bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
 	elif [ -z $DNSMASQPID ] && [[ ! -z $(ss -ntl | grep :53) ]]; then
 		echo -e "[$WARN] Perhaps port 53 is busy"
 		echo -e "[$WARN] Running with no dns service ( perhaps no Internet connection for guests )"
-		sudo -E $DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" --bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP" --port=0
+		sudo -E $DNSMASQ --listen-address="$GATEWAY" --interface="$BRIDGE" \
+		--bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP" --port=0
 	else
 		echo -e "[$WARN] Another instance of $DNSMASQ is running ..."
 	fi
