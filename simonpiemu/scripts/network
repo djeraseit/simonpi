@@ -20,9 +20,11 @@ generateMAC() {
 
 checkTap() {
 	if [ -d "/sys/class/net/$TAP" ]; then
-		TAPON=1
-		TAP=rasp-tap$(( ${TAP##rasp-tap} + 1 ))
-	else
+		while [ -d "/sys/class/net/$TAP" ]; do
+			TAPON=1
+			TAP=rasp-tap$(( ${TAP##rasp-tap} + 1 ))
+		done
+	else	
 		TAPON=0
 	fi
 }
