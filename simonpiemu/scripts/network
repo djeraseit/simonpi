@@ -59,7 +59,6 @@ fkillNetwork() {
 			sudo -E $IP link set "$i" nomaster > /dev/null 2>&1 # Enslave tap
 			sudo -E $IP tuntap del dev "$i" mode tap > /dev/null  2>&1 # Remove tap
 			sudo -E $IP link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
-			sudo -E sysctl -w net.ipv4.ip_forward=$IPFORWARD > /dev/null
 		done
 	done
 }
