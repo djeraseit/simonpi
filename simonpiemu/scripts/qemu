@@ -19,7 +19,7 @@ checkQemu() {
 	# 	fi
 	# elif [ ! -z $pid64 ]; then
 
-	
+
 	# else
 	# 	QEMUISRUNNING=0
 	# fi

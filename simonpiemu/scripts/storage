@@ -32,7 +32,7 @@ checkFs() {
 checkLoop() {
 	DEVICE1=$(sudo -E losetup -f)
 	DEVICE2=/dev/loop$(( ${DEVICE1##*/loop} + 1 ))
-	
+
 	if [ ${DEVICE2##*/loop} -gt 5  ]; then
 		echo -e "[$FAIL] No more loopback devices available"
 		exit 1
