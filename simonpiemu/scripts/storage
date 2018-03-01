@@ -124,7 +124,7 @@ checkMount() {
 }
 
 isMounted() {
-	if [ ! -f $ARCHIMGPATH ] && [[ ! -z $(mount | grep $ROOTPATH) ]]; then
+	if [ ! -f $ARCHIMGPATH ]; then
 		echo -e "[$WARN] No sd image to use on QEMU. Perhaps you have purged ${ARCHIMGPATH##*/}"
 		IMGMOUNTED=2
 		PMOUNTED=2
