@@ -21,6 +21,7 @@ finalizeIt() {
 
 initChecks() {
 	checkDocker
+
 	if [ $DOCKER = "0" ]; then
 		checkRoot
 		checkTap

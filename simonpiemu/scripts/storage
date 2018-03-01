@@ -9,11 +9,7 @@ START1=
 START2=
 LENGHT1=
 LENGHT2=
-
-# Loopback devices
-DEVICE1=$(losetup -f)
-DEVICE2=/dev/loop$(( ${DEVICE1##*/loop} + 1 ))
-CUSTOMIMG=$(losetup -l $ DEVICE2 | cut -d " " -f 15 | tail -n +2 | head -n +1)
+CUSTOMIMG=$(losetup -l | cut -d " " -f 15 | tail -n +2 | head -n +1)
 
 checkFolders() {
 	for i in ${MOUNTFOLDERS[@]}; do
@@ -34,6 +30,9 @@ checkFs() {
 }
 
 checkLoop() {
+	DEVICE1=$(sudo -E losetup -f)
+	DEVICE2=/dev/loop$(( ${DEVICE1##*/loop} + 1 ))
+	
 	if [ ${DEVICE2##*/loop} -gt 5  ]; then
 		echo -e "[$FAIL] No more loopback devices available"
 		exit 1
@@ -44,8 +43,8 @@ checkMount() {
 	if [ $SNDARG = "-c" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mapImg
-			checkLoop
 			checkRoot
+			checkLoop
 			mountImg
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
@@ -74,8 +73,8 @@ checkMount() {
 	if [ $SNDARG = "-m" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mapImg
-			checkLoop
 			checkRoot
+			checkLoop
 			mountImg
 			checkFs
 			mountParts
@@ -93,8 +92,8 @@ checkMount() {
 	if [ $SNDARG = "-r" ] || [ $SNDARG = "-i" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mapImg
-			checkLoop
 			checkRoot
+			checkLoop
 			mountImg
 			checkFs
 			mountParts
@@ -125,18 +124,18 @@ checkMount() {
 }
 
 isMounted() {
-	if [ ! -f $ARCHIMGPATH ] && ! [[ $(mount | grep $ROOTPATH) ]]; then
+	if [ ! -f $ARCHIMGPATH ] && [[ ! -z $(mount | grep $ROOTPATH) ]]; then
 		echo -e "[$WARN] No sd image to use on QEMU. Perhaps you have purged ${ARCHIMGPATH##*/}"
 		IMGMOUNTED=2
 		PMOUNTED=2
-	elif [[ $(mount | grep $ROOTPATH) ]] && [[ ${CUSTOMIMG##*/} != "${ARCHIMGPATH##*/}" ]]; then
+	elif [[ $(mount | grep $ROOTPATH) ]] && [[ ${ARCHIMGPATH##*/} != ${CUSTOMIMG##*/} ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-		ARCHIMGPATH=$CUSTOMIMG
+		ARCHIMGPATH=${CUSTOMIMG##*/}
 	elif [[ $(mount | grep $ROOTPATH) ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-	elif [[ ! $(mount | grep $ROOTPATH) ]] && [[ $(mount | grep $DEVICE1) ]]; then
+	elif [[ ! $(mount | grep $ROOTPATH) ]] && [[ ${ARCHIMGPATH##*/} = ${CUSTOMIMG##*/} ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=0
 	else
