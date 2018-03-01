@@ -25,8 +25,8 @@ checkFolders() {
 
 checkFs() {
 	echo -e "[$PASS] Checking partitions to prevent failures ..."
-	sudo -E $VFATCHK -p $DEVICE1 > /dev/null 2>&1
-	sudo -E $EXT4CHK -p $DEVICE2 > /dev/null 2>&1
+	sudo -E $VFATCHK -fp $DEVICE1 > /dev/null 2>&1
+	sudo -E $EXT4CHK -fp $DEVICE2 > /dev/null 2>&1
 }
 
 checkLoop() {
