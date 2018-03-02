@@ -26,9 +26,12 @@ checkTap() {
 	fi
 }
 
-killDnsmasq() {
+checkDnsmasq() {
 	DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
 
+}
+
+killDnsmasq() {
 	if [ ! -z $DNSMASQPID ]; then
 		sudo -E kill -9 "$DNSMASQPID"
 	fi
@@ -37,7 +40,7 @@ killDnsmasq() {
 
 killNetwork() {
 	echo -e "[$PASS] Shutting down present network for QEMU ..."
-
+	checkDnsmasq
 	killDnsmasq
 
 	while [ -d "/sys/class/net/$BRIDGE" ] || [ -d "/sys/class/net/$TAP" ]; do
@@ -50,7 +53,7 @@ killNetwork() {
 
 fkillNetwork() {
 	echo -e "[$PASS] Forced network shutdown for QEMU ..."
-
+	checkDnsmasq
 	killDnsmasq
 
 	while [ -d "/sys/class/net/$BRIDGE" ] || [[ ! -z $(ls /sys/class/net | grep rasp-tap) ]]; do
@@ -78,6 +81,7 @@ createNetwork() {
 	sudo -E $IP link set $TAP master "$BRIDGE" # Bind tap to bridge
 	sudo -E $IP link set "$TAP" up promisc on
 
+	checkDnsmasq
 
 	if [ -z $DNSMASQPID ] && [[ -z $(ss -ntl | grep :53) ]]; then
 		echo -e "[$PASS] Turning up dnsmasq for guest IP assignament ..."
