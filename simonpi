@@ -82,7 +82,7 @@ version() {
 }
 
 help () {
-	echo "Create a raw partitioned img for rpi-(1-2-3) emulation on QEMU"
+	echo "A Swiss Army knife to emulate Raspberry PI family devices on your laptop."
 	echo ""
 	echo -e "Default storage is in $G$SIMONPIFOLDER$RST"
 	echo ""
