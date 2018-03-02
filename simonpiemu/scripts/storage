@@ -99,6 +99,7 @@ checkMount() {
 			mountParts
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
+			checkLoop
 			mountParts
 		elif [ $PMOUNTED = "1" ]; then
 			return
