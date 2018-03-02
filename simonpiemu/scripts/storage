@@ -33,6 +33,11 @@ checkLoop() {
 	DEVICE1=$(sudo -E losetup -f)
 	DEVICE2=/dev/loop$(( ${DEVICE1##*/loop} + 1 ))
 
+	if [ $IMGMOUNTED = "1" ] || [ $PMOUNTED = "1" ]; then
+		DEVICE1=/dev/loop$(( ${DEVICE1##*/loop} - 2 ))
+		DEVICE2=/dev/loop$(( ${DEVICE1##*/loop} + 1 ))
+	fi
+
 	if [ ${DEVICE2##*/loop} -gt 5  ]; then
 		echo -e "[$FAIL] No more loopback devices available"
 		exit 1
@@ -48,9 +53,11 @@ checkMount() {
 			mountImg
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
+			checkLoop
 			return
 		elif [ $PMOUNTED = "1" ]; then
 			checkRoot
+			checkLoop
 			umountParts
 		else
 			exit 1
@@ -80,6 +87,7 @@ checkMount() {
 			mountParts
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
+			checkLoop
 			checkFs
 			mountParts
 		elif [ $PMOUNTED = "1" ]; then
