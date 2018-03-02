@@ -10,9 +10,6 @@ LASTIP="${GATEWAY%.1}.254"
 BROADCAST="${GATEWAY%.1}.255"
 NET="${GATEWAY%.1}.0"
 
-# PID for dnsmasq dhcp server
-DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
-
 generateMAC() {
 	# Generate Random MAC ADDRESS to avoid collisions
 	MACADDR=$(printf "52:54:%02x:%02x:%02x:%02x" $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )) $(( $RANDOM & 0xff)) $(( $RANDOM & 0xff )))
@@ -30,6 +27,8 @@ checkTap() {
 }
 
 killDnsmasq() {
+	DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
+
 	if [ ! -z $DNSMASQPID ]; then
 		sudo -E kill -9 "$DNSMASQPID"
 	fi
