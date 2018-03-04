@@ -9,7 +9,7 @@
                                                                               \/_/
 Written by Gianluca Boiano
 
-In order to update the kernel image with pacman, you have to mount the boot partition.
+In order to update the kernel image, you have to mount the boot partition.
 Do not add entries for your boot partition to /etc/fstab unless you know what are you doing.
 
 Remember to enable sshd on guest if you need it. Type:
