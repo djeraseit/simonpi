@@ -56,12 +56,12 @@ fkillNetwork() {
 	checkDnsmasq
 	killDnsmasq
 
-	while [ -d "/sys/class/net/$BRIDGE" ] || [[ ! -z $(echo /sys/class/net/*rasp-tap*) ]]; do
-		for i in $(echo /sys/class/net/*rasp-tap*); do
-			sudo -E "$IP" link set "$i" nomaster > /dev/null 2>&1 # Enslave tap
-			sudo -E "$IP" tuntap del dev "$i" mode tap > /dev/null  2>&1 # Remove tap
-			sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
+	while [ -d "/sys/class/net/$BRIDGE" ] || [ ! -z "$(find /sys/class/net/ -name "rasp*")" ]; do
+		for i in $(ls -d /sys/class/net/rasp-tap*); do
+			sudo -E "$IP" link set "${i##*/}" nomaster > /dev/null 2>&1 # Enslave tap
+			sudo -E "$IP" tuntap del dev "${i##*/}" mode tap > /dev/null  2>&1 # Remove tap
 		done
+		sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
 	done
 }
 

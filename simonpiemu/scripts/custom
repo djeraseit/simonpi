@@ -4,7 +4,8 @@ EXTPKGSFOLDER="$SIMONPIFOLDER/$MODEL/pkgs"
 
 presetsGen() {
 	echo -e "[$PASS] Adding needed changes for emulation into ${ARCHIMGPATH##*/} ..."
-
+	checkRoot
+	
 	if [[ $MODEL == rpi ]]; then
 		# It allows qemu virtualization and scsi functionality
 		sudo -E cp "$OPT/simonpiemu/assets/90-qemu.rules" \
