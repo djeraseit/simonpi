@@ -27,8 +27,7 @@ checkTap() {
 }
 
 checkDnsmasq() {
-	DNSMASQPID=$(ps -ef | grep $GATEWAY | awk '/[d]nsmasq/{print $2}')
-
+	DNSMASQPID=$(pgrep -f $GATEWAY)
 }
 
 killDnsmasq() {
@@ -36,7 +35,6 @@ killDnsmasq() {
 		sudo -E kill -9 "$DNSMASQPID"
 	fi
 }
-
 
 killNetwork() {
 	echo -e "[$PASS] Shutting down present network for QEMU ..."
