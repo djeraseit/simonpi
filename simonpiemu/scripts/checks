@@ -14,7 +14,7 @@ finalizeIt() {
 	umountParts
 	umountImg
 	checkQemu
-	if [ $DOCKER = "0" ] && [ $QEMUISRUNNING = "0" ]; then
+	if [ "$DOCKER" = "0" ] && [ "$QEMUISRUNNING" = "0" ]; then
 		killNetwork
 	fi
 }
@@ -22,7 +22,7 @@ finalizeIt() {
 initChecks() {
 	checkDocker
 
-	if [ $DOCKER = "0" ]; then
+	if [ "$DOCKER" = "0" ]; then
 		checkRoot
 		checkTap
 		createNetwork

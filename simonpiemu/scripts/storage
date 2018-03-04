@@ -12,21 +12,21 @@ LENGHT2=
 CUSTOMIMG=$(losetup -l | cut -d " " -f 15 | tail -n +2 | head -n +1)
 
 checkFolders() {
-	for i in ${MOUNTFOLDERS[@]}; do
+	for i in "${MOUNTFOLDERS[@]}"; do
 		if [ -d "$SIMONPIFOLDER/$MODEL/$i" ]; then
 			echo -e "[$WARN] $MODEL/$i folder is present"
 		else
 			echo -e "[$PASS] Creating $MODEL/$i folder ..."
 			mkdir -p "$SIMONPIFOLDER/$MODEL/$i"
-			chown -R $USER:$USER "$SIMONPIFOLDER/$MODEL/$i"
+			chown -R "$USER:$USER" "$SIMONPIFOLDER/$MODEL/$i"
 		fi
 	done
 }
 
 checkFs() {
 	echo -e "[$PASS] Checking partitions to prevent failures ..."
-	sudo -E $VFATCHK -fp $DEVICE1 > /dev/null 2>&1
-	sudo -E $EXT4CHK -fp $DEVICE2 > /dev/null 2>&1
+	sudo -E "$VFATCHK" -fp "$DEVICE1" > /dev/null 2>&1
+	sudo -E "$EXT4CHK" -fp "$DEVICE2" > /dev/null 2>&1
 }
 
 checkLoop() {
@@ -45,7 +45,7 @@ checkLoop() {
 }
 
 checkMount() {
-	if [ $SNDARG = "-c" ]; then
+	if [ "$SNDARG" = "-c" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mapImg
 			checkRoot
@@ -64,7 +64,7 @@ checkMount() {
 		fi
 	fi
 
-	if [ $SNDARG = "-e" ] || [ $SNDARG = "-p" ]; then
+	if [ "$SNDARG" = "-e" ] || [ "$SNDARG" = "-p" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			return
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
@@ -77,7 +77,7 @@ checkMount() {
 		fi
 	fi
 
-	if [ $SNDARG = "-m" ]; then
+	if [ "$SNDARG" = "-m" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mapImg
 			checkRoot
@@ -97,7 +97,7 @@ checkMount() {
 		fi
 	fi
 
-	if [ $SNDARG = "-r" ] || [ $SNDARG = "-i" ]; then
+	if [ "$SNDARG" = "-r" ] || [ "$SNDARG" = "-i" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			mapImg
 			checkRoot
@@ -116,7 +116,7 @@ checkMount() {
 		fi
 	fi
 
-	if [ $SNDARG = "-u" ]; then
+	if [ "$SNDARG" = "-u" ]; then
 		if [ $IMGMOUNTED = "0" ] && [ $PMOUNTED = "0" ]; then
 			echo -e "[$WARN] ${ARCHIMGPATH##*/} disk image not mounted"
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
@@ -133,18 +133,18 @@ checkMount() {
 }
 
 isMounted() {
-	if [ ! -f $ARCHIMGPATH ]; then
+	if [ ! -f "$ARCHIMGPATH" ]; then
 		echo -e "[$WARN] No sd image to use on QEMU. Perhaps you have purged ${ARCHIMGPATH##*/}"
 		IMGMOUNTED=2
 		PMOUNTED=2
-	elif [[ $(mount | grep $ROOTPATH) ]] && [[ ${ARCHIMGPATH##*/} != ${CUSTOMIMG##*/} ]]; then
+	elif mount | grep -q "$ROOTPATH" && [[ ${ARCHIMGPATH##*/} != "${CUSTOMIMG##*/}" ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=1
 		ARCHIMGPATH=${CUSTOMIMG##*/}
-	elif [[ $(mount | grep $ROOTPATH) ]]; then
+	elif mount | grep -q "$ROOTPATH"; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-	elif [[ ! $(mount | grep $ROOTPATH) ]] && [[ ${ARCHIMGPATH##*/} = ${CUSTOMIMG##*/} ]]; then
+	elif mount | grep -q "$ROOTPATH" && [[ ${ARCHIMGPATH##*/} = "${CUSTOMIMG##*/}" ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=0
 	else
@@ -155,8 +155,8 @@ isMounted() {
 
 formatLoDevices() {
 	echo -e "[$PASS] Creating partitions on disk image named ${ARCHIMGPATH##*/} ..."
-	sudo -E $VFAT -n boot -F 32 $DEVICE1 > /dev/null 2>&1
-	sudo -E $EXT4 -L rootfs $DEVICE2 > /dev/null 2>&1
+	sudo -E "$VFAT" -n boot -F 32 $DEVICE1 > /dev/null 2>&1
+	sudo -E "$EXT4" -L rootfs $DEVICE2 > /dev/null 2>&1
 	sync
 }
 
@@ -176,23 +176,23 @@ umountParts() {
 listStorage() {
 	checkFolders
 	echo -e "[$WARN] Content of $SIMONPIFOLDER/$MODEL"
-	ls $SIMONPIFOLDER/$MODEL
+	ls "$SIMONPIFOLDER/$MODEL"
 }
 
 mapImg() {
 	echo -e "[$PASS] Mapping lenghts of partitions ..."
-	START1=$(fdisk -lo Start $ARCHIMGPATH | tail -n 2 | head -n -1)
-	START2=$(fdisk -lo Start $ARCHIMGPATH | tail -n 1)
-	LENGTH1=$(fdisk -lo Sectors $ARCHIMGPATH | tail -n 2 | head -n -1)
-	LENGHT2=$(fdisk -lo Sectors $ARCHIMGPATH | tail -n 1)
+	START1=$(fdisk -lo Start "$ARCHIMGPATH" | tail -n 2 | head -n -1)
+	START2=$(fdisk -lo Start "$ARCHIMGPATH" | tail -n 1)
+	LENGTH1=$(fdisk -lo Sectors "$ARCHIMGPATH" | tail -n 2 | head -n -1)
+	LENGHT2=$(fdisk -lo Sectors "$ARCHIMGPATH" | tail -n 1)
 }
 
 mountImg() {
 	echo -e "[$PASS] Mounting disk image named ${ARCHIMGPATH##*/} ..."
 	sudo -E losetup -o $(( START1*512 )) --sizelimit $(( LENGHT1*512 )) \
-		$DEVICE1 $ARCHIMGPATH > /dev/null 2>&1
+		$DEVICE1 "$ARCHIMGPATH" > /dev/null 2>&1
 	sudo -E losetup -o $(( START2*512 )) --sizelimit $(( LENGHT2*512 )) \
-		$DEVICE2 $ARCHIMGPATH > /dev/null 2>&1
+		$DEVICE2 "$ARCHIMGPATH" > /dev/null 2>&1
 }
 
 umountImg() {
@@ -202,10 +202,10 @@ umountImg() {
 
 purge () {
 	echo -e "[$PASS] Soft cleaning ..."
-	rm -rf $ARCHIMGPATH
+	rm -rf "$ARCHIMGPATH"
 }
 
 purgeEverything() {
 	echo -e "[$PASS] Hard cleaning ..."
-	rm -rf $SIMONPIFOLDER/$MODEL/
+	rm -rf "{$SIMONPIFOLDER/$MODEL/:?}"
 }

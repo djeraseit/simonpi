@@ -65,7 +65,7 @@ checkModel() {
 
 checkDeps() {
 	for i in "${PROGS[@]}"; do
-		if [ $(which $i 2>/dev/null) ]; then
+		if which "$i" > /dev/null; then
 			echo -e "[$PASS] $i executable found"
 		else
 			echo -e "[$FAIL] $i executable not found. Please install it on your distro"
@@ -75,9 +75,9 @@ checkDeps() {
 }
 
 version() {
-	echo -e "$G$(cat $OPT/simonpiemu/assets/motd | head -n 9)$RST"
+	echo -e "$G$(cat < $OPT/simonpiemu/assets/motd | head -n 9)$RST"
 	echo "v$VERSION"
-	echo "$(cat /opt/simonpiemu/assets/motd | tail -n -10 | head -n 1)"
+	cat < $OPT/simonpiemu/assets/motd | tail -n -10 | head -n 1
 	exit 0
 }
 
@@ -108,7 +108,6 @@ help () {
 process_args () {
 	# Process other arguments.
 	case "$1" in
-		-h    ) help ;;
 		rpi   ) checkModel ;;
 		rpi-2 ) checkModel ;;
 		rpi-3 ) checkModel ;;
@@ -132,4 +131,4 @@ process_args () {
 	esac
 }
 
-process_args $@;
+process_args "$@";

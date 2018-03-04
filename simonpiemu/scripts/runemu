@@ -11,7 +11,7 @@ run_rpi() {
 		-no-reboot"
 
 	QEMURPI+=$NETWORKCMD
-	eval $QEMURPI
+	eval "$QEMURPI"
 }
 
 run_rpi2() {
@@ -26,7 +26,7 @@ run_rpi2() {
 		-no-reboot"
 
 	QEMURPI2+=$NETWORKCMD
-	eval $QEMURPI2
+	eval "$QEMURPI2"
 }
 
 run_rpi3() {
@@ -40,7 +40,7 @@ run_rpi3() {
 		-semihosting"
 
 	QEMURPI3+=$NETWORKCMD
-	eval $QEMURPI3
+	eval "$QEMURPI3"
 }
 
 run_emu() {

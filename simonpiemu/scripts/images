@@ -4,7 +4,7 @@ ARCHISO="ArchLinuxARM-$MODEL-latest.tar.gz"
 FILES=("$ARCHISO" "$ARCHISO.md5")
 
 integrityCheck() {
-	cd $SIMONPIFOLDER/$MODEL
+	cd "$SIMONPIFOLDER/$MODEL" || exit
 
 	if md5sum --status -c "$ARCHISO.md5"; then
 		echo -e "[$PASS] Integrity check successfully completed"
@@ -18,8 +18,8 @@ integrityCheck() {
 downloadArchImage() {
 	echo -e "[$PASS] Downloading ..."
 
-	for i in ${FILES[@]}; do
-		if [ -f $SIMONPIFOLDER/$MODEL/$i ]; then
+	for i in "${FILES[@]}"; do
+		if [ -f "$SIMONPIFOLDER/$MODEL/$i" ]; then
 			echo -e "[$WARN] $i is present";
 		else
 			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress
@@ -32,10 +32,10 @@ downloadArchImage() {
 createArchImg() {
 	isaNumber='^[0-9]+$'
 
-	if ! [[ $GIGA =~ $isaNumber ]] || [ -z $GIGA ]; then
+	if ! [[ "$GIGA" =~ $isaNumber ]] || [ -z "$GIGA" ]; then
 		echo -e "[$FAIL] Please specify a size in GB"
 		exit 1
-	elif [ $GIGA -lt 2 ]; then
+	elif [ "$GIGA" -lt 2 ]; then
 		echo -e "[$FAIL] Please specify a size >= 2 GB"
 		exit 1
 	fi
@@ -66,25 +66,25 @@ createArchImg() {
 	formatLoDevices
 	mountParts
 	echo -e "[$PASS] Extracting $ARCHISO to ${ARCHIMGPATH##*/} ..."
-	sudo $BSDTAR -xpf $SIMONPIFOLDER/$MODEL/$ARCHISO -C "$ROOTPATH"
+	sudo "$BSDTAR" -xpf "$SIMONPIFOLDER/$MODEL/$ARCHISO" -C "$ROOTPATH"
 	sync
 	customContent
-	sudo -E mv $ROOTPATH/boot/* $BOOTPATH
+	sudo -E mv "$ROOTPATH/boot/*" "$BOOTPATH"
 	sync
 	umountParts
 	umountImg
-	sudo chown $USER:$USER $ARCHIMGPATH
+	sudo chown "$USER:$USER" "$ARCHIMGPATH"
 	echo -e "[$PASS] DONE"
 }
 
 runCustomImg() {
-	if [ -z $IMGPATH ]; then
+	if [ -z "$IMGPATH" ]; then
 		echo -e "[$FAIL] Please specify an image path"
 		exit 1
-	elif [ ! -f $IMGPATH ]; then
+	elif [ ! -f "$IMGPATH" ]; then
 		echo -e "[$FAIL] File not found"
 		exit 1
-	elif [ $(file $IMGPATH | cut -d  ' ' -f 2) != "DOS/MBR" ]; then
+	elif [ "$(file "$IMGPATH" | cut -d  ' ' -f 2)" != "DOS/MBR" ]; then
 		echo -e "[$FAIL] Please specify a valid disk image"
 		exit 1
 	else
