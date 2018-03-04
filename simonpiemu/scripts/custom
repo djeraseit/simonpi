@@ -36,7 +36,7 @@ presetsDel() {
 	fi
 
 	if [ -f "$ROOTPATH/etc/fstab-off" ]; then
-		sudo -E mv "$ROOTPATH/etc/fstab-off $ROOTPATH/etc/fstab"
+		sudo -E mv "$ROOTPATH/etc/fstab-off" "$ROOTPATH/etc/fstab"
 	fi
 
 	if [ -f "$ROOTPATH/etc/motd" ]; then
