@@ -66,10 +66,9 @@ createArchImg() {
 	formatLoDevices
 	mountParts
 	echo -e "[$PASS] Extracting $ARCHISO to ${ARCHIMGPATH##*/} ..."
-	sudo "$BSDTAR" -xpf "$SIMONPIFOLDER/$MODEL/$ARCHISO" -C "$ROOTPATH"
-	sync
-	customContent
-	sudo -E mv "$ROOTPATH/boot/*" "$BOOTPATH"
+	sudo "$BSDTAR" --exclude=^boot -xpf "$SIMONPIFOLDER/$MODEL/$ARCHISO" -C "$ROOTPATH"
+	sudo "$BSDTAR" -xpf "$SIMONPIFOLDER/$MODEL/$ARCHISO" boot/* -C "$BOOTPATH" > /dev/null 2>&1
+	customContent	
 	sync
 	umountParts
 	umountImg
