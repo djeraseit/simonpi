@@ -142,15 +142,15 @@ isMounted() {
 		IMGMOUNTED=1
 		PMOUNTED=1
 
-		if [[ ${ARCHIMGPATH##*/} != "${CUSTOMIMG##*/}" ]]; then
+		if [ "$SNDARG" = "-i" ]; then
 			ARCHIMGPATH=${CUSTOMIMG##*/}
 		fi
 
-	elif ! mount | grep "$ROOTPATH" > /dev/null && [ "${CUSTOMIMG##*/}" != "" ]; then
+	elif ! mount | grep "$ROOTPATH" > /dev/null && [[ ${ARCHIMGPATH##*/} = "${CUSTOMIMG##*/}" ]]; then
 		IMGMOUNTED=1
 		PMOUNTED=0
 
-		if [[ ${ARCHIMGPATH##*/} != "${CUSTOMIMG##*/}" ]]; then
+		if [ "$SNDARG" = "-i" ]; then
 			ARCHIMGPATH=${CUSTOMIMG##*/}
 		fi
 
