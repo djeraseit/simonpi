@@ -14,6 +14,7 @@ DNSMASQ="dnsmasq"
 EXT4="mkfs.ext4"
 EXT4CHK="fsck.ext4"
 FDISK="fdisk"
+FILE="file"
 GREP="grep"
 IP="ip"
 IPTABLES="iptables"
@@ -24,7 +25,7 @@ SUDO="sudo"
 VFAT="mkfs.vfat"
 VFATCHK="fsck.vfat"
 WGET="wget"
-PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$GREP" "$IPTABLES" \
+PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$FILE" "$GREP" "$IPTABLES" \
 	"$PS" "$QEMUARM" "$QEMUARM64" "$SUDO" "$VFAT" "$WGET")
 
 # Parameters, Folders and Files
