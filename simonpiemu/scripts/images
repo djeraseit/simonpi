@@ -83,7 +83,7 @@ runCustomImg() {
 	elif [ ! -f "$IMGPATH" ]; then
 		echo -e "[$FAIL] File not found"
 		exit 1
-	elif [ "$(file "$IMGPATH" | cut -d  ' ' -f 2)" != "DOS/MBR" ]; then
+	elif [ "$($FILE "$IMGPATH" | cut -d  ' ' -f 2)" != "DOS/MBR" ]; then
 		echo -e "[$FAIL] Please specify a valid disk image"
 		exit 1
 	else
