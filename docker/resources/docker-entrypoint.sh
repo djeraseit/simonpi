@@ -4,7 +4,7 @@ echo "===> Update&install all needed packages"
 
 apk update && apk add --no-cache binutils e2fsprogs util-linux iproute2 \
 		libarchive-tools bash sudo dnsmasq wget unzip tar iptables \
-		coreutils qemu-system-arm qemu-system-aarch64
+		coreutils qemu-system-arm qemu-system-aarch64 file
 		
 echo "===> Networking settings ..."
     mkdir -p /dev/net
