@@ -9,12 +9,11 @@ docker pull m0rf30/simonpi
 
 Please run
 ```
-docker run -ti --privileged -v /dev:/dev -v ~/.simonpi:/root/.simonpi m0rf30/simonpi
 docker run -ti --privileged -v /dev:/dev -v ~/.simonpi:/root/.simonpi m0rf30/simonpi simonpi rpi-X -s Y
 ```
 to generate a Raspberry Pi X image of Y GB
 
-Next fire up your RPI3 container with:
+Next fire up your RPIX container with:
 ```
 docker run -ti -p 2222:2222 --privileged -v /dev:/dev -v ~/.simonpi:/root/.simonpi m0rf30/simonpi simonpi rpi-X -r
 ```
