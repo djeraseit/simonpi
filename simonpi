@@ -21,15 +21,16 @@ IPTABLES="iptables"
 PS="ps"
 QEMUARM="qemu-system-arm"
 QEMUARM64="qemu-system-aarch64"
+QEMUIMG="qemu-img"
 SUDO="sudo"
 VFAT="mkfs.vfat"
 VFATCHK="fsck.vfat"
 WGET="wget"
 PROGS=("$AWK" "$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$FILE" "$GREP" "$IPTABLES" \
-	"$PS" "$QEMUARM" "$QEMUARM64" "$SUDO" "$VFAT" "$WGET")
+	"$PS" "$QEMUARM" "$QEMUARM64" "$QEMUIMG" "$SUDO" "$VFAT" "$WGET")
 
 # Parameters, Folders and Files
-VERSION=1.0.6
+VERSION=1.0.8
 USER=$(whoami)
 SNDARG=$2
 GIGA=$3

@@ -208,8 +208,10 @@ umountImg() {
 }
 
 purge () {
-	echo -e "[$PASS] Soft cleaning ..."
-	rm -rf "$ARCHIMGPATH"
+	if [ $IMGMOUNTED != "2" ]; then
+		echo -e "[$PASS] Soft cleaning ..."
+		rm -rf "$ARCHIMGPATH"		
+	fi
 }
 
 purgeEverything() {

@@ -48,10 +48,8 @@ createArchImg() {
 		echo -e "[$WARN] An ${ARCHIMGPATH##*/} file already exists. Please delete it"
 		exit 1
 	else
-		SIZE=$(( GIGA*256 ))
 		echo -e "[$PASS] Creating a $GIGA GB disk image named ${ARCHIMGPATH##*/} ..."
-		dd if=/dev/zero of="$ARCHIMGPATH" bs=4M count="$SIZE" > /dev/null 2>&1
-
+		$QEMUIMG create -f raw "$ARCHIMGPATH" "$GIGA"G > /dev/null
 		echo -e "[$PASS] Creating partition table on ${ARCHIMGPATH##*/} ..."
 		(echo o; echo n; echo p; echo 1; echo 8192; echo +100M; echo t; echo c; \
 			echo n; echo p; echo 2; echo 8192; echo ; echo ; echo w) | \
