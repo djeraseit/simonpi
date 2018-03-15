@@ -11,10 +11,11 @@ services:
     image: m0rf30/simonpi
     tty: true
     command: 'simonpi rpi-3 -r'
+    privileged: true
     volumes:    
-    - .:/root/.simonpi
-    - ./rpi-3/boot:/root/.simonpi/rpi-3/boot
-    - ./rpi-3/root:/root/.simonpi/rpi-3/root
+    - ~/.simonpi:/root/.simonpi
+    - ~/.simonpi/rpi-3/boot:/root/.simonpi/rpi-3/boot
+    - ~/.simonpi/rpi-3/root:/root/.simonpi/rpi-3/root
     ports:
     - "2222:2222"
 
