@@ -119,7 +119,7 @@ process_args () {
 	esac
 
 	case "$2" in
-		-c	  ) isMounted && checkMount && checkFs ;;
+		-c	  ) isMounted && checkMount ;;
 		-e	  ) isMounted && checkMount && purge && purgeEverything ;;
 		-i    ) runCustomImg && isMounted && checkMount && presetsGen && run_emu ;;
 		-k	  ) checkQemu && killQemu && fkillNetwork ;;
