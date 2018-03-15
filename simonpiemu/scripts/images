@@ -16,12 +16,11 @@ integrityCheck() {
 }
 
 downloadArchImage() {
-	echo -e "[$PASS] Downloading ..."
-
 	for i in "${FILES[@]}"; do
 		if [ -f "$SIMONPIFOLDER/$MODEL/$i" ]; then
 			echo -e "[$WARN] $i is present";
 		else
+			echo -e "[$PASS] Downloading ..."
 			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress
 		fi
 	done
