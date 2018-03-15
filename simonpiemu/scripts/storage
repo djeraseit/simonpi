@@ -52,14 +52,17 @@ checkMount() {
 			checkRoot
 			checkLoop
 			mountImg
+			checkFs
+			umountImg
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
-			checkLoop
-			return
+			checkFs
+			umountImg						
 		elif [ $PMOUNTED = "1" ]; then
 			checkRoot
-			checkLoop
 			umountParts
+			checkFs
+			umountImg
 		else
 			exit 1
 		fi
