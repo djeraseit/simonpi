@@ -86,8 +86,8 @@ createNetwork() {
 		sudo -E "$DNSMASQ" --listen-address="$GATEWAY" --interface="$BRIDGE" \
 			--bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP"
 	elif [ -z "$DNSMASQPID" ] && ss -ntl | grep -q :53; then
-		echo -e "[$WARN] Perhaps port 53 is busy"
-		echo -e "[$WARN] Running with no dns service ( perhaps no Internet connection for guests )"
+		echo -e "[$WARN] Port 53 is busy"
+		echo -e "[$WARN] Running with no dns service ( no Internet connection for guests )"
 		sudo -E "$DNSMASQ" --listen-address="$GATEWAY" --interface="$BRIDGE" \
 			--bind-interfaces --dhcp-range="$FIRSTIP","$LASTIP" --port=0
 	else
