@@ -3,12 +3,12 @@
 echo "===> Update&install all needed packages"
 
 apk update && apk add --no-cache bash binutils coreutils dnsmasq dosfstools e2fsprogs \
-				 file grep iproute2 iptables libarchive-tools qemu-img \
-				 qemu-system-arm qemu-system-aarch64 sudo tar unzip util-linux wget
-		
+	file grep iproute2 iptables libarchive-tools qemu-img \
+	qemu-system-arm qemu-system-aarch64 sudo tar unzip util-linux wget
+
 echo "===> Networking settings ..."
-    mkdir -p /dev/net
-    mknod /dev/net/tun c 10 200
+mkdir -p /dev/net
+mknod /dev/net/tun c 10 200
 
 ## install_from_git
 install_from_git() {
