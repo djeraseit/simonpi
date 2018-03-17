@@ -52,7 +52,7 @@ createArchImg() {
 		echo -e "[$PASS] Creating partition table on ${ARCHIMGPATH##*/} ..."
 		(echo o; echo n; echo p; echo 1; echo 8192; echo +100M; echo t; echo c; \
 			echo n; echo p; echo 2; echo 8192; echo ; echo ; echo w) | \
-			$FDISK -H 255 -S 63 "$ARCHIMGPATH" >/dev/null 2>&1
+			$FDISK "$ARCHIMGPATH" >/dev/null 2>&1
 	fi
 
 	sync
