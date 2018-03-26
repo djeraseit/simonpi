@@ -220,5 +220,5 @@ purge () {
 
 purgeEverything() {
 	echo -e "[$PASS] Hard cleaning ..."
-	rm -rf "{$SIMONPIFOLDER/$MODEL/:?}"
+	rm -rf "${SIMONPIFOLDER:?}/$MODEL/"
 }
