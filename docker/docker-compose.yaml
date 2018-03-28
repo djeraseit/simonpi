@@ -13,9 +13,8 @@ services:
     command: 'simonpi rpi-3 -r'
     privileged: true
     volumes:    
+    - /dev:/dev
     - ~/.simonpi:/root/.simonpi
-    - ~/.simonpi/rpi-3/boot:/root/.simonpi/rpi-3/boot
-    - ~/.simonpi/rpi-3/root:/root/.simonpi/rpi-3/root
     ports:
     - "2222:2222"
 
