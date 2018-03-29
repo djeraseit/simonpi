@@ -10,7 +10,7 @@ echo "===> Networking settings ..."
 # Create the kvm node (required --privileged)
 if [ ! -e /dev/kvm ]; then
     set +e
-    mknod /dev/kvm c 10 $(grep '\<kvm\>' /proc/misc | cut -f 1 -d' ')
+    mknod /dev/kvm c 10 "$(grep '\<kvm\>' /proc/misc | cut -f 1 -d' ')"
     set -e
 fi
 
@@ -40,7 +40,7 @@ install_from_git() {
     rm -rf simonpi-master master.zip
 }
 
-echo "===> install simonpi"
+echo "===> Installing Sim on Pi"
 install_from_git simonpi
 
 echo "===> DONE $0 $*"
