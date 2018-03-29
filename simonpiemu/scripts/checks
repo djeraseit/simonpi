@@ -1,5 +1,6 @@
 #!/bin/bash
 
+ARCH=
 GUESTPORT=22
 EXTERPORT=2222
 GUESTPORT1=80
@@ -12,6 +13,14 @@ checkRoot() {
 		echo -e "[$FAIL] Please type your user password or run this script as root"
 		exit 1
 	fi
+}
+
+checkArch() {
+	case $MODEL in
+		rpi) ARCH="armv6h" ;;
+		rpi-2) ARCH="armv7h" ;;
+		rpi-3) ARCH="aarch64" ;;
+	esac
 }
 
 finalizeIt() {

@@ -58,7 +58,7 @@ checkMount() {
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
 			checkFs
-			umountImg						
+			umountImg
 		elif [ $PMOUNTED = "1" ]; then
 			checkRoot
 			umountParts
@@ -214,7 +214,7 @@ umountImg() {
 purge () {
 	if [ $IMGMOUNTED != "2" ]; then
 		echo -e "[$PASS] Soft cleaning ..."
-		rm -rf "$ARCHIMGPATH"		
+		rm -rf "$ARCHIMGPATH"
 	fi
 }
 
