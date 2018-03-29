@@ -58,7 +58,7 @@ customContent() {
 			echo -e "[$WARN] Copying custom content to ${ARCHIMGPATH##*/} ..."
 			for i in $EXTPKGSFOLDER/*; do
 				echo -e "	[$PASS] Copying $i in /home/alarm ..."
-				sudo -E cp "$EXTPKGSFOLDER/$i" "$ROOTPATH/home/alarm"
+				sudo -E cp "$i" "$ROOTPATH/home/alarm"
 				sync
 			done
 		else
