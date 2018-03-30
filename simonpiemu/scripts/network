@@ -12,7 +12,7 @@ NET="${GATEWAY%.1}.0"
 
 generateMAC() {
 	# Generate Random MAC ADDRESS to avoid collisions
-	MACADDR=$(printf "52:54:%02x:%02x:%02x:%02x" $(( RANDOM & 0xff)) $(( RANDOM & 0xff )) $(( RANDOM & 0xff)) $(( RANDOM & 0xff )))
+	printf "52:54:%02x:%02x:%02x:%02x" $(( RANDOM & 0xff)) $(( RANDOM & 0xff )) $(( RANDOM & 0xff)) $(( RANDOM & 0xff ))
 }
 
 checkTap() {
