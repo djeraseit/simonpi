@@ -40,8 +40,8 @@ initChecks() {
 		checkRoot
 		checkTap
 		createNetwork
-		NETWORKCMD=" -net nic,macaddr=$genMAC -net tap,ifname=$TAP,script=no,downscript=no"
+		NETWORKCMD=" -net nic,macaddr=$(genMAC) -net tap,ifname=$TAP,script=no,downscript=no"
 	else
-		NETWORKCMD=" -net nic,macaddr=$genMAC -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
+		NETWORKCMD=" -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
 	fi
 }
