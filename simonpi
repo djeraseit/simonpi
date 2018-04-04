@@ -29,7 +29,7 @@ PROGS=("$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$FILE" "$GREP" "$IPTABLES" \
 	"$PS" "$QEMUARM" "$QEMUARM64" "$QEMUIMG" "$SUDO" "$VFAT" "$WGET")
 
 # Parameters, Folders and Files
-VERSION=1.0.8
+VERSION=1.0.9
 USER=$(whoami)
 SNDARG=$2
 GIGA=$3
