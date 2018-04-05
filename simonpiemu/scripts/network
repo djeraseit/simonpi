@@ -2,7 +2,7 @@
 
 # Network Variables
 BRIDGE=rasp-br0
-IPFORWARD=$(sysctl -n net.ipv4.ip_forward)
+IPFORWARD=$(cat /proc/sys/net/ipv4/ip_forward)
 TAP=rasp-tap0
 GATEWAY=192.168.66.1
 FIRSTIP="${GATEWAY%.1}.2"
@@ -77,7 +77,7 @@ killNetwork() {
 		sudo -E "$IP" link set "$TAP" nomaster > /dev/null 2>&1 # Enslave tap
 		sudo -E "$IP" tuntap del dev "$TAP" mode tap > /dev/null  2>&1 # Remove tap
 		sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
-		sudo -E sysctl -w net.ipv4.ip_forward="$IPFORWARD" > /dev/null
+		sudo -E su -c "echo $IPFORWARD > /proc/sys/net/ipv4/ip_forward"
 	done
 }
 
@@ -110,7 +110,7 @@ setTap() {
 createNetwork() {
 	echo -e "[$PASS] Turning up a network for QEMU ..."
 	if [ "$IPFORWARD" != "1" ]; then
-		sudo -E sysctl -w net.ipv4.ip_forward=1 > /dev/null
+		sudo -E su -c "echo $IPFORWARD > /proc/sys/net/ipv4/ip_forward"
 	fi
 
 	if [ $TAPON -eq 0 ]; then
