@@ -42,20 +42,23 @@ setupDnsmasq() {
 	mapfile -t searchdomains < <(grep search /etc/resolv.conf | sed 's/search //' | sed 's/ /,/g')
 
 	domainname=$(echo "${searchdomains[@]}" | awk -F"," '{print $1}')
+	
+	if ! [[ -z $domainname  ]]; then
+		DNSMASQ_OPTS="$DNSMASQ_OPTS --dhcp-option=option:domain-name,$domainname"
+	fi
 
 	for nameserver in "${nameservers[@]}"; do
 		[[ -z $DNS_SERVERS ]] && DNS_SERVERS=$nameserver || DNS_SERVERS="$DNS_SERVERS,$nameserver"
 	done
 
-	DNSMASQ_OPTS="$DNSMASQ_OPTS --dhcp-option=option:dns-server,$DNS_SERVERS --dhcp-option=option:router,$GATEWAY --dhcp-option=option:domain-name,$domainname"
-
 	if [ -z "$DNSMASQPID" ] && ! ss -ntl | grep -q :53; then
 		echo -e "[$PASS] Turning up dnsmasq for guest IP assignment ..."
+		DNSMASQ_OPTS="$DNSMASQ_OPTS --dhcp-option=option:dns-server,$DNS_SERVERS --dhcp-option=option:router,$GATEWAY"
 		eval "sudo -E $DNSMASQ $DNSMASQ_OPTS"
 	elif [ -z "$DNSMASQPID" ] && ss -ntl | grep -q :53; then
 		echo -e "[$WARN] Port 53 is busy"
 		echo -e "[$WARN] Trying to use local dns service ( maybe offline )"
-		DNSMASQ_OPTS="$DNSMASQ_OPTS --port=0"
+		DNSMASQ_OPTS="$DNSMASQ_OPTS --dhcp-option=option:dns-server,127.0.0.1 --port=0"
 		eval "sudo -E $DNSMASQ $DNSMASQ_OPTS"
 	else
 		echo -e "[$WARN] Another instance of $DNSMASQ is running ..."
