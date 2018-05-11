@@ -7,6 +7,8 @@
      \/___/  \/_/\/_/\/_/\/_/                 \/___/  \/_/\/_/                 \ \ \/  \/_/
                                                                                 \ \_\
                                                                                  \/_/
+
+
 # Description
 A quick & dirty script to emulate Raspberry family devices on your laptop.
 It generates a valid sdcard image that could be deployed on real hardware and used as virtual storage for QEMU.
