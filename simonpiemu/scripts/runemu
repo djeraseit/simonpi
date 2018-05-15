@@ -6,7 +6,7 @@ run_rpi() {
 		-m 256 \
 		-M versatilepb \
 		-drive file=$ARCHIMGPATH,if=scsi,format=raw,discard=unmap,detect-zeroes=unmap \
-		-kernel $OPT/simonpiemu/kernels/qemu-kernel-rpi \
+		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
 		-semihosting \
 		-no-reboot"
 
@@ -21,7 +21,7 @@ run_rpi2() {
 		-M vexpress-a15 \
 		-smp cpus=2 \
 		-drive file=$ARCHIMGPATH,if=sd,format=raw,discard=unmap,detect-zeroes=unmap \
-		-kernel $OPT/simonpiemu/kernels/qemu-kernel-rpi-2 \
+		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
 		-semihosting \
 		-no-reboot"
 
@@ -31,13 +31,16 @@ run_rpi2() {
 
 run_rpi3() {
 	QEMURPI3="$QEMUARM64 -nographic \
-		-cpu cortex-a53 \
+		-cpu cortex-a57 \
 		-m 2048 \
-		-M vexpress-a15 \
-		-drive file=$ARCHIMGPATH,if=sd,format=raw,discard=unmap,detect-zeroes=unmap \
-		-kernel $OPT/simonpiemu/kernels/qemu-kernel-rpi-3 \
-		-dtb $OPT/simonpiemu/dtbs/vexpress-v2f-1xv7-ca53x2.dtb \
-		-semihosting"
+		-M virt \
+		-bios /usr/share/ovmf/AARCH64/QEMU_EFI.fd \
+		-drive if=none,format=raw,file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,id=hd0 \
+		-device virtio-blk-device,drive=hd0 \
+		-drive file=$ARCHIMGPATH,if=none,format=raw,id=hd1 \
+		-device virtio-blk-device,drive=hd1 \
+		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
+		-append \"root=/dev/vda2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1\""
 
 	QEMURPI3+=$NETWORKCMD
 	eval "$QEMURPI3"
