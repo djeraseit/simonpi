@@ -38,6 +38,15 @@ install_from_git() {
     sed -i "s/OPT=./OPT=\/opt/g" /usr/bin/simonpi
     cd ..
     rm -rf simonpi-master master.zip
+    
+    # OVMF ARM
+    wget http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-ARM/RELEASE_GCC5/QEMU_EFI.fd
+    install -D -m644 QEMU_EFI.fd /usr/share/ovmf/ARM/QEMU_EFI.fd
+    rm QEMU_EFI.fd
+    # OVMF AARCH64
+    wget http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-AARCH64/RELEASE_GCC5/QEMU_EFI.fd
+    install -D -m644 QEMU_EFI.fd /usr/share/ovmf/AARCH64/QEMU_EFI.fd
+    rm QEMU_EFI.fd
 }
 
 echo "===> Installing Sim on Pi"
