@@ -18,11 +18,14 @@ run_rpi2() {
 	QEMURPI2="$QEMUARM -nographic \
 		-cpu cortex-a15 \
 		-m 1024 \
-		-M vexpress-a15 \
-		-smp cpus=2 \
-		-drive file=$ARCHIMGPATH,if=sd,format=raw,discard=unmap,detect-zeroes=unmap \
+		-M virt \
+		-bios /usr/share/ovmf/ARM/QEMU_EFI.fd \
+		-drive if=none,format=raw,file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,id=hd0 \
+		-device virtio-blk-device,drive=hd0 \
+		-drive file=$ARCHIMGPATH,if=none,format=raw,id=hd1 \
+		-device virtio-blk-device,drive=hd1 \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-semihosting \
+		-append \"root=/dev/vda2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1\" \
 		-no-reboot"
 
 	QEMURPI2+=$NETWORKCMD
@@ -40,7 +43,8 @@ run_rpi3() {
 		-drive file=$ARCHIMGPATH,if=none,format=raw,id=hd1 \
 		-device virtio-blk-device,drive=hd1 \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-append \"root=/dev/vda2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1\""
+		-append \"root=/dev/vda2 rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1\" \
+		-no-reboot"
 
 	QEMURPI3+=$NETWORKCMD
 	eval "$QEMURPI3"
