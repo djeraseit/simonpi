@@ -42,8 +42,7 @@ run_rpi3() {
 		-drive file=$ARCHIMGPATH,if=none,format=raw,discard=unmap,detect-zeroes=unmap,id=hd1 \
 		-device virtio-blk-device,drive=hd1 \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-append \"root=/dev/vda2 rootfstype=ext4 rw console=ttyAMA0 quiet\"
-		-serial stdio"
+		-append \"root=/dev/vda2 rootfstype=ext4 rw console=ttyAMA0 quiet\""
 
 	QEMURPI3+=$NETWORKCMD
 	eval "$QEMURPI3"
