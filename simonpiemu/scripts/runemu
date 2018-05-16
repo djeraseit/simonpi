@@ -5,10 +5,11 @@ run_rpi() {
 		-cpu arm1176 \
 		-m 256 \
 		-M versatilepb \
-		-drive file=$ARCHIMGPATH,if=scsi,format=raw,discard=unmap,detect-zeroes=unmap \
+		-drive file=$ARCHIMGPATH,if=scsi,format=raw,cache=none \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
 		-semihosting \
-		-no-reboot"
+		-no-reboot \
+		-append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1\""
 
 	QEMURPI+=$NETWORKCMD
 	eval "$QEMURPI"
@@ -20,12 +21,12 @@ run_rpi2() {
 		-m 1024 \
 		-M virt \
 		-bios /usr/share/ovmf/ARM/QEMU_EFI.fd \
-		-drive if=none,format=raw,file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,id=hd0 \
+		-drive file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,if=none,format=raw,cache=none,id=hd0 \
 		-device virtio-blk-device,drive=hd0 \
-		-drive file=$ARCHIMGPATH,if=none,format=raw,id=hd1 \
+		-drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
 		-device virtio-blk-device,drive=hd1 \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-append \"root=/dev/vda2 rootfstype=ext4 rw console=ttyAMA0 quiet\""
+		-append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw console=ttyAMA0\""
 
 	QEMURPI2+=$NETWORKCMD
 	eval "$QEMURPI2"
@@ -37,12 +38,12 @@ run_rpi3() {
 		-m 2048 \
 		-M virt,gic_version=3 -machine virtualization=true \
 		-bios /usr/share/ovmf/AARCH64/QEMU_EFI.fd \
-		-drive if=none,format=raw,file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,id=hd0 \
+		-drive file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,if=none,format=raw,cache=none,id=hd0 \
 		-device virtio-blk-device,drive=hd0 \
-		-drive file=$ARCHIMGPATH,if=none,format=raw,discard=unmap,detect-zeroes=unmap,id=hd1 \
+		-drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
 		-device virtio-blk-device,drive=hd1 \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-append \"root=/dev/vda2 rootfstype=ext4 rw console=ttyAMA0 quiet\""
+		-append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw console=ttyAMA0\""
 
 	QEMURPI3+=$NETWORKCMD
 	eval "$QEMURPI3"
