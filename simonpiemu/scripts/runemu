@@ -10,9 +10,9 @@ run_rpi() {
 		-semihosting \
 		-no-reboot \
 		-append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1\" \
-		-initrd $BOOTPATH/initramfs-linux.img"
+		-initrd $OPT/simonpiemu/kernels/$MODEL/initramfs-linux.img"
 
-	QEMURPI+=$NETWORKCMD
+	#QEMURPI+=$NETWORKCMD
 	eval "$QEMURPI"
 }
 
@@ -47,7 +47,7 @@ run_rpi3() {
 		-append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw console=ttyAMA0\" \
 		-initrd $BOOTPATH/initramfs-linux.img"
 
-	QEMURPI3+=$NETWORKCMD
+	#QEMURPI3+=$NETWORKCMD
 	eval "$QEMURPI3"
 }
 

@@ -3,26 +3,6 @@
 CUSTOMDATAFOLDER="$SIMONPIFOLDER/$MODEL/data"
 EXTPKGSFOLDER="$SIMONPIFOLDER/$MODEL/pkgs"
 
-presetsGen() {
-	echo -e "[$PASS] Adding needed changes for emulation into ${ARCHIMGPATH##*/} ..."
-	checkRoot
-
-	if [[ $MODEL == rpi ]]; then
-		# It allows qemu virtualization and scsi functionality
-		sudo -E cp "$OPT/simonpiemu/assets/90-qemu.rules" \
-			"$ROOTPATH/etc/udev/rules.d/90-qemu.rules"
-		sync
-	fi
-}
-
-presetsDel() {
-	echo -e "[$PASS] Removing needed changes for emulation from ${ARCHIMGPATH##*/} ..."
-	if [[ $MODEL == rpi ]]; then
-		sudo -E rm "$ROOTPATH/etc/udev/rules.d/90-qemu.rules"
-		sync
-	fi
-}
-
 customContent() {
 	if [ -d "$CUSTOMDATAFOLDER" ]; then
 		echo -e "[$WARN] $CUSTOMDATAFOLDER folder is present"

@@ -24,7 +24,6 @@ checkArch() {
 }
 
 finalizeIt() {
-	presetsDel
 	umountParts
 	umountImg
 	checkQemu

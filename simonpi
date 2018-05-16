@@ -120,12 +120,12 @@ process_args () {
 	case "$2" in
 		-c	  ) isMounted && checkMount ;;
 		-e	  ) isMounted && checkMount && purge && purgeEverything ;;
-		-i    ) runCustomImg && isMounted && checkMount && presetsGen && run_emu ;;
+		-i    ) runCustomImg && isMounted && checkMount && run_emu ;;
 		-k	  ) checkQemu && killQemu && fkillNetwork ;;
 		-l	  ) listStorage ;;
 		-m	  ) isMounted && checkMount ;;
 		-p	  ) isMounted && checkMount && purge ;;
-		-r    ) isMounted && checkMount && presetsGen && run_emu ;;
+		-r    ) isMounted && checkMount && run_emu ;;
 		-s    ) createArchImg ;;
 		-u    ) isMounted && checkMount ;;
  		*    ) help ;;
