@@ -11,45 +11,16 @@ presetsGen() {
 		# It allows qemu virtualization and scsi functionality
 		sudo -E cp "$OPT/simonpiemu/assets/90-qemu.rules" \
 			"$ROOTPATH/etc/udev/rules.d/90-qemu.rules"
+		sync
 	fi
-
-	# Prevent vfat corruption for boot partition
-	if [ -f "$ROOTPATH/etc/fstab" ]; then
-		sudo -E mv "$ROOTPATH/etc/fstab" "$ROOTPATH/etc/fstab-off"
-		sudo -E cp "$OPT/simonpiemu/assets/fstab" "$ROOTPATH/etc/fstab"
-	fi
-
-	sudo -E cp "$OPT/simonpiemu/assets/motd" "$ROOTPATH/etc/motd"
-
-	# systemd-modules-load fix
-	if [ -f "$ROOTPATH/etc/modules-load.d/raspberrypi.conf" ]; then
-		sudo -E mv "$ROOTPATH/etc/modules-load.d/raspberrypi.conf" \
-			"$ROOTPATH/etc/modules-load.d/raspberrypi-off"
-	fi
-
-	sync
 }
 
 presetsDel() {
 	echo -e "[$PASS] Removing needed changes for emulation from ${ARCHIMGPATH##*/} ..."
 	if [[ $MODEL == rpi ]]; then
 		sudo -E rm "$ROOTPATH/etc/udev/rules.d/90-qemu.rules"
+		sync
 	fi
-
-	if [ -f "$ROOTPATH/etc/fstab-off" ]; then
-		sudo -E mv "$ROOTPATH/etc/fstab-off" "$ROOTPATH/etc/fstab"
-	fi
-
-	if [ -f "$ROOTPATH/etc/motd" ]; then
-		sudo -E rm "$ROOTPATH/etc/motd"
-	fi
-
-	if [ -f "$ROOTPATH/etc/modules-load.d/raspberrypi-off" ]; then
-		sudo -E mv "$ROOTPATH/etc/modules-load.d/raspberrypi-off" \
-			"$ROOTPATH/etc/modules-load.d/raspberrypi.conf"
-	fi
-
-	sync
 }
 
 customContent() {
