@@ -9,7 +9,7 @@ run_rpi() {
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
 		-semihosting \
 		-no-reboot \
-		-append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 loglevel=0 panic=1\" \
+		-append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 quiet panic=1\" \
 		-initrd $OPT/simonpiemu/kernels/$MODEL/initramfs-linux.img"
 
 	#QEMURPI+=$NETWORKCMD
