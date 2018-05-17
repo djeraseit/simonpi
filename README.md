@@ -24,6 +24,9 @@ Powered with :heart: by Arch Linux Arm images
 
 # Instructions
 * ```git clone https://github.com/M0Rf30/simonpi.git```
+* ```cd simonpi```
+* ```sudo echo "allow rasp-br0 >> /etc/qemu/bridge.conf```
+
 * type 
 
 ```./simonpi -h for details```
@@ -43,6 +46,9 @@ and X could be mmcblk0 or other block devices
 You could find sim-on-pi on AUR
 
 ```yaourt -S simonpi-git```
+
+Just remember to type:
+* ```sudo echo "allow rasp-br0 >> /etc/qemu/bridge.conf```
 
 ## Docker image
 See the **How to** into **docker** folder
