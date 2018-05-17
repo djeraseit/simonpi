@@ -7,10 +7,9 @@ run_rpi() {
 		-M versatilepb \
 		-drive file=$ARCHIMGPATH,if=scsi,format=raw,cache=none \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-semihosting \
 		-no-reboot \
 		-append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 quiet panic=1\" \
-		-initrd $OPT/simonpiemu/kernels/$MODEL/initramfs-linux.img"
+		-initrd $BOOTPATH/initramfs-linux.img"
 
 	#QEMURPI+=$NETWORKCMD
 	eval "$QEMURPI"
