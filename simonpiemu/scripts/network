@@ -3,7 +3,6 @@
 # Network Variables
 BRIDGE=rasp-br0
 IPFORWARD=$(cat /proc/sys/net/ipv4/ip_forward)
-TAP=rasp-tap0
 GATEWAY=192.168.66.1
 FIRSTIP="${GATEWAY%.1}.2"
 LASTIP="${GATEWAY%.1}.254"
@@ -13,17 +12,6 @@ NET="${GATEWAY%.1}.0"
 genMAC() {
 	# Generate Random MAC ADDRESS to avoid collisions
 	printf "52:54:%02x:%02x:%02x:%02x" $(( RANDOM & 0xff)) $(( RANDOM & 0xff )) $(( RANDOM & 0xff)) $(( RANDOM & 0xff ))
-}
-
-checkTap() {
-	if [ -d "/sys/class/net/$TAP" ]; then
-		while [ -d "/sys/class/net/$TAP" ]; do
-			TAPON=1
-			TAP=rasp-tap$(( ${TAP##rasp-tap} + 1 ))
-		done
-	else
-		TAPON=0
-	fi
 }
 
 checkDnsmasq() {
@@ -76,9 +64,7 @@ killNetwork() {
 	checkDnsmasq
 	killDnsmasq
 
-	while [ -d "/sys/class/net/$BRIDGE" ] || [ -d "/sys/class/net/$TAP" ]; do
-		sudo -E "$IP" link set "$TAP" nomaster > /dev/null 2>&1 # Enslave tap
-		sudo -E "$IP" tuntap del dev "$TAP" mode tap > /dev/null  2>&1 # Remove tap
+	while [ -d "/sys/class/net/$BRIDGE" ]; do
 		sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
 		sudo -E su -c "echo $IPFORWARD > /proc/sys/net/ipv4/ip_forward"
 	done
@@ -89,11 +75,7 @@ fkillNetwork() {
 	checkDnsmasq
 	killDnsmasq
 
-	while [ -d "/sys/class/net/$BRIDGE" ] || [ ! -z "$(find /sys/class/net/ -name "rasp*")" ]; do
-		for i in $(ls -d /sys/class/net/rasp-tap*); do
-			sudo -E "$IP" link set "${i##*/}" nomaster > /dev/null 2>&1 # Enslave tap
-			sudo -E "$IP" tuntap del dev "${i##*/}" mode tap > /dev/null  2>&1 # Remove tap
-		done
+	while [ -d "/sys/class/net/$BRIDGE" ]; do
 		sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
 	done
 }
@@ -104,27 +86,17 @@ bridgeUp() {
 	sudo -E "$IP" link set "$BRIDGE" up
 }
 
-setTap() {
-	sudo -E "$IP" tuntap add dev "$TAP" mode tap # Add tap interface
-	sudo -E "$IP" link set $TAP master "$BRIDGE" # Bind tap to bridge
-	sudo -E "$IP" link set "$TAP" up promisc on
-}
-
 createNetwork() {
 	echo -e "[$PASS] Turning up a network for QEMU ..."
 	if [ "$IPFORWARD" != "1" ]; then
 		sudo -E su -c "echo $IPFORWARD > /proc/sys/net/ipv4/ip_forward"
 	fi
 
-	if [ $TAPON -eq 0 ]; then
-		bridgeUp
-	fi
-
-	setTap
+	bridgeUp
 	checkDnsmasq
 	setupDnsmasq
-	sudo -E "$IPTABLES" -t nat -I POSTROUTING -s "$NET"/24 -j MASQUERADE # Nat configuration
-	# Hack for guest VMs complaining about "bad udp checksums in 5 packets"
-	sudo -E "$IPTABLES" -A POSTROUTING -t mangle -p udp --dport bootpc -j CHECKSUM --checksum-fill
+	sudo -E "$IPTABLES" -t nat -A POSTROUTING -j MASQUERADE # Nat configuration
+	sudo -E "$IPTABLES" -I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
+
 	echo -e "[$PASS] Gateway address: $G$GATEWAY$RST"
 }

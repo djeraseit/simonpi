@@ -11,7 +11,7 @@ run_rpi() {
 		-append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 quiet panic=1\" \
 		-initrd $BOOTPATH/initramfs-linux.img"
 
-	QEMURPI+=$NETWORKCMD
+	QEMURPI+="$NETWORKCMD"
 	eval "$QEMURPI"
 }
 

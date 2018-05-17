@@ -37,9 +37,8 @@ initChecks() {
 
 	if [ "$DOCKER" = "0" ]; then
 		checkRoot
-		checkTap
 		createNetwork
-		NETWORKCMD=" -net nic,macaddr=$(genMAC) -net tap,ifname=$TAP,script=no,downscript=no"
+		NETWORKCMD=" -net nic,macaddr=$(genMAC) -net bridge,br=$BRIDGE"
 	else
 		NETWORKCMD=" -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
 	fi
