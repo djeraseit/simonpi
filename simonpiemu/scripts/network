@@ -14,6 +14,11 @@ genMAC() {
 	printf "52:54:%02x:%02x:%02x:%02x" $(( RANDOM & 0xff)) $(( RANDOM & 0xff )) $(( RANDOM & 0xff)) $(( RANDOM & 0xff ))
 }
 
+getInternetIf() {
+	iface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
+	echo "$iface"
+}
+
 checkDnsmasq() {
 	DNSMASQPID=$(pgrep -f $GATEWAY)
 }
@@ -86,6 +91,13 @@ bridgeUp() {
 	sudo -E "$IP" link set "$BRIDGE" up
 }
 
+enslaveInternetIf() {
+	iface=$(getInternetIf)
+	sudo -E "$IPTABLES" -t nat -A POSTROUTING -o "$iface" -j MASQUERADE
+	sudo -E "$IPTABLES" -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+	sudo -E "$IPTABLES" -A FORWARD -i "$BRIDGE" -o "$iface" -j ACCEPT
+}
+
 createNetwork() {
 	echo -e "[$PASS] Turning up a network for QEMU ..."
 	if [ "$IPFORWARD" != "1" ]; then
@@ -93,10 +105,9 @@ createNetwork() {
 	fi
 
 	bridgeUp
+	enslaveInternetIf
 	checkDnsmasq
 	setupDnsmasq
-	sudo -E "$IPTABLES" -t nat -A POSTROUTING -j MASQUERADE # Nat configuration
-	sudo -E "$IPTABLES" -I FORWARD -m physdev --physdev-is-bridged -j ACCEPT
 
 	echo -e "[$PASS] Gateway address: $G$GATEWAY$RST"
 }
