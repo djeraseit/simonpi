@@ -21,7 +21,7 @@ downloadArchImage() {
 			echo -e "[$WARN] $i is present";
 		else
 			echo -e "[$PASS] Downloading ..."
-			$WGET "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress
+			"$WGET" "http://os.archlinuxarm.org/os/$i" -P "$SIMONPIFOLDER/$MODEL" -q --show-progress
 		fi
 	done
 

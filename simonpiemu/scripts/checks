@@ -15,6 +15,10 @@ checkRoot() {
 	fi
 }
 
+checkUser() {
+	whoami
+}
+
 checkArch() {
 	case $MODEL in
 		rpi) ARCH="armv6h" ;;
@@ -37,9 +41,22 @@ initChecks() {
 
 	if [ "$DOCKER" = "0" ]; then
 		checkRoot
+		checkTap
 		createNetwork
-		NETWORKCMD=" -net nic,macaddr=$(genMAC) -net bridge,br=$BRIDGE"
+
+		if [ "$MODEL" = "rpi" ]; then
+			NETWORKCMD=" -net nic,macaddr=$(genMAC) -net tap,ifname=$TAP,script=no,downscript=no"
+		else
+			NETWORKCMD=" -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev tap,id=net0,ifname=$TAP,script=no,downscript=no"
+		fi
+
 	else
-		NETWORKCMD=" -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
+
+		if [ "$MODEL" = "rpi" ]; then
+			NETWORKCMD=" -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
+		else
+			NETWORKCMD=" -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
+		fi
+	
 	fi
 }

@@ -2,7 +2,7 @@
 
 # Network Variables
 BRIDGE=rasp-br0
-IPFORWARD=$(cat /proc/sys/net/ipv4/ip_forward)
+TAP=rasp-tap0 
 GATEWAY=192.168.66.1
 FIRSTIP="${GATEWAY%.1}.2"
 LASTIP="${GATEWAY%.1}.254"
@@ -17,6 +17,17 @@ genMAC() {
 getInternetIf() {
 	iface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
 	echo "$iface"
+}
+
+checkTap() {
+	if [ -d "/sys/class/net/$TAP" ]; then
+		while [ -d "/sys/class/net/$TAP" ]; do
+			TAPON=1
+			TAP=rasp-tap$(( ${TAP##rasp-tap} + 1 ))
+		done
+	else
+		TAPON=0
+	fi
 }
 
 checkDnsmasq() {
@@ -69,9 +80,11 @@ killNetwork() {
 	checkDnsmasq
 	killDnsmasq
 
-	while [ -d "/sys/class/net/$BRIDGE" ]; do
+	while [ -d "/sys/class/net/$BRIDGE" ] || [ -d "/sys/class/net/$TAP" ]; do
+		sudo -E "$IP" link set "$TAP" nomaster > /dev/null 2>&1 # Enslave tap
+		sudo -E "$IP" tuntap del dev "$TAP" mode tap > /dev/null  2>&1 # Remove tap
 		sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
-		sudo -E su -c "echo $IPFORWARD > /proc/sys/net/ipv4/ip_forward"
+		sudo -E su -c "echo 0 > /proc/sys/net/ipv4/ip_forward"
 	done
 }
 
@@ -80,7 +93,11 @@ fkillNetwork() {
 	checkDnsmasq
 	killDnsmasq
 
-	while [ -d "/sys/class/net/$BRIDGE" ]; do
+	while [ -d "/sys/class/net/$BRIDGE" ] || [ ! -z "$(find /sys/class/net/ -name "rasp*")" ]; do
+		for i in $(ls -d /sys/class/net/rasp-tap*); do
+			sudo -E "$IP" link set "${i##*/}" nomaster > /dev/null 2>&1 # Enslave tap
+			sudo -E "$IP" tuntap del dev "${i##*/}" mode tap > /dev/null  2>&1 # Remove tap
+		done
 		sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
 	done
 }
@@ -89,25 +106,36 @@ bridgeUp() {
 	sudo -E "$IP" link add "$BRIDGE" type bridge # add bridge
 	sudo -E "$IP" addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
 	sudo -E "$IP" link set "$BRIDGE" up
+	sleep 0.5s
 }
 
-enslaveInternetIf() {
+setNat() {
 	iface=$(getInternetIf)
 	sudo -E "$IPTABLES" -t nat -A POSTROUTING -o "$iface" -j MASQUERADE
 	sudo -E "$IPTABLES" -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
-	sudo -E "$IPTABLES" -A FORWARD -i "$BRIDGE" -o "$iface" -j ACCEPT
+	sudo -E "$IPTABLES" -A FORWARD -i "$TAP" -o "$iface" -j ACCEPT
+}
+
+setTap() {
+	sudo -E "$IP" tuntap add dev "$TAP" mode tap user "$(checkUser)" # Add tap interface
+	sudo -E "$IP" link set "$TAP" up promisc on
+	sleep 0.5s
+	sudo -E "$IP" link set $TAP master "$BRIDGE" # Bind tap to bridge
 }
 
 createNetwork() {
 	echo -e "[$PASS] Turning up a network for QEMU ..."
 	if [ "$IPFORWARD" != "1" ]; then
-		sudo -E su -c "echo $IPFORWARD > /proc/sys/net/ipv4/ip_forward"
+		sudo -E su -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
 	fi
 
-	bridgeUp
-	enslaveInternetIf
+	if [ $TAPON -eq 0 ]; then
+		bridgeUp
+	fi
+
+	setTap
 	checkDnsmasq
 	setupDnsmasq
-
+	setNat
 	echo -e "[$PASS] Gateway address: $G$GATEWAY$RST"
 }
