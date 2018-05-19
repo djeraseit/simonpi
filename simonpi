@@ -5,7 +5,7 @@
 
 OPT=.
 
-# You could overwrite paths using VARNAME=value ./simonpi
+# You can overwrite paths using VARNAME=value ./simonpi
 
 # Software used in this script.
 BSDTAR="bsdtar"
