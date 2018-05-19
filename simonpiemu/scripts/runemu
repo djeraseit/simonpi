@@ -8,8 +8,7 @@ run_rpi() {
 		-drive file=$ARCHIMGPATH,if=scsi,format=raw,cache=none \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
 		-no-reboot \
-		-append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 quiet panic=1\" \
-		-initrd $BOOTPATH/initramfs-linux.img"
+		-append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 quiet panic=1\""
 
 	QEMURPI+="$NETWORKCMD"
 	eval "$QEMURPI"
@@ -26,8 +25,7 @@ run_rpi2() {
 		-drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
 		-device virtio-blk-device,drive=hd1 \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw console=ttyAMA0\" \
-		-initrd $BOOTPATH/initramfs-linux.img"
+		-append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw console=ttyAMA0\""	
 	
 	QEMURPI2+=$NETWORKCMD
 	eval "$QEMURPI2"
@@ -44,8 +42,7 @@ run_rpi3() {
 		-drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
 		-device virtio-blk-device,drive=hd1 \
 		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw console=ttyAMA0\" \
-		-initrd $BOOTPATH/initramfs-linux.img"
+		-append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw console=ttyAMA0\""
 
 	QEMURPI3+=$NETWORKCMD
 	eval "$QEMURPI3"

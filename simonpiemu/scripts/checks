@@ -38,6 +38,10 @@ finalizeIt() {
 
 initChecks() {
 	checkDocker
+	
+	if [ "$SNDARG" != "-i" ]; then
+		CMD=" -initrd $BOOTPATH/initramfs-linux.img"
+	fi
 
 	if [ "$DOCKER" = "0" ]; then
 		checkRoot
@@ -45,17 +49,17 @@ initChecks() {
 		createNetwork
 
 		if [ "$MODEL" = "rpi" ]; then
-			NETWORKCMD=" -net nic,macaddr=$(genMAC) -net tap,ifname=$TAP,script=no,downscript=no"
+			NETWORKCMD="$CMD -net nic,macaddr=$(genMAC) -net tap,ifname=$TAP,script=no,downscript=no"
 		else
-			NETWORKCMD=" -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev tap,id=net0,ifname=$TAP,script=no,downscript=no"
+			NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev tap,id=net0,ifname=$TAP,script=no,downscript=no"
 		fi
 
 	else
 
 		if [ "$MODEL" = "rpi" ]; then
-			NETWORKCMD=" -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
+			NETWORKCMD="$CMD -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
 		else
-			NETWORKCMD=" -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
+			NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
 		fi
 	
 	fi
