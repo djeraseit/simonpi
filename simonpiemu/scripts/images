@@ -48,7 +48,7 @@ createArchImg() {
 		exit 1
 	else
 		echo -e "[$PASS] Creating a $GIGA GB disk image named ${ARCHIMGPATH##*/} ..."
-		$QEMUIMG create -f "$DISKEXT" "$ARCHIMGPATH" "$GIGA"G > /dev/null
+		$QEMUIMG create -f raw "$ARCHIMGPATH" "$GIGA"G > /dev/null
 		echo -e "[$PASS] Creating partition table on ${ARCHIMGPATH##*/} ..."
 		(echo o; echo n; echo p; echo 1; echo 8192; echo +100M; echo t; echo c; \
 			echo n; echo p; echo 2; echo 8192; echo ; echo ; echo w) | \
