@@ -7,7 +7,6 @@ GATEWAY=192.168.66.1
 FIRSTIP="${GATEWAY%.1}.2"
 LASTIP="${GATEWAY%.1}.254"
 BROADCAST="${GATEWAY%.1}.255"
-NET="${GATEWAY%.1}.0"
 
 genMAC() {
 	# Generate Random MAC ADDRESS to avoid collisions
@@ -94,7 +93,7 @@ fkillNetwork() {
 	killDnsmasq
 
 	while [ -d "/sys/class/net/$BRIDGE" ] || [ ! -z "$(find /sys/class/net/ -name "rasp*")" ]; do
-		for i in $(ls -d /sys/class/net/rasp-tap*); do
+		for i in /sys/class/net/rasp-tap*; do
 			sudo -E "$IP" link set "${i##*/}" nomaster > /dev/null 2>&1 # Enslave tap
 			sudo -E "$IP" tuntap del dev "${i##*/}" mode tap > /dev/null  2>&1 # Remove tap
 		done

@@ -75,19 +75,18 @@ createArchImg() {
 }
 
 runCustomImg() {
-	IMGPATH="$1"
+	CUSTOMIMG="$1"
 
-	if [ -z "$IMGPATH" ]; then
+	if [ -z "$CUSTOMIMG" ]; then
 		echo -e "[$FAIL] Please specify an image path"
 		exit 1
-	elif [ ! -f "$IMGPATH" ]; then
+	elif [ ! -f "$CUSTOMIMG" ]; then
 		echo -e "[$FAIL] File not found"
 		exit 1
-	elif [ "$($FILE "$IMGPATH" | cut -d  ' ' -f 2)" != "DOS/MBR" ]; then
+	elif [ "$(file "$CUSTOMIMG" | cut -d  ' ' -f 2)" != "DOS/MBR" ]; then
 		echo -e "[$FAIL] Please specify a valid disk image"
 		exit 1
 	else
-		echo -e "[$PASS] Running with disk image named ${IMGPATH##*/}"
-		ARCHIMGPATH=$IMGPATH
+		echo -e "[$PASS] Running with disk image named ${CUSTOMIMG##*/}"
 	fi
 }

@@ -138,22 +138,17 @@ checkMount() {
 }
 
 isMounted() {
+	if [ ! -z "$CUSTOMIMG" ] && [ "$ARCHIMGPATH" != "$CUSTOMIMG" ]; then
+		ARCHIMGPATH="$CUSTOMIMG"
+	fi
+
 	if mount | grep "$ROOTPATH" > /dev/null; then
 		IMGMOUNTED=1
 		PMOUNTED=1
 
-		if [ "$SNDARG" = "-i" ]; then
-			ARCHIMGPATH=${CUSTOMIMG##*/}
-		fi
-
-	elif ! mount | grep "$ROOTPATH" > /dev/null && [[ ${ARCHIMGPATH##*/} = "${CUSTOMIMG##*/}" ]]; then
+	elif ! mount | grep "$ROOTPATH" > /dev/null && ! [ -z "${ARCHIMGPATH}" ]; then
 		IMGMOUNTED=1
 		PMOUNTED=0
-
-		if [ "$SNDARG" = "-i" ]; then
-			ARCHIMGPATH=${CUSTOMIMG##*/}
-		fi
-	
 	elif [ ! -f "$ARCHIMGPATH" ]; then
 		echo -e "[$WARN] No sd image to use on QEMU. Perhaps you have purged ${ARCHIMGPATH##*/}"
 		IMGMOUNTED=2
