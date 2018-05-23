@@ -145,8 +145,7 @@ isMounted() {
 	if mount | grep "$ROOTPATH" > /dev/null; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-
-	elif ! mount | grep "$ROOTPATH" > /dev/null && ! [ -z "${ARCHIMGPATH}" ]; then
+	elif ! mount | grep "$ROOTPATH" > /dev/null && [ ! -z "${CUSTOMIMG}" ]; then
 		IMGMOUNTED=1
 		PMOUNTED=0
 	elif [ ! -f "$ARCHIMGPATH" ]; then
