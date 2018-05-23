@@ -29,6 +29,7 @@ downloadArchImage() {
 }
 
 createArchImg() {
+	GIGA="$1"
 	isaNumber='^[0-9]+$'
 
 	if ! [[ "$GIGA" =~ $isaNumber ]] || [ -z "$GIGA" ]; then
@@ -74,6 +75,8 @@ createArchImg() {
 }
 
 runCustomImg() {
+	IMGPATH="$1"
+
 	if [ -z "$IMGPATH" ]; then
 		echo -e "[$FAIL] Please specify an image path"
 		exit 1

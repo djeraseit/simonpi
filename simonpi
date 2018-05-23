@@ -32,9 +32,7 @@ PROGS=("$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$FILE" "$GREP" "$IPTABLES" \
 VERSION=1.0.11
 USER=$(whoami)
 SNDARG=$2
-GIGA=$3
 MODEL=$1
-IMGPATH=$3
 SIMONPIFOLDER=~/.simonpi
 FILENAME="sd-arch-$MODEL-qemu.img"
 ARCHIMGPATH=$SIMONPIFOLDER/$FILENAME
@@ -120,13 +118,13 @@ process_args () {
 	case "$2" in
 		-c	  ) isMounted && checkMount ;;
 		-e	  ) isMounted && checkMount && purge && purgeEverything ;;
-		-i    ) runCustomImg && isMounted && checkMount && run_emu ;;
+		-i    ) runCustomImg "$3" && isMounted && checkMount && run_emu ;;
 		-k	  ) checkQemu && killQemu && fkillNetwork ;;
 		-l	  ) listStorage ;;
 		-m	  ) isMounted && checkMount ;;
 		-p	  ) isMounted && checkMount && purge ;;
 		-r    ) isMounted && checkMount && run_emu ;;
-		-s    ) createArchImg ;;
+		-s    ) createArchImg "$3" ;;
 		-u    ) isMounted && checkMount ;;
  		*    ) help ;;
 	esac
