@@ -30,6 +30,7 @@ Powered with :heart: by Arch Linux Arm images
 [![asciicast](https://asciinema.org/a/EdrHT8X04hIJx4VOUKTgl1RJE.png)](https://asciinema.org/a/EdrHT8X04hIJx4VOUKTgl1RJE)
 
 # Instructions
+## From sources
 1. Download the sources and go into the simonpi directory
  
 ```git clone https://github.com/M0Rf30/simonpi.git```
@@ -60,21 +61,6 @@ Powered with :heart: by Arch Linux Arm images
     
 and follow the help guidelines
 
-# Deployment
-All the assets (disk images, downloaded archives..) are saved in 
-```~/.simonpi``` by default.
-
-You can transfer your sd img on a valid sdcard using this command:
-
-```dd if=sd-arch-MODEL-qemu.img of=/dev/sdX bs=4M```
-
-where MODEL could be:
-* rpi
-* rpi-2
-* rpi-3
-
-and X could be mmcblk0 or other block devices
-
 ## For Arch Linux users
 You can find sim-on-pi on AUR
 
@@ -86,6 +72,22 @@ and that's all!
 
 ## Docker image
 See the **How to** into **docker** folder
+
+# Deployment
+All the assets (disk images, downloaded archives..) are saved in 
+```~/.simonpi``` by default.
+
+You can transfer your sd img on a valid sdcard using programs like Etcher or this simple command:
+
+```dd if=sd-arch-MODEL-qemu.img of=/dev/sdX bs=4M```
+
+where MODEL could be:
+* rpi
+* rpi-2
+* rpi-3
+
+and X could be mmcblk0 or other block devices
+
 
 # PR
 * Fork it 
