@@ -33,31 +33,31 @@ Powered with :heart: by Arch Linux Arm images
 ## From sources
 1. Download the sources and go into the simonpi directory
  
-```git clone https://github.com/M0Rf30/simonpi.git```
+   ```git clone https://github.com/M0Rf30/simonpi.git```
 
-```cd simonpi```
+   ```cd simonpi```
 
 2. Set permissions for QEMU bridge interface
   
-```sudo echo "allow rasp-br0 >> /etc/qemu/bridge.conf```
+   ```sudo echo "allow rasp-br0 >> /etc/qemu/bridge.conf```
 
 3. Download the required OVMF images:
     
-    for rpi-2 (arch=ARM)
+   for rpi-2 (arch=ARM)
 
-        http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-ARM/RELEASE_GCC5/QEMU_EFI.fd
+   http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-ARM/RELEASE_GCC5/QEMU_EFI.fd
 
-    for rpi-3 (arch=AARCH64)
+   for rpi-3 (arch=AARCH64)
 
-        http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-AARCH64/RELEASE_GCC5/QEMU_EFI.fd
+   http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-AARCH64/RELEASE_GCC5/QEMU_EFI.fd
 
-    and place them respectively in the follow path:
-    
-        /usr/share/OVMF/$arch/QEMU_EFI.fd
+   and place them respectively in the follow path:
+
+   /usr/share/OVMF/$arch/QEMU_EFI.fd
 
 4. Type:
 
-```./simonpi -h for details```
+   ```./simonpi -h for details```
     
 and follow the help guidelines
 
