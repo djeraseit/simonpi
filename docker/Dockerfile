@@ -1,4 +1,4 @@
-FROM alpine:3.7
+FROM alpine:edge
 LABEL maintainer="Gianluca Boiano <morf3089@gmail.com>"
 
 COPY resources /
