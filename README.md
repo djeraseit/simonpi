@@ -30,6 +30,22 @@ Powered with :heart: by Arch Linux Arm images
 [![asciicast](https://asciinema.org/a/EdrHT8X04hIJx4VOUKTgl1RJE.png)](https://asciinema.org/a/EdrHT8X04hIJx4VOUKTgl1RJE)
 
 # Instructions
+## Required runtime dependencies
+* coreutils
+* dnsmasq 
+* dosfstools
+* e2fsprogs  
+* file  
+* grep  
+* iproute2 
+* iptables 
+* libarchive
+* procps-ng 
+* qemu-arch-extra 
+* sudo
+* util-linux 
+* wget
+
 ## From sources
 1. Download the sources and go into the simonpi directory
  
