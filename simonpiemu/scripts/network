@@ -41,7 +41,7 @@ setupDnsmasq() {
 		--bind-interfaces --dhcp-range=$FIRSTIP,$LASTIP"
 
 	# Build DNS options from container /etc/resolv.conf
-	mapfile -t nameservers < <(grep nameserver /etc/resolv.conf | sed 's/nameserver //')
+	mapfile -t nameservers < <(grep nameserver /etc/resolv.conf | head -n 2 | sed 's/nameserver //')
 	mapfile -t searchdomains < <(grep search /etc/resolv.conf | sed 's/search //' | sed 's/ /,/g')
 
 	domainname=$(echo "${searchdomains[@]}" | awk -F"," '{print $1}')
