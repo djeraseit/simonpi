@@ -41,8 +41,7 @@ checkLoop() {
 	fi
 
 	if [ ${DEVICE2##*/loop} -gt 5  ]; then
-		echo -e "[$FAIL] No more loopback devices available"
-		exit 1
+		echo -e "[$WARN] You are using more than 3 instances"
 	fi
 }
 
