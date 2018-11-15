@@ -9,7 +9,7 @@ START1=
 START2=
 LENGHT1=
 LENGHT2=
-CUSTOMIMG=$(losetup -l | cut -d " " -f 15 | tail -n +2 | head -n +1)
+LOOPFLAG=$(losetup -l | cut -d " " -f 15 | tail -n +2 | head -n +1)
 
 checkFolders() {
 	for i in "${MOUNTFOLDERS[@]}"; do
@@ -33,12 +33,6 @@ checkFs() {
 checkLoop() {
 	DEVICE1=$(sudo -E losetup -f)
 	DEVICE2=/dev/loop$(( ${DEVICE1##*/loop} + 1 ))
-
-	if [ $IMGMOUNTED = "1" ] || [ $PMOUNTED = "1" ]; then
-		numloop=$(( ${DEVICE1##*/loop} - 2 ))
-		DEVICE1=/dev/loop$numloop
-		DEVICE2=/dev/loop$(( numloop + 1 ))
-	fi
 
 	if [ ${DEVICE2##*/loop} -gt 5  ]; then
 		echo -e "[$WARN] You are using more than 3 instances"
@@ -144,9 +138,9 @@ isMounted() {
 	if mount | grep "$ROOTPATH" > /dev/null; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-	elif ! mount | grep "$ROOTPATH" > /dev/null && [ ! -z "${CUSTOMIMG}" ]; then
-		IMGMOUNTED=1
-		PMOUNTED=0
+	elif ! mount | grep "$ROOTPATH" > /dev/null && [ ! -z "${LOOPFLAG}" ]; then
+	 	IMGMOUNTED=1
+	 	PMOUNTED=0
 	elif [ ! -f "$ARCHIMGPATH" ]; then
 		echo -e "[$WARN] No sd image to use on QEMU. Perhaps you have purged ${ARCHIMGPATH##*/}"
 		IMGMOUNTED=2
