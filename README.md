@@ -26,9 +26,6 @@ It generates a valid sdcard image that can be deployed on real hardware and used
 
 Powered with :heart: by Arch Linux Arm images
 
-# In action with a Raspbian image
-[![asciicast](https://asciinema.org/a/EdrHT8X04hIJx4VOUKTgl1RJE.png)](https://asciinema.org/a/EdrHT8X04hIJx4VOUKTgl1RJE)
-
 # Instructions
 ## Required runtime dependencies
 * coreutils
