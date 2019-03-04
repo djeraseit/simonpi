@@ -17,9 +17,9 @@ services:
         networks:
             - lwm2m-net
         ports:
-            - '5693:5683/udp'
-            - '5694:5684/udp'
-            - '56930:56830/udp'
+            - '5663:5683/udp'
+            - '5664:5684/udp'
+            - '56630:56830/udp'
         links:
             - simonpi.rpi3.server
     simonpi.rpi3.server:
@@ -35,7 +35,7 @@ services:
             - lwm2m-net
         ports:
             - '8080:8080'
-            - '5673:5683/udp'
-            - '5674:5684/udp'
-            - '56730:56830/udp'
+            - '5663:5683/udp'
+            - '5664:5684/udp'
+            - '56630:56830/udp'
 
