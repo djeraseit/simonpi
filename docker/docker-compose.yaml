@@ -1,9 +1,10 @@
 version: '3'
 networks:
-    lwm2m-net: null
+    lwm2m-net:
+        driver: bridge
 services:
     simonpi.rpi3.client:
-        container_name: simonpi.rpi3.client
+        container_name: client
         image: 'm0rf30/simonpi:lwm2m'
         tty: true
         command: 'simonpi rpi-3 -i /root/.simonpi/lwm2m-aarch64-client.img'
@@ -14,12 +15,14 @@ services:
             - simonpi.rpi3.server
         networks:
             - lwm2m-net
-	ports:
-            - '5683:5683/udp'
-            - '5684:5684/udp'
-            - '56830:56830/udp'
+        ports:
+            - '5693:5683/udp'
+            - '5694:5684/udp'
+            - '56930:56830/udp'
+        links:
+            - simonpi.rpi3.server
     simonpi.rpi3.server:
-        container_name: simonpi.rpi3.server
+        container_name: server
         image: 'm0rf30/simonpi:lwm2m'
         tty: true
         command: 'simonpi rpi-3 -i /root/.simonpi/lwm2m-aarch64-server.img'
@@ -30,6 +33,7 @@ services:
             - lwm2m-net
         ports:
             - '8080:8080'
-            - '5683:5683/udp'
-            - '5684:5684/udp'
-            - '56830:56830/udp'
+            - '5673:5683/udp'
+            - '5674:5684/udp'
+            - '56730:56830/udp'
+
