@@ -33,7 +33,7 @@ PROGS=("$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$FILE" "$GREP" "$IPTABLES" \
 USER=$(whoami)
 SNDARG=$2
 MODEL=$1
-FILENAME="sd-arch-$MODEL-qemu.img"
+: "${FILENAME:=sd-arch-$MODEL-qemu.img}"
 ARCHIMGPATH=$SIMONPI/$FILENAME
 
 # Importing external scripts
