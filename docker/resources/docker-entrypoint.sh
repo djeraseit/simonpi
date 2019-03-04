@@ -34,15 +34,15 @@ download() {
 ## install_from_git
 install_from_git() {
 	cd /home
-	download https://github.com/M0Rf30/simonpi/archive/master.zip
-	unzip master.zip
-	cd simonpi-master
+	download https://github.com/M0Rf30/simonpi/archive/lwm2m.zip
+	unzip lwm2m.zip
+	cd simonpi-lwm2m
 	install -Dm755 simonpi /usr/bin/simonpi
 	install -dm755 /opt/simonpiemu/
 	cp -r simonpiemu/* /opt/simonpiemu/
 	sed -i "s/OPT=./OPT=\/opt/g" /usr/bin/simonpi
 	cd ..
-	rm -rf simonpi-master master.zip
+	rm -rf simonpi-lwm2m lwm2m.zip
 
 	# OVMF ARM
 	download http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-ARM/RELEASE_GCC5/QEMU_EFI.fd

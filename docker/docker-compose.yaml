@@ -1,20 +1,30 @@
-# Copyright IBM Corp. All Rights Reserved.
-#
-# SPDX-License-Identifier: Apache-2.0
-#
-
 version: '3'
-
+networks:
+    lwm2m-net: null
 services:
-  simonpi-rpi-3:
-    container_name: simonpi-rpi-3
-    image: m0rf30/simonpi:latest
-    tty: true
-    command: 'simonpi rpi-3 -r'
-    privileged: true
-    volumes:    
-    - /dev:/dev
-    - ~/.simonpi:/root/.simonpi
-    ports:
-    - "2222:2222"
-
+    simonpi.rpi3.client:
+        container_name: simonpi.rpi3.client
+        image: 'm0rf30/simonpi:lwm2m'
+        tty: true
+        command: 'simonpi rpi-3 -i /root/.simonpi/lwm2m-aarch64-client.img'
+        privileged: true
+        volumes:
+            - '/dev:/dev'
+            - '~/lwm2m-client:/root/.simonpi'
+        depends_on:
+            - simonpi.rpi3.server
+        networks:
+            - lwm2m-net
+    simonpi.rpi3.server:
+        container_name: simonpi.rpi3.server
+        image: 'm0rf30/simonpi:lwm2m'
+        tty: true
+        command: 'simonpi rpi-3 -i /root/.simonpi/lwm2m-aarch64-server.img'
+        privileged: true
+        volumes:
+            - '/dev:/dev'
+            - '~/lwm2m-server:/root/.simonpi'
+        networks:
+            - lwm2m-net
+        ports:
+            - '8080:8080'
