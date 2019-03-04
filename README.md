@@ -41,7 +41,7 @@ Powered with :heart: by Arch Linux Arm images
 * qemu-arch-extra 
 * sudo
 * util-linux 
-* wget
+* curl
 
 ## From sources
 1. Download the sources and go into the simonpi directory
