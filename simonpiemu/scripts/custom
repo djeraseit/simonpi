@@ -1,14 +1,14 @@
 #!/bin/bash
 
-CUSTOMDATAFOLDER="$SIMONPIFOLDER/$MODEL/data"
-EXTPKGSFOLDER="$SIMONPIFOLDER/$MODEL/pkgs"
+: "${CUSTOMDATAFOLDER:=$SIMONPIFOLDER/$MODEL/data}"
+: "${EXTPKGSFOLDER:=$SIMONPIFOLDER/$MODEL/pkgs}"
 
 customContent() {
 	if [ -d "$CUSTOMDATAFOLDER" ]; then
 		echo -e "[$WARN] $CUSTOMDATAFOLDER folder is present"
 		if [ "$(ls "$CUSTOMDATAFOLDER")" ]; then
 			echo -e "[$WARN] Copying custom content to ${ARCHIMGPATH##*/} ..."
-			for i in $CUSTOMDATAFOLDER/*; do
+			for i in "$CUSTOMDATAFOLDER"/*; do
 				echo -e "	[$PASS] Copying ${i##*/} in /home/alarm ..."
 				sudo -E cp "$i" "$ROOTPATH/home/alarm"
 				sync
@@ -26,7 +26,7 @@ customContent() {
 		echo -e "[$WARN] $EXTPKGSFOLDER folder is present"
 		if [ "$(ls "$EXTPKGSFOLDER")" ]; then
 			echo -e "[$WARN] Installing packages on ${ARCHIMGPATH##*/} ..."
-			for i in $EXTPKGSFOLDER/*; do
+			for i in "$EXTPKGSFOLDER"/*; do
 				echo -e "	[$PASS] Installing ${i##*/} with pacman ..."
 				checkArch
 				sudo -E pacman --arch "$ARCH" -U "$i"  --root "$ROOTPATH" \

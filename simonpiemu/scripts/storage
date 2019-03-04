@@ -131,14 +131,14 @@ checkMount() {
 }
 
 isMounted() {
-	if [ ! -z "$CUSTOMIMG" ] && [ "$ARCHIMGPATH" != "$CUSTOMIMG" ]; then
+	if [ -n "$CUSTOMIMG" ] && [ "$ARCHIMGPATH" != "$CUSTOMIMG" ]; then
 		ARCHIMGPATH="$CUSTOMIMG"
 	fi
 
 	if mount | grep "$SIMONPIFOLDER/$MODEL" > /dev/null; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-	elif ! mount | grep "$SIMONPIFOLDER/$MODEL" > /dev/null && [ ! -z "${LOOPFLAG}" ]; then
+	elif ! mount | grep "$SIMONPIFOLDER/$MODEL" > /dev/null && [ -n "${LOOPFLAG}" ]; then
 	 	IMGMOUNTED=1
 	 	PMOUNTED=0
 	elif [ ! -f "$ARCHIMGPATH" ]; then
@@ -153,16 +153,16 @@ isMounted() {
 
 formatLoDevices() {
 	echo -e "[$PASS] Creating partitions on disk image named ${ARCHIMGPATH##*/} ..."
-	sudo -E "$VFAT" -n boot -F 32 $DEVICE1 > /dev/null 2>&1
-	sudo -E "$EXT4" -L rootfs $DEVICE2 > /dev/null 2>&1
+	sudo -E "$VFAT" -n boot -F 32 "$DEVICE1" > /dev/null 2>&1
+	sudo -E "$EXT4" -L rootfs "$DEVICE2" > /dev/null 2>&1
 	sync
 }
 
 mountParts() {
 	checkFolders
 	echo -e "[$PASS] Mounting partitions of ${ARCHIMGPATH##*/} ..."
-	sudo -E mount $DEVICE1 "$BOOTPATH"
-	sudo -E mount $DEVICE2 "$ROOTPATH"
+	sudo -E mount "$DEVICE1" "$BOOTPATH"
+	sudo -E mount "$DEVICE2" "$ROOTPATH"
 }
 
 umountParts() {
@@ -188,9 +188,9 @@ mapImg() {
 mountImg() {
 	echo -e "[$PASS] Mounting disk image named ${ARCHIMGPATH##*/} ..."
 	sudo -E losetup -o $(( START1*512 )) --sizelimit $(( LENGHT1*512 )) \
-		$DEVICE1 "$ARCHIMGPATH" > /dev/null 2>&1
+		"$DEVICE1" "$ARCHIMGPATH" > /dev/null 2>&1
 	sudo -E losetup -o $(( START2*512 )) --sizelimit $(( LENGHT2*512 )) \
-		$DEVICE2 "$ARCHIMGPATH" > /dev/null 2>&1
+		"$DEVICE2" "$ARCHIMGPATH" > /dev/null 2>&1
 }
 
 umountImg() {

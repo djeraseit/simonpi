@@ -1,9 +1,9 @@
 #!/bin/bash
 
 # Network Variables
-BRIDGE=rasp-br0
-TAP=rasp-tap0 
-GATEWAY=192.168.66.1
+: "${BRIDGE:=rasp-br0}"
+: "${TAP:=rasp-tap0}"
+: "${GATEWAY:=192.168.66.1}"
 FIRSTIP="${GATEWAY%.1}.2"
 LASTIP="${GATEWAY%.1}.254"
 BROADCAST="${GATEWAY%.1}.255"
@@ -46,7 +46,7 @@ setupDnsmasq() {
 
 	domainname=$(echo "${searchdomains[@]}" | awk -F"," '{print $1}')
 	
-	if ! [[ -z $domainname  ]]; then
+	if [[ -n $domainname  ]]; then
 		DNSMASQ_OPTS="$DNSMASQ_OPTS --dhcp-option=option:domain-name,$domainname"
 	fi
 
@@ -69,7 +69,7 @@ setupDnsmasq() {
 }
 
 killDnsmasq() {
-	if [ ! -z "$DNSMASQPID" ]; then
+	if [ -n "$DNSMASQPID" ]; then
 		sudo -E kill -9 "$DNSMASQPID"
 	fi
 }
@@ -92,7 +92,7 @@ fkillNetwork() {
 	checkDnsmasq
 	killDnsmasq
 
-	while [ -d "/sys/class/net/$BRIDGE" ] || [ ! -z "$(find /sys/class/net/ -name "rasp*")" ]; do
+	while [ -d "/sys/class/net/$BRIDGE" ] || [ -n "$(find /sys/class/net/ -name "rasp*")" ]; do
 		for i in /sys/class/net/rasp-tap*; do
 			sudo -E "$IP" link set "${i##*/}" nomaster > /dev/null 2>&1 # Enslave tap
 			sudo -E "$IP" tuntap del dev "${i##*/}" mode tap > /dev/null  2>&1 # Remove tap
