@@ -4,7 +4,7 @@ echo "===> Update&install all needed packages"
 
 apk update && apk add --no-cache bash binutils coreutils dnsmasq dosfstools e2fsprogs \
     file grep iproute2 iptables libarchive-tools qemu-img \
-    qemu-system-arm qemu-system-aarch64 sudo tar unzip util-linux wget
+    qemu-system-arm qemu-system-aarch64 sudo tar unzip util-linux
 
 echo "===> Networking settings ..."
 # Create the kvm node (required --privileged)
@@ -29,7 +29,7 @@ fi
 ## install_from_git
 install_from_git() {
     cd /home
-    wget https://github.com/M0Rf30/simonpi/archive/master.zip
+    curl -L -O -C - https://github.com/M0Rf30/simonpi/archive/master.zip
     unzip master.zip
     cd simonpi-master
     install -Dm755 simonpi /usr/bin/simonpi

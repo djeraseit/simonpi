@@ -1,8 +1,8 @@
 #!/bin/bash
 
 MOUNTFOLDERS=("boot" "root")
-BOOTPATH="$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[0]}"
-ROOTPATH="$SIMONPIFOLDER/$MODEL/${MOUNTFOLDERS[1]}"
+BOOTPATH="$SIMONPI/$MODEL/${MOUNTFOLDERS[0]}"
+ROOTPATH="$SIMONPI/$MODEL/${MOUNTFOLDERS[1]}"
 IMGMOUNTED=
 PMOUNTED=
 START1=
@@ -13,12 +13,12 @@ LOOPFLAG=$(losetup -l | cut -d " " -f 15 | tail -n +2 | head -n +1)
 
 checkFolders() {
 	for i in "${MOUNTFOLDERS[@]}"; do
-		if [ -d "$SIMONPIFOLDER/$MODEL/$i" ]; then
+		if [ -d "$SIMONPI/$MODEL/$i" ]; then
 			echo -e "[$WARN] $MODEL/$i folder is present"
 		else
 			echo -e "[$PASS] Creating $MODEL/$i folder ..."
-			mkdir -p "$SIMONPIFOLDER/$MODEL/$i"
-			chown -R "$USER:$USER" "$SIMONPIFOLDER/$MODEL/$i"
+			mkdir -p "$SIMONPI/$MODEL/$i"
+			chown -R "$USER:$USER" "$SIMONPI/$MODEL/$i"
 		fi
 	done
 }
@@ -82,11 +82,13 @@ checkMount() {
 			checkLoop
 			mountImg
 			checkFs
+			checkFolders
 			mountParts
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
 			checkLoop
 			checkFs
+			checkFolders
 			mountParts
 		elif [ $PMOUNTED = "1" ]; then
 			return
@@ -102,10 +104,12 @@ checkMount() {
 			checkLoop
 			mountImg
 			checkFs
+			checkFolders
 			mountParts
 		elif [ $IMGMOUNTED = "1" ] && [ $PMOUNTED = "0" ]; then
 			checkRoot
 			checkLoop
+			checkFolders
 			mountParts
 		elif [ $PMOUNTED = "1" ]; then
 			return
@@ -135,10 +139,10 @@ isMounted() {
 		ARCHIMGPATH="$CUSTOMIMG"
 	fi
 
-	if mount | grep "$SIMONPIFOLDER/$MODEL" > /dev/null; then
+	if mount | grep "$SIMONPI/$MODEL" > /dev/null; then
 		IMGMOUNTED=1
 		PMOUNTED=1
-	elif ! mount | grep "$SIMONPIFOLDER/$MODEL" > /dev/null && [ -n "${LOOPFLAG}" ]; then
+	elif ! mount | grep "$SIMONPI/$MODEL" > /dev/null && [ -n "${LOOPFLAG}" ]; then
 	 	IMGMOUNTED=1
 	 	PMOUNTED=0
 	elif [ ! -f "$ARCHIMGPATH" ]; then
@@ -159,7 +163,6 @@ formatLoDevices() {
 }
 
 mountParts() {
-	checkFolders
 	echo -e "[$PASS] Mounting partitions of ${ARCHIMGPATH##*/} ..."
 	sudo -E mount "$DEVICE1" "$BOOTPATH"
 	sudo -E mount "$DEVICE2" "$ROOTPATH"
@@ -173,8 +176,8 @@ umountParts() {
 
 listStorage() {
 	checkFolders
-	echo -e "[$WARN] Content of $SIMONPIFOLDER/$MODEL"
-	ls "$SIMONPIFOLDER/$MODEL"
+	echo -e "[$WARN] Content of $SIMONPI/$MODEL"
+	ls "$SIMONPI/$MODEL"
 }
 
 mapImg() {
@@ -207,5 +210,5 @@ purge () {
 
 purgeEverything() {
 	echo -e "[$PASS] Hard cleaning ..."
-	rm -rf "${SIMONPIFOLDER:?}/$MODEL/"
+	rm -rf "${SIMONPI:?}/$MODEL/"
 }
