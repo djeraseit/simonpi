@@ -8,6 +8,7 @@ services:
         image: 'm0rf30/simonpi:lwm2m'
         tty: true
         command: 'simonpi rpi-3 -i /root/.simonpi/lwm2m-aarch64-client.img'
+        privileged: true
         volumes:
             - '/dev:/dev'
             - '~/lwm2m-client:/root/.simonpi'
@@ -26,6 +27,7 @@ services:
         image: 'm0rf30/simonpi:lwm2m'
         tty: true
         command: 'simonpi rpi-3 -i /root/.simonpi/lwm2m-aarch64-server.img'
+        privileged: true
         volumes:
             - '/dev:/dev'
             - '~/lwm2m-server:/root/.simonpi'
