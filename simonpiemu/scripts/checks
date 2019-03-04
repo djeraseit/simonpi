@@ -63,9 +63,9 @@ initChecks() {
 	else
 
 		if [ "$MODEL" = "rpi" ]; then
-			NETWORKCMD="$CMD -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1,hostfwd=tcp::$EXTERPORT2-:$GUESTPORT2,hostfwd=tcp::$EXTERPORT3-:$GUESTPORT3,hostfwd=tcp::$EXTERPORT4-:$GUESTPORT4"
+			NETWORKCMD="$CMD -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1,hostfwd=udp::$EXTERPORT2-:$GUESTPORT2,hostfwd=udp::$EXTERPORT3-:$GUESTPORT3,hostfwd=udp::$EXTERPORT4-:$GUESTPORT4"
 		else
-			NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1,hostfwd=tcp::$EXTERPORT2-:$GUESTPORT2,hostfwd=tcp::$EXTERPORT3-:$GUESTPORT3,hostfwd=tcp::$EXTERPORT4-:$GUESTPORT4"
+			NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1,hostfwd=udp::$EXTERPORT2-:$GUESTPORT2,hostfwd=udp::$EXTERPORT3-:$GUESTPORT3,hostfwd=udp::$EXTERPORT4-:$GUESTPORT4"
 		fi
 	
 	fi
