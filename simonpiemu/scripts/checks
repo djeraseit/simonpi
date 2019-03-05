@@ -1,10 +1,10 @@
 #!/bin/bash
 
 ARCH=
-GUESTPORT0=22
-EXTERPORT0=2222
-GUESTPORT1=80
-EXTERPORT1=8080
+: "${GUESTPORT0:=22}"
+: "${EXTERPORT0:=2222}"
+: "${GUESTPORT1:=80}"
+: "${EXTERPORT1:=8080}"
 
 # Must be root for some ops
 checkRoot() {
