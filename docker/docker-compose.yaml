@@ -8,9 +8,9 @@ services:
         image: 'm0rf30/simonpi:lwm2m'
         tty: true
         environment:
-            - EXTPORT2=5663
-            - EXTPORT3=5664
-            - EXTPORT4=56630
+            - EXTERPORT2=5663
+            - EXTERPORT3=5664
+            - EXTERPORT4=56630
         command: 'simonpi rpi-3 -i /root/.simonpi/lwm2m-aarch64-client.img'
         privileged: true
         volumes:
