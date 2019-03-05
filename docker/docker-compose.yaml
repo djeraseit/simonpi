@@ -7,6 +7,10 @@ services:
         container_name: client
         image: 'm0rf30/simonpi:lwm2m'
         tty: true
+        environment:
+            - EXTPORT2=5663
+            - EXTPORT3=5664
+            - EXTPORT4=56630
         command: 'simonpi rpi-3 -i /root/.simonpi/lwm2m-aarch64-client.img'
         privileged: true
         volumes:
@@ -35,7 +39,7 @@ services:
             - lwm2m-net
         ports:
             - '8080:8080'
-            - '5663:5683/udp'
-            - '5664:5684/udp'
-            - '56630:56830/udp'
+            - '5683:5683/udp'
+            - '5684:5684/udp'
+            - '56830:56830/udp'
 
