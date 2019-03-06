@@ -61,7 +61,9 @@ initChecks() {
 		fi
 
 	else
-
+		setNatDocker
+		enableIpFwd
+		
 		if [ "$MODEL" = "rpi" ]; then
 			NETWORKCMD="$CMD -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1,hostfwd=udp::$EXTERPORT2-:$GUESTPORT2,hostfwd=udp::$EXTERPORT3-:$GUESTPORT3,hostfwd=udp::$EXTERPORT4-:$GUESTPORT4"
 		else
