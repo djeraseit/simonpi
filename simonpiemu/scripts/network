@@ -14,8 +14,14 @@ genMAC() {
 }
 
 getInternetIf() {
-	iface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
+	iface=$("$IP" route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
 	echo "$iface"
+}
+
+getIfAddress() {
+	iface=$(getInternetIf)
+	address=$("$IP" a show "$iface" | grep -oP 'inet \K[\d\.]+')
+	echo "$address"
 }
 
 checkTap() {
@@ -108,11 +114,27 @@ bridgeUp() {
 	sleep 0.5s
 }
 
+enableIpFwd() {
+	if [ "$IPFORWARD" != "1" ]; then
+		sudo -E su -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
+	fi
+}
+
+# setNat gives to QEMU guests the ability to connect to the outside world
 setNat() {
 	iface=$(getInternetIf)
 	sudo -E "$IPTABLES" -t nat -A POSTROUTING -o "$iface" -j MASQUERADE
 	sudo -E "$IPTABLES" -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 	sudo -E "$IPTABLES" -A FORWARD -i "$TAP" -o "$iface" -j ACCEPT
+}
+
+# setNatDocker gives to containers the ability to accept outside connections and redirect
+# traffic to the dockerized VM guests
+setNatDocker() {
+	iface=$(getInternetIf)
+	address=$(getIfAddress)
+	sudo -E "$IPTABLES" -t nat -A PREROUTING -d "$address" -j DNAT -to-destination 10.0.2.15
+	sudo -E "$IPTABLES" -t filter -P FORWARD ACCEPT
 }
 
 setTap() {
@@ -124,9 +146,6 @@ setTap() {
 
 createNetwork() {
 	echo -e "[$PASS] Turning up a network for QEMU ..."
-	if [ "$IPFORWARD" != "1" ]; then
-		sudo -E su -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
-	fi
 
 	if [ $TAPON -eq 0 ]; then
 		bridgeUp
@@ -136,5 +155,6 @@ createNetwork() {
 	checkDnsmasq
 	setupDnsmasq
 	setNat
+	enableIpFwd
 	echo -e "[$PASS] Gateway address: $G$GATEWAY$RST"
 }
