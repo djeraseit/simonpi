@@ -133,6 +133,7 @@ setNat() {
 setNatDocker() {
 	iface=$(getInternetIf)
 	address=$(getIfAddress)
+	sysctl -w net.ipv4.conf.all.route_localnet=1
 	sudo -E "$IPTABLES" -t nat -A POSTROUTING -o "$iface" -j MASQUERADE
 	sudo -E "$IPTABLES" -t nat -A PREROUTING -d "$address" -j DNAT --to-destination 0.0.0.0
 	sudo -E "$IPTABLES" -t filter -P FORWARD ACCEPT
