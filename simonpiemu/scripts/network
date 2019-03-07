@@ -133,8 +133,11 @@ setNat() {
 setNatDocker() {
 	iface=$(getInternetIf)
 	address=$(getIfAddress)
-	sudo -E "$IPTABLES" -t nat -A PREROUTING -d "$address" -j DNAT -to-destination 10.0.2.15
+	sudo -E "$IPTABLES" -t nat -A POSTROUTING -o "$iface" -j MASQUERADE
+	sudo -E "$IPTABLES" -t nat -A PREROUTING -d "$address" -j DNAT --to-destination 0.0.0.0
 	sudo -E "$IPTABLES" -t filter -P FORWARD ACCEPT
+#	iptables -t nat -A OUTPUT -p tcp --dport 80 -d 169.254.169.254 -j DNAT --to-destination 127.0.0.1:8099
+
 }
 
 setTap() {
