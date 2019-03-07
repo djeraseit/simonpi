@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Enable this for debug purpose only
-#set -x
+set -x
 VERSION=1.0.15
 OPT=.
 
