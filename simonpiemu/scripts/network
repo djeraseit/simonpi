@@ -41,22 +41,27 @@ setupDnsmasq() {
     --bind-interfaces --dhcp-range=$FIRSTIP,$LASTIP"
     
     # Build DNS options from container /etc/resolv.conf
-    mapfile -t nameservers < <(grep nameserver /etc/resolv.conf | head -n 2 | sed 's/nameserver //')
-    mapfile -t searchdomains < <(grep search /etc/resolv.conf | sed 's/search //' | sed 's/ /,/g')
+    mapfile -t nameservers < <(grep nameserver /etc/resolv.conf \
+    | head -n 2 | sed 's/nameserver //')
+    mapfile -t searchdomains < <(grep search /etc/resolv.conf \
+    | sed 's/search //' | sed 's/ /,/g')
     
     domainname=$(echo "${searchdomains[@]}" | awk -F"," '{print $1}')
     
     if [[ -n $domainname  ]]; then
-        DNSMASQ_OPTS="$DNSMASQ_OPTS --dhcp-option=option:domain-name,$domainname"
+        DNSMASQ_OPTS+=" --dhcp-option=option:domain-name,$domainname"
     fi
     
     for nameserver in "${nameservers[@]}"; do
-        [[ -z $DNS_SERVERS ]] && DNS_SERVERS=$nameserver || DNS_SERVERS="$DNS_SERVERS,$nameserver"
+        [[ -z $DNS_SERVERS ]] \
+        && DNS_SERVERS=$nameserver \
+        || DNS_SERVERS="$DNS_SERVERS,$nameserver"
     done
     
-    if [ -z "$DNSMASQPID" ] && ! ss -ntl | grep -q :53; then
+    if [ -z "$DNSMASQPID" ] \
+    && ! ss -ntl | grep -q :53; then
         echo -e "[$PASS] Turning up dnsmasq for guest IP assignment ..."
-        DNSMASQ_OPTS="$DNSMASQ_OPTS --dhcp-option=option:dns-server,$DNS_SERVERS --dhcp-option=option:router,$GATEWAY"
+        DNSMASQ_OPTS+=" --dhcp-option=option:dns-server,$DNS_SERVERS --dhcp-option=option:router,$GATEWAY"
         eval "sudo -E $DNSMASQ $DNSMASQ_OPTS"
         elif [ -z "$DNSMASQPID" ] && ss -ntl | grep -q :53; then
         echo -e "[$WARN] Port 53 is busy"
@@ -79,7 +84,8 @@ killNetwork() {
     checkDnsmasq
     killDnsmasq
     
-    while [ -d "/sys/class/net/$BRIDGE" ] || [ -d "/sys/class/net/$TAP" ]; do
+    while [ -d "/sys/class/net/$BRIDGE" ] \
+    || [ -d "/sys/class/net/$TAP" ]; do
         sudo -E "$IP" link set "$TAP" nomaster > /dev/null 2>&1 # Enslave tap
         sudo -E "$IP" tuntap del dev "$TAP" mode tap > /dev/null  2>&1 # Remove tap
         sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
@@ -92,34 +98,45 @@ fkillNetwork() {
     checkDnsmasq
     killDnsmasq
     
-    while [ -d "/sys/class/net/$BRIDGE" ] || [ -n "$(find /sys/class/net/ -name "rasp*")" ]; do
+    while [ -d "/sys/class/net/$BRIDGE" ] \
+    || [ -n "$(find /sys/class/net/ -name "rasp*")" ]; do
         for i in /sys/class/net/rasp-tap*; do
-            sudo -E "$IP" link set "${i##*/}" nomaster > /dev/null 2>&1 # Enslave tap
-            sudo -E "$IP" tuntap del dev "${i##*/}" mode tap > /dev/null  2>&1 # Remove tap
+            # Enslave tap
+            sudo -E "$IP" link set "${i##*/}" nomaster > /dev/null 2>&1
+            # Remove tap
+            sudo -E "$IP" tuntap del dev "${i##*/}" mode tap > /dev/null  2>&1
         done
-        sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1 # Remove bridge
+        # Remove bridge
+        sudo -E "$IP" link delete "$BRIDGE" type bridge > /dev/null 2>&1
     done
 }
 
 bridgeUp() {
-    sudo -E "$IP" link add "$BRIDGE" type bridge # add bridge
-    sudo -E "$IP" addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE" # Set ip to bridge interface
+    # Add bridge
+    sudo -E "$IP" link add "$BRIDGE" type bridge
+    # Set ip to bridge interface
+    sudo -E "$IP" addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE"
     sudo -E "$IP" link set "$BRIDGE" up
+    
     sleep 0.5s
 }
 
 setNat() {
     iface=$(getInternetIf)
     sudo -E "$IPTABLES" -t nat -A POSTROUTING -o "$iface" -j MASQUERADE
-    sudo -E "$IPTABLES" -A FORWARD -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+    sudo -E "$IPTABLES" -A FORWARD -m conntrack \
+    --ctstate RELATED,ESTABLISHED -j ACCEPT
     sudo -E "$IPTABLES" -A FORWARD -i "$TAP" -o "$iface" -j ACCEPT
 }
 
 setTap() {
-    sudo -E "$IP" tuntap add dev "$TAP" mode tap user "$(checkUser)" # Add tap interface
+    # Add tap interface
+    sudo -E "$IP" tuntap add dev "$TAP" mode tap user "$(checkUser)"
     sudo -E "$IP" link set "$TAP" up promisc on
+    
     sleep 0.5s
-    sudo -E "$IP" link set $TAP master "$BRIDGE" # Bind tap to bridge
+    # Bind tap to bridge
+    sudo -E "$IP" link set $TAP master "$BRIDGE"
 }
 
 createNetwork() {

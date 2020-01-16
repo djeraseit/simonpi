@@ -21,7 +21,8 @@ downloadArchImage() {
             echo -e "[$WARN] $i is present";
         else
             echo -e "[$PASS] Downloading ..."
-            "$CURL" -# -L -C - "http://os.archlinuxarm.org/os/$i" -o "$SIMONPI/$MODEL/$i"
+            "$CURL" -# -L -C - "http://os.archlinuxarm.org/os/$i" \
+            -o "$SIMONPI/$MODEL/$i"
         fi
     done
     

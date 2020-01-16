@@ -6,24 +6,8 @@ QEMUISRUNNING=
 export QEMU_AUDIO_DRV=none
 
 checkQemu() {
-    # local pid="$(pidof $QEMUARM)"
-    # local pid64="$(pidof $QEMUARM64)"
-    # local ppid="$(grep '^PPid:' /proc/$pid/status | grep -o '[0-9]*')"
-    # local ppid64="$(grep '^PPid:' /proc/$pid64/status | grep -o '[0-9]*')"
-    # local ppidName="$(cat /proc/$ppid/comm)"
-    # local ppid64Name="$(cat /proc/$ppid64/comm)"
-    
-    # if [ ! -z $pid ] ||  ; then
-    # 	if [ $ppidName = "simonpi" ] || [ $ppid64Name = "simonpi" ]; then
-    # 		QEMUISRUNNING=1
-    # 	fi
-    # elif [ ! -z $pid64 ]; then
-    
-    
-    # else
-    # 	QEMUISRUNNING=0
-    # fi
-    if [ -n "$(pidof "$QEMUARM")" ] || [ -n "$(pidof "$QEMUARM64")" ]; then
+    if [ -n "$(pidof "$QEMUARM")" ] \
+    || [ -n "$(pidof "$QEMUARM64")" ]; then
         QEMUISRUNNING=1
     else
         QEMUISRUNNING=0
