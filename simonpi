@@ -26,13 +26,14 @@ OPT=.
 : "${VFATCHK:=fsck.vfat}"
 : "${CURL:=curl}"
 PROGS=("$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$FILE" "$GREP" "$IPTABLES" \
-	"$PS" "$QEMUARM" "$QEMUARM64" "$QEMUIMG" "$SUDO" "$VFAT" "$CURL")
+"$PS" "$QEMUARM" "$QEMUARM64" "$QEMUIMG" "$SUDO" "$VFAT" "$CURL")
 
 # Parameters, Folders and Files
 : "${SIMONPI:=$HOME/.simonpi}"
 USER=$(whoami)
 SNDARG=$2
 MODEL=$1
+FAMILIES=4
 : "${FILENAME:=sd-arch-$MODEL-qemu.img}"
 ARCHIMGPATH=$SIMONPI/$FILENAME
 
@@ -54,79 +55,79 @@ G='\e[0;32m'
 RST='\e[0m'
 
 checkModel() {
-	if [[ $MODEL != rpi* ]]; then
-		echo "Please select the rpi model"
-		echo "Available:	rpi	rpi-2	rpi-3"
-		exit 1
-	fi
+    if [[ ${MODEL##*-} = 1 ]] \
+    || [[ ${MODEL##*-} -gt ${FAMILIES} ]] \
+	|| [[ ${#MODEL} -gt 5 ]]; then
+        echo "Please select the rpi model"
+        echo "Available:	rpi	rpi-2	rpi-3"
+        exit 1
+    fi
 }
 
 checkDeps() {
-	for i in "${PROGS[@]}"; do
-		if command -v "$i" > /dev/null; then
-			echo -e "[$PASS] $i executable found"
-		else
-			echo -e "[$FAIL] $i executable not found. Please install it on your distro"
-			exit 1;
-		fi
-	done
+    for i in "${PROGS[@]}"; do
+        if command -v "$i" > /dev/null; then
+            echo -e "[$PASS] $i executable found"
+        else
+            echo -e "[$FAIL] $i executable not found. Please install it on your distro"
+            exit 1;
+        fi
+    done
 }
 
 version() {
-	echo -e "$G$(cat < $OPT/simonpiemu/assets/motd | head -n 9)$RST"
-	echo "v$VERSION"
-	cat < $OPT/simonpiemu/assets/motd | tail -n -10 | head -n 1
-	exit 0
+    echo -e "$G$(cat < $OPT/simonpiemu/assets/motd | head -n 9)$RST"
+    echo "v$VERSION"
+    cat < $OPT/simonpiemu/assets/motd | tail -n -10 | head -n 1
+    exit 0
 }
 
 help () {
-	echo "A Swiss Army knife to emulate Raspberry PI family devices on your laptop."
-	echo ""
-	echo -e "Default storage is in $G$SIMONPI$RST"
-	echo ""
-	echo "usage: ./simonpi MODEL [<opts>]"
-	echo "	Available MODELs:	rpi	rpi-2	rpi-3"
-	echo "	<opts>	-h			print this message"
-	echo "		-c			check filesystem integrity of disk image"
-	echo "		-e			purge everything in storage folder"
-	echo "		-k			kill every instance and network virtual interface"
-	echo "		-i	<path/to/img>	Run a custom disk image like Raspbian one"
-	echo "		-l			list files in storage folder"
-	echo "		-m			mount ${MOUNTFOLDERS[0]} and ${MOUNTFOLDERS[1]} partitions"
-	echo "		-p			purge everything except for downloaded archives"
-	echo "		-r			run QEMU processor emulator for defined model"
-	echo "		-s	<size in GB>	write a partitioned raw image disk with Arch Linux"
-	echo "		-u			unmount ${MOUNTFOLDERS[0]} and ${MOUNTFOLDERS[1]} partitions"
-	echo "examples:"
-	echo "	./simonpi rpi-3 -s 2		create a 2GB sd .img for rpi-3"
-	echo "	./simonpi rpi-2 -p		purge everything related to rpi-2 img creation"
-	exit 0
+    echo "A Swiss Army knife to emulate Raspberry PI family devices on your laptop."
+    echo ""
+    echo -e "Default storage is in $G$SIMONPI$RST"
+    echo ""
+    echo "usage: ./simonpi MODEL [<opts>]"
+    echo "	Available MODELs:	rpi	rpi-2	rpi-3"
+    echo "	<opts>	-h			print this message"
+    echo "		-c			check filesystem integrity of disk image"
+    echo "		-e			purge everything in storage folder"
+    echo "		-k			kill every instance and network virtual interface"
+    echo "		-i	<path/to/img>	Run a custom disk image like Raspbian one"
+    echo "		-l			list files in storage folder"
+    echo "		-m			mount ${MOUNTFOLDERS[0]} and ${MOUNTFOLDERS[1]} partitions"
+    echo "		-p			purge everything except for downloaded archives"
+    echo "		-r			run QEMU processor emulator for defined model"
+    echo "		-s	<size in GB>	write a partitioned raw image disk with Arch Linux"
+    echo "		-u			unmount ${MOUNTFOLDERS[0]} and ${MOUNTFOLDERS[1]} partitions"
+    echo "examples:"
+    echo "	./simonpi rpi-3 -s 2		create a 2GB sd .img for rpi-3"
+    echo "	./simonpi rpi-2 -p		purge everything related to rpi-2 img creation"
+    exit 0
 }
 
 process_args () {
-	# Process other arguments.
-	case "$1" in
-		rpi   ) checkModel ;;
-		rpi-2 ) checkModel ;;
-		rpi-3 ) checkModel ;;
-		-h    ) help ;;
-		-v    ) version ;;
-		*     ) checkModel ;;
-	esac
-
-	case "$2" in
-		-c	  ) isMounted && checkMount ;;
-		-e	  ) isMounted && checkMount && purge && purgeEverything ;;
-		-i    ) runCustomImg "$3" && isMounted && checkMount && run_emu ;;
-		-k	  ) checkQemu && killQemu && fkillNetwork ;;
-		-l	  ) checkFolders && listStorage ;;
-		-m	  ) isMounted && checkMount ;;
-		-p	  ) isMounted && checkMount && purge ;;
-		-r    ) isMounted && checkMount && run_emu ;;
-		-s    ) checkFolders && createArchImg "$3" ;;
-		-u    ) isMounted && checkMount ;;
- 		*    ) help ;;
-	esac
+    # Process other arguments.
+    case "$1" in
+        rpi*   ) checkModel ;;
+        -h    ) help ;;
+        -v    ) version ;;
+        *     ) checkModel ;;
+    esac
+    
+    case "$2" in
+        -c	  ) isMounted && checkMount ;;
+        -e	  ) isMounted && checkMount && purge && purgeEverything ;;
+        -i    ) runCustomImg "$3" && isMounted && checkMount && run_emu ;;
+        -k	  ) checkQemu && killQemu && fkillNetwork ;;
+        -l	  ) checkFolders && listStorage ;;
+        -m	  ) isMounted && checkMount ;;
+        -p	  ) isMounted && checkMount && purge ;;
+        -r    ) isMounted && checkMount && run_emu ;;
+        -s    ) checkFolders && createArchImg "$3" ;;
+        -u    ) isMounted && checkMount ;;
+        *    ) help ;;
+    esac
 }
 
 process_args "$@";
