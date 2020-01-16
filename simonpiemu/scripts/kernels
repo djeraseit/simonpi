@@ -1,0 +1,1 @@
+curl -sL https://github.com/M0Rf30/qemu-kernel-rpi2/releases/latest | grep qemu-kernel-rpi2/releases/download | cut -d \" -f 2

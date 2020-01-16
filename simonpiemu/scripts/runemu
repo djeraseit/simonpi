@@ -1,57 +1,57 @@
 #!/bin/bash
 
 run_rpi() {
-	QEMURPI="$QEMUARM -nographic \
-		-cpu arm1176 \
-		-m 256 \
-		-M versatilepb \
-		-drive file=$ARCHIMGPATH,if=scsi,format=raw,cache=none \
-		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-no-reboot \
-		-append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 quiet audit=0 panic=1\""
-
-	QEMURPI+="$NETWORKCMD"
-	eval "$QEMURPI"
+    QEMURPI="$QEMUARM -nographic \
+    -cpu arm1176 \
+    -m 256 \
+    -M versatilepb \
+    -drive file=$ARCHIMGPATH,if=scsi,format=raw,cache=none \
+    -kernel $OPT/simonpiemu/kernels/$MODEL/Image \
+    -no-reboot \
+    -append \"root=/dev/sda2 fstab=no rootfstype=ext4 rw console=ttyAMA0 quiet audit=0 panic=1\""
+    
+    QEMURPI+="$NETWORKCMD"
+    eval "$QEMURPI"
 }
 
 run_rpi2() {
-	QEMURPI2="$QEMUARM -nographic \
-		-cpu cortex-a15 \
-		-m 1024 \
-		-M virt \
-		-bios /usr/share/ovmf/ARM/QEMU_EFI.fd \
-		-drive file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,if=none,format=raw,cache=none,id=hd0 \
-		-device virtio-blk-device,drive=hd0 \
-		-drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
-		-device virtio-blk-device,drive=hd1 \
-		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw audit=0 console=ttyAMA0\""	
-	
-	QEMURPI2+=$NETWORKCMD
-	eval "$QEMURPI2"
+    QEMURPI2="$QEMUARM -nographic \
+    -cpu cortex-a15 \
+    -m 1024 \
+    -M virt \
+    -bios /usr/share/ovmf/ARM/QEMU_EFI.fd \
+    -drive file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,if=none,format=raw,cache=none,id=hd0 \
+    -device virtio-blk-device,drive=hd0 \
+    -drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
+    -device virtio-blk-device,drive=hd1 \
+    -kernel $OPT/simonpiemu/kernels/$MODEL/Image \
+    -append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw audit=0 console=ttyAMA0\""
+    
+    QEMURPI2+=$NETWORKCMD
+    eval "$QEMURPI2"
 }
 
 run_rpi3() {
-	QEMURPI3="$QEMUARM64 -nographic \
-		-cpu cortex-a57 \
-		-m 2048 \
-		-M virt,gic_version=3 -machine virtualization=true \
-		-bios /usr/share/ovmf/AARCH64/QEMU_EFI.fd \
-		-drive file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,if=none,format=raw,cache=none,id=hd0 \
-		-device virtio-blk-device,drive=hd0 \
-		-drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
-		-device virtio-blk-device,drive=hd1 \
-		-kernel $OPT/simonpiemu/kernels/$MODEL/Image \
-		-append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw audit=0 console=ttyAMA0\""
-
-	QEMURPI3+=$NETWORKCMD
-	eval "$QEMURPI3"
+    QEMURPI3="$QEMUARM64 -nographic \
+    -cpu cortex-a57 \
+    -m 2048 \
+    -M virt,gic_version=3 -machine virtualization=true \
+    -bios /usr/share/ovmf/AARCH64/QEMU_EFI.fd \
+    -drive file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,if=none,format=raw,cache=none,id=hd0 \
+    -device virtio-blk-device,drive=hd0 \
+    -drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
+    -device virtio-blk-device,drive=hd1 \
+    -kernel $OPT/simonpiemu/kernels/$MODEL/Image \
+    -append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw audit=0 console=ttyAMA0\""
+    
+    QEMURPI3+=$NETWORKCMD
+    eval "$QEMURPI3"
 }
 
 run_emu() {
-	case $MODEL in
-		rpi    ) initChecks && run_rpi && finalizeIt ;;
-		rpi-2  ) initChecks && run_rpi2 && finalizeIt ;;
-		rpi-3  ) initChecks && run_rpi3 && finalizeIt ;;
-	esac
+    case $MODEL in
+        rpi    ) initChecks && run_rpi && finalizeIt ;;
+        rpi-2  ) initChecks && run_rpi2 && finalizeIt ;;
+        rpi-3  ) initChecks && run_rpi3 && finalizeIt ;;
+    esac
 }
