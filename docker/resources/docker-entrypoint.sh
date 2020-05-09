@@ -4,7 +4,7 @@ echo "===> Update&install all needed packages"
 
 apk update && apk add --no-cache bash binutils coreutils dnsmasq dosfstools e2fsprogs \
     file grep iproute2 iptables libarchive-tools qemu-img \
-qemu-system-arm qemu-system-aarch64 sudo tar unzip util-linux curl
+qemu-system-arm qemu-system-aarch64 rpm2cpio sudo unzip util-linux curl
 
 echo "===> Networking settings ..."
 # Create the kvm node (required --privileged)
@@ -51,10 +51,10 @@ install_from_git() {
 
 	# OVMF ARM
     download "https://mirrors.tuna.tsinghua.edu.cn/fedora/releases/${fedora_ver}/Everything/x86_64/os/Packages/e/edk2-arm-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm"
-	bsdtar -xf edk2-arm-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm
+	rpm2cpio edk2-arm-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm
 	# OVMF AARCH64
 	download "https://mirrors.tuna.tsinghua.edu.cn/fedora/releases/${fedora_ver}/Everything/x86_64/os/Packages/e/edk2-aarch64-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm"
-	bsdtar -xf edk2-aarch64-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm
+	rpm2cpio edk2-aarch64-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm
 	cp -av usr /
 	cd /usr/share/AAVMF
   	ln -sf ../edk2/arm/vars-template-pflash.raw AAVMF32_VARS.fd
