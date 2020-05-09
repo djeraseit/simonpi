@@ -44,14 +44,20 @@ install_from_git() {
 	cd ..
 	rm -rf simonpi-master master.zip
 
+	# Need to be manually bumped
+	fedora_ver=32
+	pkgver=20200201
+	pkgrel=1
+
 	# OVMF ARM
-	download http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-ARM/RELEASE_GCC5/QEMU_EFI.fd
-	install -D -m644 QEMU_EFI.fd /usr/share/ovmf/ARM/QEMU_EFI.fd
-	rm QEMU_EFI.fd
+    download "https://mirrors.tuna.tsinghua.edu.cn/fedora/releases/${fedora_ver}/Everything/x86_64/os/Packages/e/edk2-arm-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm"
+	bsdtar -xf edk2-arm-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm
 	# OVMF AARCH64
-	download http://snapshots.linaro.org/components/kernel/leg-virt-tianocore-edk2-upstream/latest/QEMU-AARCH64/RELEASE_GCC5/QEMU_EFI.fd
-	install -D -m644 QEMU_EFI.fd /usr/share/ovmf/AARCH64/QEMU_EFI.fd
-	rm QEMU_EFI.fd
+	download "https://mirrors.tuna.tsinghua.edu.cn/fedora/releases/${fedora_ver}/Everything/x86_64/os/Packages/e/edk2-aarch64-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm"
+	bsdtar -xf edk2-aarch64-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm
+	cp -av usr /
+	cd /usr/share/AAVMF
+  	ln -sf ../edk2/arm/vars-template-pflash.raw AAVMF32_VARS.fd
 }
 
 echo "===> Installing Sim on Pi"
