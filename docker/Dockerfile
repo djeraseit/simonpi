@@ -1,4 +1,4 @@
-FROM alpine:3.9
+FROM alpine:3.11
 LABEL maintainer="Gianluca Boiano <morf3089@gmail.com>"
 
 COPY resources /
