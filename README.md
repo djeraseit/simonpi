@@ -104,7 +104,7 @@ where MODEL could be:
 * rpi
 * rpi-2
 * rpi-3
-
+* rpi-4 and theorically next upgrades
 and X could be mmcblk0 or other block devices
 
 
@@ -117,6 +117,4 @@ and X could be mmcblk0 or other block devices
 Any suggestions are welcome
 
 # Used Kernels
-Take a look here for adopted Kernel images:
-
-https://github.com/M0Rf30/qemu-kernels-rpi
+Take a look [here](https://github.com/M0Rf30/qemu-kernels-rpi) for adopted Kernel images:
