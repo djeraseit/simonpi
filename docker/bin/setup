@@ -1,10 +1,7 @@
 #!/bin/bash
-
 echo "===> Update&install all needed packages"
 
-apk update \
-&& apk add --no-cache \
-bash \
+apk add --no-cache \
 binutils \
 coreutils \
 cpio \
@@ -22,7 +19,6 @@ qemu-system-aarch64 \
 qemu-system-arm \
 rpm2cpio \
 sudo \
-tar \
 unzip \
 util-linux
 
@@ -30,7 +26,7 @@ echo "===> Networking settings ..."
 # Create the kvm node (required --privileged)
 if [ ! -e /dev/kvm ]; then
     set +e
-    mknod /dev/kvm c 10 "$(grep '\<kvm\>' /proc/misc | cut -f 1 -d' ')"
+    mknod /dev/kvm c 10 232
     set -e
 fi
 
@@ -42,13 +38,13 @@ echo "allow rasp-br0" >> /etc/qemu/bridge.conf
 if [ ! -e /dev/net/tun ]; then
     set +e
     mkdir -p /dev/net
-    mknod /dev/net/tun c 10 "$(grep '\<tun\>' /proc/misc | cut -f 1 -d' ')"
+    mknod /dev/net/tun c 10 200
     set -e
 fi
 
 ## download
 download() {
-    curl -L -O -C - "$1"
+    curl -sL -O -C - "$1"
 }
 
 ## install_from_git
@@ -63,25 +59,31 @@ install_from_git() {
     sed -i "s/OPT=./OPT=\/opt/g" /usr/bin/simonpi
     cd ..
     rm -rf simonpi-master master.zip
-    
+}
+
+install_ovmf() {
     # Need to be manually bumped
     fedora_ver=32
     pkgver=20200201
     pkgrel=1
-    
+
+    cd /home
+
     # OVMF ARM
-    download "https://mirrors.tuna.tsinghua.edu.cn/fedora/releases/${fedora_ver}/Everything/x86_64/os/Packages/e/edk2-arm-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm"
-    rpm2cpio "edk2-arm-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm" | cpio -idmv
+    download https://fedora.mirror.garr.it/fedora/linux/updates/"${fedora_ver}"/Everything/x86_64/Packages/e/edk2-arm-"${pkgver}"stable-"${pkgrel}".fc"${fedora_ver}".noarch.rpm
+    rpm2cpio edk2-arm-"${pkgver}"stable-"${pkgrel}".fc"${fedora_ver}".noarch.rpm | cpio -idmv
     # OVMF AARCH64
-    download "https://mirrors.tuna.tsinghua.edu.cn/fedora/releases/${fedora_ver}/Everything/x86_64/os/Packages/e/edk2-aarch64-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm"
-    rpm2cpio "edk2-aarch64-${pkgver}stable-${pkgrel}.fc${fedora_ver}.noarch.rpm" | cpio -idmv
+    download https://fedora.mirror.garr.it/fedora/linux/updates/"${fedora_ver}"/Everything/x86_64/Packages/e/edk2-aarch64-"${pkgver}"stable-"${pkgrel}".fc"${fedora_ver}".noarch.rpm
+    rpm2cpio edk2-aarch64-"${pkgver}"stable-"${pkgrel}".fc"${fedora_ver}".noarch.rpm | cpio -idmv
     cp -av usr /
     cd /usr/share/AAVMF
     ln -sf ../edk2/arm/vars-template-pflash.raw AAVMF32_VARS.fd
 }
-
 echo "===> Installing Sim on Pi"
 install_from_git simonpi
+
+echo "===> Installing AVMF ARM & AARCH64"
+install_ovmf
 
 echo "===> DONE $0 $*"
 

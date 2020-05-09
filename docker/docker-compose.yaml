@@ -6,11 +6,11 @@
 version: '3'
 
 services:
-  simonpi-rpi-3:
-    container_name: simonpi-rpi-3
+  simonpi-rpi-4:
+    container_name: simonpi-rpi-4
     image: m0rf30/simonpi:latest
     tty: true
-    command: 'simonpi rpi-3 -r'
+    command: 'simonpi rpi-4 -r'
     privileged: true
     volumes:    
     - /dev:/dev
