@@ -19,7 +19,8 @@ run_rpi2() {
     -cpu cortex-a15 \
     -m 1024 \
     -M virt \
-    -bios /usr/share/edk2/arm/QEMU_EFI.fd \
+    -drive file=/usr/share/edk2/arm/QEMU_EFI-pflash.raw,if=pflash,format=raw,readonly \
+    -drive file=/usr/share/edk2/arm/vars-template-pflash.raw,if=pflash,format=raw \
     -drive file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,if=none,format=raw,cache=none,id=hd0 \
     -device virtio-blk-device,drive=hd0 \
     -drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
@@ -33,10 +34,11 @@ run_rpi2() {
 
 run_rpi3() {
     QEMURPI3="$QEMUARM64 -nographic \
+    -machine virt-5.0,accel=tcg,gic-version=3 \
     -cpu cortex-a57 \
     -m 2048 \
-    -M virt,gic_version=3 -machine virtualization=true \
-    -bios /usr/share/edk2/aarch64/QEMU_EFI.fd \
+    -drive file=/usr/share/edk2/aarch64/QEMU_EFI-pflash.raw,if=pflash,format=raw,readonly \
+    -drive file=/usr/share/edk2/aarch64/vars-template-pflash.raw,if=pflash,format=raw \
     -drive file=fat:rw:$OPT/simonpiemu/kernels/$MODEL,if=none,format=raw,cache=none,id=hd0 \
     -device virtio-blk-device,drive=hd0 \
     -drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
